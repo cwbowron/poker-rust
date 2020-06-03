@@ -204,6 +204,32 @@ fn canonical_order<'a>(rank_map: &'a HashMap<Rank, Vec<&Card>>) -> Vec<Card> {
     return canonical_cards;
 }
 
+fn is_quads(canonical_cards: &[Card]) -> bool {
+    canonical_cards[0].rank == canonical_cards[1].rank
+        && canonical_cards[1].rank == canonical_cards[2].rank
+        && canonical_cards[2].rank == canonical_cards[3].rank
+}
+
+fn is_full_house(canonical_cards: &[Card]) -> bool {
+    canonical_cards[0].rank == canonical_cards[1].rank
+        && canonical_cards[1].rank == canonical_cards[2].rank
+        && canonical_cards[3].rank == canonical_cards[4].rank
+}
+
+fn is_trips(canonical_cards: &[Card]) -> bool {
+    canonical_cards[0].rank == canonical_cards[1].rank
+        && canonical_cards[1].rank == canonical_cards[2].rank
+}
+
+fn is_two_pair(canonical_cards: &[Card]) -> bool {
+    canonical_cards[0].rank == canonical_cards[1].rank
+        && canonical_cards[2].rank == canonical_cards[3].rank
+}
+
+fn is_pair(canonical_cards: &[Card]) -> bool {
+    canonical_cards[0].rank == canonical_cards[1].rank
+}
+
 fn evaluate(cards: &[Card]) -> (HandCategory, Vec<Card>) {
     // let rank_count = 15;
     // let mut byRank = Vec::with_capacity(rank_count);
@@ -234,23 +260,19 @@ fn evaluate(cards: &[Card]) -> (HandCategory, Vec<Card>) {
 
     let canonical_cards = canonical_order(&rank_map);
     
-    // println!("{:?}", canonical_cards);
-    // println!("{}", fmt_cards(&canonical_cards));
-    // for (rank, rank_cards) in rank_map.iter() {
-    //     println!("{}: {:?}", rank.to_string(), rank_cards);
-    // }
-    if canonical_cards[0].rank == canonical_cards[1].rank
-        && canonical_cards[1].rank == canonical_cards[2].rank
-        && canonical_cards[2].rank == canonical_cards[3].rank {
-            return (HandCategory::Quads, canonical_cards);
-        } else if canonical_cards[0].rank == canonical_cards[1].rank
-        && canonical_cards[1].rank == canonical_cards[2].rank {
-            return (HandCategory::Triplets, canonical_cards);
-        } else if canonical_cards[0].rank == canonical_cards[1].rank {
-            return (HandCategory::OnePair, canonical_cards);
-        } else {
-            return (HandCategory::HighCard, canonical_cards);
-        }
+    if is_quads(&canonical_cards) {
+        return (HandCategory::Quads, canonical_cards);
+    } else if is_full_house(&canonical_cards) {
+        return (HandCategory::FullHouse, canonical_cards);
+    } else if is_trips(&canonical_cards) {
+        return (HandCategory::Triplets, canonical_cards);
+    } else if is_two_pair(&canonical_cards) {
+        return (HandCategory::OnePair, canonical_cards);
+    } else if is_pair(&canonical_cards) {
+        return (HandCategory::OnePair, canonical_cards);
+    } else {
+        return (HandCategory::HighCard, canonical_cards);
+    }
 }
 
 fn deal(cards: &mut Vec<Card>, n: usize) {
