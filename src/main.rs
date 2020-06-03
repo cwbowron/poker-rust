@@ -252,7 +252,6 @@ fn canonical_order<'a>(rank_map: &'a HashMap<Rank, Vec<&Card>>) -> Vec<Card> {
     let mut canonical_cards: Vec<Card> = Vec::new();
     for rank in sorted_keys {
         if let Some(rank_cards) = rank_map.get(rank) {
-            // println!("{:?}", rank_cards);
             for card in rank_cards {
                 canonical_cards.push(card.copy());
             }
@@ -263,22 +262,6 @@ fn canonical_order<'a>(rank_map: &'a HashMap<Rank, Vec<&Card>>) -> Vec<Card> {
 }
 
 fn evaluate(cards: &[Card]) -> (HandCategory, Vec<Card>) {
-    // let rank_count = 15;
-    // let mut byRank = Vec::with_capacity(rank_count);
-
-    // for n in 0..rank_count {
-    //     byRank.push(Vec::new());
-    // }
-    
-    // for card in cards {
-    //     let rank_ord = card.rank as usize;
-    //     byRank[rank_ord].push(card);
-    // }
-
-    // for rank in byRank {
-    //     println!("{:?}", rank);
-    // }
-
     let mut rank_map = HashMap::new();
     for rank in Rank::iter() {
         rank_map.insert(rank, Vec::new());
