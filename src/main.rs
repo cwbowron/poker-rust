@@ -163,50 +163,71 @@ enum HandCategory {
     HighCard = 0
 }
 
-fn is_quads(canonical_cards: &[Card]) -> bool {
-    canonical_cards[0].rank == canonical_cards[1].rank
+fn is_quads(canonical_cards: &[Card]) -> Option<Vec<Card>> {
+    if canonical_cards[0].rank == canonical_cards[1].rank
         && canonical_cards[1].rank == canonical_cards[2].rank
-        && canonical_cards[2].rank == canonical_cards[3].rank
+        && canonical_cards[2].rank == canonical_cards[3].rank {
+            return Some(canonical_cards[0..5].to_vec());
+        } else {
+            return None;
+        }
 }
 
-fn is_full_house(canonical_cards: &[Card]) -> bool {
-    canonical_cards[0].rank == canonical_cards[1].rank
+fn is_full_house(canonical_cards: &[Card]) -> Option<Vec<Card>> {
+    if canonical_cards[0].rank == canonical_cards[1].rank
         && canonical_cards[1].rank == canonical_cards[2].rank
-        && canonical_cards[3].rank == canonical_cards[4].rank
+        && canonical_cards[3].rank == canonical_cards[4].rank {
+            return Some(canonical_cards[0..5].to_vec());
+        } else {
+            return None;
+        }
 }
 
-fn is_trips(canonical_cards: &[Card]) -> bool {
-    canonical_cards[0].rank == canonical_cards[1].rank
-        && canonical_cards[1].rank == canonical_cards[2].rank
+fn is_trips(canonical_cards: &[Card]) -> Option<Vec<Card>> {
+    if canonical_cards[0].rank == canonical_cards[1].rank
+        && canonical_cards[1].rank == canonical_cards[2].rank {
+            return Some(canonical_cards[0..5].to_vec());
+        } else {
+            return None;
+
+        }
 }
 
-fn is_two_pair(canonical_cards: &[Card]) -> bool {
-    canonical_cards[0].rank == canonical_cards[1].rank
-        && canonical_cards[2].rank == canonical_cards[3].rank
+fn is_two_pair(canonical_cards: &[Card]) -> Option<Vec<Card>> {
+    if canonical_cards[0].rank == canonical_cards[1].rank
+        && canonical_cards[2].rank == canonical_cards[3].rank {
+            return Some(canonical_cards[0..5].to_vec());
+        } else {
+            return None;
+        }
 }
 
-fn is_pair(canonical_cards: &[Card]) -> bool {
-    canonical_cards[0].rank == canonical_cards[1].rank
+fn is_pair(canonical_cards: &[Card]) -> Option<Vec<Card>> {
+    if canonical_cards[0].rank == canonical_cards[1].rank {
+        return Some(canonical_cards[0..5].to_vec());
+    } else {
+        return None;
+    }
 }
 
-fn is_high_card(canonical_cards: &[Card]) -> bool {
-    true
+fn is_high_card(canonical_cards: &[Card]) -> Option<Vec<Card>> {
+    return Some(canonical_cards[0..5].to_vec());
 }
 
-fn is_straight_flush(canonical_cards: &[Card]) -> bool {
-    false
+fn is_straight_flush(canonical_cards: &[Card]) -> Option<Vec<Card>> {
+    None
 }
 
-fn is_straight(canonical_cards: &[Card]) -> bool {
-    false
+fn is_straight(canonical_cards: &[Card]) -> Option<Vec<Card>> {
+    None
 }
 
-fn is_flush(canonical_cards: &[Card]) -> bool {
-    false
+fn is_flush(canonical_cards: &[Card]) -> Option<Vec<Card>> {
+    None
 }
 
 impl HandCategory {
-    fn get_test(&self) -> fn(&[Card]) -> bool {
+    fn get_test(&self) -> fn(&[Card]) -> Option<Vec<Card>> {
         match self {
             HandCategory::HighCard => is_high_card,
             HandCategory::OnePair => is_pair,
@@ -276,8 +297,8 @@ fn evaluate(cards: &[Card]) -> (HandCategory, Vec<Card>) {
     let canonical_cards = canonical_order(&rank_map);
 
     for category in HandCategory::iter() {
-        if category.get_test()(&canonical_cards) {
-            return (category, canonical_cards);
+        if let Some(result_cards) = category.get_test()(&canonical_cards) {
+            return (category, result_cards);
         }
     }
 
@@ -327,7 +348,7 @@ fn main() {
     //     println!("{}", card.to_string());
     // }
 
-    deal(&mut deck, 3);
+    deal(&mut deck, 8);
     
     // let mut hand = &deck[..5].to_vec();
     // println!("Hand: {:#?}", hand);
