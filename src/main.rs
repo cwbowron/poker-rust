@@ -2,7 +2,6 @@ extern crate strum;
 #[macro_use] extern crate strum_macros;
 
 use strum::IntoEnumIterator;
-use std::string::String;
 use std::collections::HashMap;
 use std::cmp::Ordering;
 
@@ -11,6 +10,7 @@ use card::Suit;
 use card::Rank;
 use card::Card;
 use card::sort;
+use card::fmt_cards;
 
 mod deck;
 use deck::make_shuffled_deck;
@@ -227,20 +227,6 @@ impl HandCategory {
         }
     }
 }
-
-fn fmt_cards(cards: &[Card]) -> String {
-    return cards.iter()
-        .map(|card| card.to_string())
-        .collect::<Vec<String>>()
-        .join(" ");
-}
-
-// fn fmt_card_refs(cards: &[&Card]) -> String {
-//     return cards.iter()
-//         .map(|card| card.to_string())
-//         .collect::<Vec<String>>()
-//         .join(" ");
-// }
 
 fn cmp_size<T>(a: &[T], b:&[T]) -> std::cmp::Ordering {
     return b.len().cmp(&a.len());

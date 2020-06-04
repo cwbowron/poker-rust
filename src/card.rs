@@ -95,3 +95,10 @@ pub fn sort(deck: &mut Vec<Card>) {
     suit_sort(deck);
     rank_sort(deck);
 }
+
+pub fn fmt_cards(cards: &[Card]) -> String {
+    return cards.iter()
+        .map(|card| card.to_string())
+        .collect::<Vec<String>>()
+        .join(" ");
+}
