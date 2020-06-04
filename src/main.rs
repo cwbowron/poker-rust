@@ -302,10 +302,15 @@ fn is_flush(canonical_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
             .collect();
         
         if suited.len() >= 5 {
-            return Some(suited[0..5]
-                        .iter()
+            let mut cards = suited.iter()
+                .map(|card_ref| Card::copy(card_ref))
+                .collect();
+
+            sort(&mut cards);
+            return Some(cards.iter()
+                        .take(5)
                         .map(|card_ref| Card::copy(card_ref))
-                        .collect::<Vec<Card>>());
+                        .collect());
         }
     }
     return None;
