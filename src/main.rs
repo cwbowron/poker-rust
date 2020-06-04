@@ -166,6 +166,8 @@ enum HandCategory {
     HighCard = 0
 }
 
+type RankMap = HashMap<Rank, Vec<Card>>;
+
 fn is_quads(canonical_cards: &[Card]) -> Option<Vec<Card>> {
     if canonical_cards[0].rank == canonical_cards[1].rank
         && canonical_cards[1].rank == canonical_cards[2].rank
@@ -327,7 +329,7 @@ fn cmp_size<T>(a: &[T], b:&[T]) -> std::cmp::Ordering {
     return b.len().cmp(&a.len());
 }
 
-fn canonical_order<'a>(rank_map: &'a HashMap<Rank, Vec<&Card>>) -> Vec<Card> {
+fn canonical_order(rank_map: &RankMap) -> Vec<Card> {
     let mut sorted_keys: Vec<&Rank> = rank_map.keys().collect();
     sorted_keys.sort_by(|a, b| {
         match cmp_size(rank_map.get(a).unwrap(), rank_map.get(b).unwrap()) {
@@ -357,7 +359,7 @@ fn evaluate(cards: &[Card]) -> (HandCategory, Vec<Card>) {
     
     for card in cards {
         if let Some(mut rank_vector) = rank_map.get_mut(&card.rank) {
-            rank_vector.push(card);
+            rank_vector.push(Card::copy(card));
         }
     }
 
@@ -418,7 +420,7 @@ fn main() {
     //     println!("{}", card.to_string());
     // }
 
-    for n in 0..1000 {
+    for n in 0..10 {
         let mut deck = make_shuffled_deck();
         deal(&mut deck, 8);
     }
