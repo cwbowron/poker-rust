@@ -488,8 +488,8 @@ fn deal(cards: &mut Vec<Card>, n: usize) {
     }
 
     evals.sort_by(|a, b| {
-        let (pocket_a, score_a) = a;
-        let (pocket_b, score_b) = b;
+        let (_pocket_a, score_a) = a;
+        let (_pocket_b, score_b) = b;
         cmp_score(score_a, score_b)
     });
     evals.reverse();
