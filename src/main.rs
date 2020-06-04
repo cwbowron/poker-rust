@@ -2,7 +2,6 @@ extern crate strum;
 #[macro_use] extern crate strum_macros;
 
 use strum::IntoEnumIterator;
-use std::collections::HashMap;
 use std::cmp::Ordering;
 
 mod card;
@@ -15,40 +14,9 @@ use card::sort;
 mod deck;
 use deck::make_shuffled_deck;
 
-struct RankMap(HashMap<Rank, Vec<Card>>);
+mod rank_map;
+use rank_map::RankMap;
 
-impl RankMap {
-    fn new(cards: &[Card]) -> RankMap {
-        let mut rank_map = HashMap::new();
-        for rank in Rank::iter() {
-            rank_map.insert(rank, Vec::new());
-        }
-        
-        for card in cards {
-            if let Some(rank_vector) = rank_map.get_mut(&card.rank) {
-                rank_vector.push(Card::copy(card));
-            }
-        }
-        
-        return RankMap(rank_map);
-    }
-
-    fn flatten(&self) -> Vec<Card> {
-        let mut cards = Vec::new();
-        for ranked_cards in self.0.values() {
-            for card in ranked_cards {
-                cards.push(Card::copy(card));
-            }
-        }
-        
-        return cards;
-    }
-
-    fn get(&self, rank: &Rank) -> Option<&Vec<Card>> {
-        self.0.get(rank)
-    }
-}
-    
 #[allow(dead_code)]
 #[derive(Copy, Clone, Debug, Eq, PartialEq, EnumIter, EnumString, ToString, Ord, PartialOrd)]
 enum HandCategory {
