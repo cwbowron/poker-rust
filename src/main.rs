@@ -92,8 +92,7 @@ fn make_deck() -> Vec<Card> {
     for rank in Rank::iter() {
         if rank != Rank::LowAce {
             for suit in Suit::iter() {
-                let card = Card { rank: rank, suit: suit };
-                deck.push(card);
+                deck.push(Card::new(rank, suit));
             }
         }
     }
