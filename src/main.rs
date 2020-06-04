@@ -223,7 +223,20 @@ fn is_straight(canonical_cards: &[Card]) -> Option<Vec<Card>> {
 }
 
 fn is_flush(canonical_cards: &[Card]) -> Option<Vec<Card>> {
-    None
+    for suit in Suit::iter() {
+        let suited: Vec<&Card> = canonical_cards
+            .iter()
+            .filter(|card| card.suit == suit)
+            .collect();
+        
+        if suited.len() >= 5 {
+            return Some(suited[0..5]
+                        .iter()
+                        .map(|card_ref| Card::copy(card_ref))
+                        .collect::<Vec<Card>>());
+        }
+    }
+    return None;
 }
 
 impl HandCategory {
