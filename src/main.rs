@@ -3,10 +3,8 @@ extern crate strum;
 
 use strum::IntoEnumIterator;
 use std::string::String;
-// use rand::Rng;
 use std::collections::HashMap;
 use std::cmp::Ordering;
-// use std::iter::FromIterator;
 
 mod card;
 use card::Suit;
