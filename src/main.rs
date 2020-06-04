@@ -81,6 +81,12 @@ impl Card {
     }
 }
 
+impl PartialEq for Card {
+    fn eq(&self, other: &Self) -> bool {
+        self.rank == other.rank && self.suit == other.suit
+    }
+}
+
 fn make_deck() -> Vec<Card> {
     let mut deck = Vec::with_capacity(52);
     for rank in Rank::iter() {
@@ -183,61 +189,74 @@ enum HandCategory {
     HighCard = 0
 }
 
-fn is_quads(canonical_cards: &[Card], rankMap: &RankMap) -> Option<Vec<Card>> {
-    if canonical_cards[0].rank == canonical_cards[1].rank
-        && canonical_cards[1].rank == canonical_cards[2].rank
-        && canonical_cards[2].rank == canonical_cards[3].rank {
-            // TODO cards[0...4] + highest remaining card
-            return Some(canonical_cards[0..5].to_vec());
-        } else {
-            return None;
+fn flatten_rank_map(rank_map: &RankMap) -> Vec<Card> {
+    let mut cards = Vec::new();
+    for (rank, rankedCards) in rank_map.iter() {
+        for card in rankedCards {
+            cards.push(Card::copy(card));
         }
+    }
+
+    return cards;
 }
 
-fn is_full_house(canonical_cards: &[Card], rankMap: &RankMap) -> Option<Vec<Card>> {
-    if canonical_cards[0].rank == canonical_cards[1].rank
-        && canonical_cards[1].rank == canonical_cards[2].rank
-        && canonical_cards[3].rank == canonical_cards[4].rank {
-            // TODO highest triplet and highest pair
-            return Some(canonical_cards[0..5].to_vec());
-        } else {
-            return None;
+fn make_sets(rank_map: &RankMap, setSizes: &mut Vec<usize>) -> Option<Vec<Card>> {
+    if setSizes.len() > 0 {
+        let setSize = setSizes.remove(0);
+        for rank in Rank::iter() {
+            if let Some(ranked_cards) = rank_map.get(&rank) {
+                if ranked_cards.len() >= setSize {
+                    let mut set = ranked_cards[0..setSize].to_vec();
+
+                    let cards = flatten_rank_map(rank_map);
+                    let mut filtered_cards = Vec::new();
+
+                    for card in cards {
+                        if !set.contains(&card) {
+                            filtered_cards.push(card);
+                        }
+                    }
+                    let nextRankMap = make_rank_map(&filtered_cards);
+                    if let Some(sets) = make_sets(&nextRankMap, setSizes) {
+                        for card in sets {
+                            set.push(card);
+                        }
+
+                        return Some(set);
+                    }
+                }
+            }
         }
-}
-
-fn is_trips(canonical_cards: &[Card], rankMap: &RankMap) -> Option<Vec<Card>> {
-    if canonical_cards[0].rank == canonical_cards[1].rank
-        && canonical_cards[1].rank == canonical_cards[2].rank {
-            // TODO cards[0...3] + highest remaining cards
-            return Some(canonical_cards[0..5].to_vec());
-        } else {
-            return None;
-
-        }
-}
-
-fn is_two_pair(canonical_cards: &[Card], rankMap: &RankMap) -> Option<Vec<Card>> {
-    if canonical_cards[0].rank == canonical_cards[1].rank
-        && canonical_cards[2].rank == canonical_cards[3].rank {
-            // TODO highest pairs + highest remaining card
-            return Some(canonical_cards[0..5].to_vec());
-        } else {
-            return None;
-        }
-}
-
-fn is_pair(canonical_cards: &[Card], rankMap: &RankMap) -> Option<Vec<Card>> {
-    if canonical_cards[0].rank == canonical_cards[1].rank {
-        // TODO highest pair + highest remaining cards
-        return Some(canonical_cards[0..5].to_vec());
-    } else {
         return None;
+    } else {
+        return Some(Vec::new());
     }
 }
 
-fn is_high_card(canonical_cards: &[Card], rankMap: &RankMap) -> Option<Vec<Card>> {
-    // TODO rank sorted order
-    return Some(canonical_cards[0..5].to_vec());
+fn is_quads(canonical_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
+    return make_sets(rank_map, &mut vec![4, 1]);
+}
+
+fn is_full_house(canonical_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
+    return make_sets(rank_map, &mut vec![3, 2]);
+}
+
+fn is_trips(canonical_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
+    return make_sets(rank_map, &mut vec![3, 1, 1]);
+}
+
+fn is_two_pair(canonical_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
+    return make_sets(rank_map, &mut vec![2, 2, 1]);
+}
+
+fn is_pair(canonical_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
+    return make_sets(rank_map, &mut vec![2, 1, 1, 1]);
+}
+
+fn is_high_card(canonical_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
+    let mut cards = canonical_cards.to_vec();
+    sort(&mut cards);
+    return Some(cards[0..5].to_vec());
 }
 
 fn is_straight_simple(cards: &[Card]) -> Option<Vec<Card>> {
@@ -271,11 +290,11 @@ fn is_straight_simple(cards: &[Card]) -> Option<Vec<Card>> {
     return None;
 }
 
-fn is_straight(canonical_cards: &[Card], rankMap: &RankMap) -> Option<Vec<Card>> {
+fn is_straight(canonical_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
     return is_straight_simple(canonical_cards);
 }
 
-fn is_flush(canonical_cards: &[Card], rankMap: &RankMap) -> Option<Vec<Card>> {
+fn is_flush(canonical_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
     for suit in Suit::iter() {
         let suited: Vec<&Card> = canonical_cards
             .iter()
@@ -292,7 +311,7 @@ fn is_flush(canonical_cards: &[Card], rankMap: &RankMap) -> Option<Vec<Card>> {
     return None;
 }
 
-fn is_straight_flush(canonical_cards: &[Card], rankMap: &RankMap) -> Option<Vec<Card>> {
+fn is_straight_flush(canonical_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
     for suit in Suit::iter() {
         let suited: Vec<&Card> = canonical_cards
             .iter()
@@ -418,7 +437,7 @@ fn deal(cards: &mut Vec<Card>, n: usize) {
         let (category, sorted_cards) = evaluate(&cards);
         println!("Pocket: {} -> {} -> {}", fmt_cards(&pocket), fmt_cards(&sorted_cards), category.to_string());
 
-        // if category == HandCategory::StraightFlush {
+        // if category == HandCategory::FullHouse {
         //     panic!();
         // }
     }
@@ -429,7 +448,7 @@ fn main() {
     //     println!("{}", card.to_string());
     // }
 
-    for n in 0..10 {
+    for _n in 0..100 {
         let mut deck = make_shuffled_deck();
         deal(&mut deck, 8);
     }
