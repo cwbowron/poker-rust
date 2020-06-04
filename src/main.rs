@@ -228,18 +228,6 @@ impl HandCategory {
     }
 }
 
-fn cmp_ranks(a: &[Card], b: &[Card]) -> std::cmp::Ordering {
-    for n in 0..std::cmp::min(a.len(), b.len()) {
-        let card_a = &a[n];
-        let card_b = &b[n];
-        let cmp = card_a.rank.cmp(&card_b.rank);
-        if cmp != Ordering::Equal {
-            return cmp;
-        }
-    }
-    return Ordering::Equal;
-}
-
 #[derive(Eq)]
 struct PokerHand {
     category: HandCategory,
@@ -259,6 +247,18 @@ impl PokerHand {
         }
         
         panic!();
+    }
+
+    fn cmp_ranks(a: &[Card], b: &[Card]) -> std::cmp::Ordering {
+        for n in 0..std::cmp::min(a.len(), b.len()) {
+            let card_a = &a[n];
+            let card_b = &b[n];
+            let cmp = card_a.rank.cmp(&card_b.rank);
+            if cmp != Ordering::Equal {
+                return cmp;
+            }
+        }
+        return Ordering::Equal;
     }
 }
 
@@ -280,7 +280,7 @@ impl std::cmp::Ord for PokerHand {
         match self.category.cmp(&other.category) {
             Ordering::Less => return Ordering::Less,
             Ordering::Greater => return Ordering::Greater,
-            Ordering::Equal => return cmp_ranks(&self.cards, &other.cards)
+            Ordering::Equal => return PokerHand::cmp_ranks(&self.cards, &other.cards)
         }
     }
 }
@@ -333,9 +333,7 @@ fn deal(cards: &mut Vec<Card>, n: usize) {
         let (_pocket_a, poker_hand_a) = a;
         let (_pocket_b, poker_hand_b) = b;
         poker_hand_a.cmp(&poker_hand_b)
-        // cmp_score(score_a, score_b)
     });
-    // evals.sort_by_key(|item| item.1);
     evals.reverse();
 
     for eval in evals {
