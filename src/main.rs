@@ -15,23 +15,40 @@ use card::sort;
 mod deck;
 use deck::make_shuffled_deck;
 
-type RankMap = HashMap<Rank, Vec<Card>>;
+struct RankMap(HashMap<Rank, Vec<Card>>);
 
-fn make_rank_map(cards: &[Card]) -> RankMap {
-    let mut rank_map = HashMap::new();
-    for rank in Rank::iter() {
-        rank_map.insert(rank, Vec::new());
-    }
-    
-    for card in cards {
-        if let Some(rank_vector) = rank_map.get_mut(&card.rank) {
-            rank_vector.push(Card::copy(card));
+impl RankMap {
+    fn new(cards: &[Card]) -> RankMap {
+        let mut rank_map = HashMap::new();
+        for rank in Rank::iter() {
+            rank_map.insert(rank, Vec::new());
         }
+        
+        for card in cards {
+            if let Some(rank_vector) = rank_map.get_mut(&card.rank) {
+                rank_vector.push(Card::copy(card));
+            }
+        }
+        
+        return RankMap(rank_map);
     }
 
-    return rank_map;
-}
+    fn flatten(&self) -> Vec<Card> {
+        let mut cards = Vec::new();
+        for ranked_cards in self.0.values() {
+            for card in ranked_cards {
+                cards.push(Card::copy(card));
+            }
+        }
+        
+        return cards;
+    }
 
+    fn get(&self, rank: &Rank) -> Option<&Vec<Card>> {
+        self.0.get(rank)
+    }
+}
+    
 #[allow(dead_code)]
 #[derive(Copy, Clone, Debug, Eq, PartialEq, EnumIter, EnumString, ToString, Ord, PartialOrd)]
 enum HandCategory {
@@ -63,17 +80,6 @@ enum HandCategory {
     HighCard = 0
 }
 
-fn flatten_rank_map(rank_map: &RankMap) -> Vec<Card> {
-    let mut cards = Vec::new();
-    for ranked_cards in rank_map.values() {
-        for card in ranked_cards {
-            cards.push(Card::copy(card));
-        }
-    }
-
-    return cards;
-}
-
 fn make_sets(rank_map: &RankMap, set_sizes: &mut Vec<usize>) -> Option<Vec<Card>> {
     if set_sizes.len() > 0 {
         let set_size = set_sizes.remove(0);
@@ -82,7 +88,7 @@ fn make_sets(rank_map: &RankMap, set_sizes: &mut Vec<usize>) -> Option<Vec<Card>
                 if ranked_cards.len() >= set_size {
                     let mut set = ranked_cards[0..set_size].to_vec();
 
-                    let cards = flatten_rank_map(rank_map);
+                    let cards = rank_map.flatten();
                     let mut filtered_cards = Vec::new();
 
                     for card in cards {
@@ -90,7 +96,7 @@ fn make_sets(rank_map: &RankMap, set_sizes: &mut Vec<usize>) -> Option<Vec<Card>
                             filtered_cards.push(card);
                         }
                     }
-                    let next_rank_map = make_rank_map(&filtered_cards);
+                    let next_rank_map = RankMap::new(&filtered_cards);
                     if let Some(sets) = make_sets(&next_rank_map, set_sizes) {
                         for card in sets {
                             set.push(card);
@@ -236,7 +242,8 @@ struct PokerHand {
 
 impl PokerHand {
     fn new(cards: &[Card]) -> PokerHand {
-        let rank_map = make_rank_map(&cards);
+        // let rank_map = make_rank_map(&cards);
+        let rank_map = RankMap::new(&cards);
         for category in HandCategory::iter() {
             if let Some(result_cards) = category.get_test()(&cards, &rank_map) {
                 return PokerHand {
