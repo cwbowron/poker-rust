@@ -222,7 +222,26 @@ fn is_straight_flush(canonical_cards: &[Card]) -> Option<Vec<Card>> {
 }
 
 fn is_straight(canonical_cards: &[Card]) -> Option<Vec<Card>> {
-    None
+    let mut vec: Vec<&Card> = Vec::new();
+    for rank in Rank::iter() {
+        match canonical_cards
+            .iter()
+            .find(|card| card.rank == rank) {
+                Some(card) => {
+                    vec.push(card);
+                    if vec.len() >= 5 {
+                        return Some(
+                            vec.iter()
+                                .map(|card_ref| Card::copy(card_ref))
+                                .collect());
+                    }
+                }
+                None => vec.clear()
+            }
+    }
+
+    // TODO 5432A
+    return None;
 }
 
 fn is_flush(canonical_cards: &[Card]) -> Option<Vec<Card>> {
