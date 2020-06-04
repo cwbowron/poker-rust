@@ -52,7 +52,9 @@ enum Rank {
     #[strum(to_string = "3")]
     Three = 3,
     #[strum(to_string = "2")]
-    Two = 2
+    Two = 2,
+    #[strum(to_string = "2")]
+    LowAce = 1
 }
 
 #[derive(Clone, Debug)]
@@ -82,12 +84,13 @@ impl Card {
 fn make_deck() -> Vec<Card> {
     let mut deck = Vec::with_capacity(52);
     for rank in Rank::iter() {
-        for suit in Suit::iter() {
-            let card = Card { rank: rank, suit: suit };
-            deck.push(card);
+        if rank != Rank::LowAce {
+            for suit in Suit::iter() {
+                let card = Card { rank: rank, suit: suit };
+                deck.push(card);
+            }
         }
     }
-
     
     return deck;
 }
