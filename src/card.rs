@@ -82,3 +82,16 @@ pub fn cmp_card_rank(a: &Card, b: &Card) -> std::cmp::Ordering {
 pub fn cmp_card_suit(a: &Card, b: &Card) -> std::cmp::Ordering {
     b.suit.cmp(&a.suit)
 }
+
+pub fn rank_sort(deck: &mut Vec<Card>) {
+    deck.sort_by(cmp_card_rank);
+}
+
+pub fn suit_sort(deck: &mut Vec<Card>) {
+    deck.sort_by(cmp_card_suit);
+}
+
+pub fn sort(deck: &mut Vec<Card>) {
+    suit_sort(deck);
+    rank_sort(deck);
+}

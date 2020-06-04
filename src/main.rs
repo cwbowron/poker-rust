@@ -10,24 +10,10 @@ mod card;
 use card::Suit;
 use card::Rank;
 use card::Card;
-use card::cmp_card_rank;
-use card::cmp_card_suit;
+use card::sort;
 
 mod deck;
 use deck::make_shuffled_deck;
-
-fn rank_sort(deck: &mut Vec<Card>) {
-    deck.sort_by(cmp_card_rank);
-}
-
-fn suit_sort(deck: &mut Vec<Card>) {
-    deck.sort_by(cmp_card_suit);
-}
-
-fn sort(deck: &mut Vec<Card>) {
-    suit_sort(deck);
-    rank_sort(deck);
-}
 
 type RankMap = HashMap<Rank, Vec<Card>>;
 
