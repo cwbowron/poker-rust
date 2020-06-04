@@ -170,6 +170,7 @@ fn is_quads(canonical_cards: &[Card]) -> Option<Vec<Card>> {
     if canonical_cards[0].rank == canonical_cards[1].rank
         && canonical_cards[1].rank == canonical_cards[2].rank
         && canonical_cards[2].rank == canonical_cards[3].rank {
+            // TODO cards[0...4] + highest remaining card
             return Some(canonical_cards[0..5].to_vec());
         } else {
             return None;
@@ -180,6 +181,7 @@ fn is_full_house(canonical_cards: &[Card]) -> Option<Vec<Card>> {
     if canonical_cards[0].rank == canonical_cards[1].rank
         && canonical_cards[1].rank == canonical_cards[2].rank
         && canonical_cards[3].rank == canonical_cards[4].rank {
+            // TODO highest triplet and highest pair
             return Some(canonical_cards[0..5].to_vec());
         } else {
             return None;
@@ -189,6 +191,7 @@ fn is_full_house(canonical_cards: &[Card]) -> Option<Vec<Card>> {
 fn is_trips(canonical_cards: &[Card]) -> Option<Vec<Card>> {
     if canonical_cards[0].rank == canonical_cards[1].rank
         && canonical_cards[1].rank == canonical_cards[2].rank {
+            // TODO cards[0...3] + highest remaining cards
             return Some(canonical_cards[0..5].to_vec());
         } else {
             return None;
@@ -199,6 +202,7 @@ fn is_trips(canonical_cards: &[Card]) -> Option<Vec<Card>> {
 fn is_two_pair(canonical_cards: &[Card]) -> Option<Vec<Card>> {
     if canonical_cards[0].rank == canonical_cards[1].rank
         && canonical_cards[2].rank == canonical_cards[3].rank {
+            // TODO highest pairs + highest remaining card
             return Some(canonical_cards[0..5].to_vec());
         } else {
             return None;
@@ -207,6 +211,7 @@ fn is_two_pair(canonical_cards: &[Card]) -> Option<Vec<Card>> {
 
 fn is_pair(canonical_cards: &[Card]) -> Option<Vec<Card>> {
     if canonical_cards[0].rank == canonical_cards[1].rank {
+        // TODO highest pair + highest remaining cards
         return Some(canonical_cards[0..5].to_vec());
     } else {
         return None;
@@ -214,6 +219,7 @@ fn is_pair(canonical_cards: &[Card]) -> Option<Vec<Card>> {
 }
 
 fn is_high_card(canonical_cards: &[Card]) -> Option<Vec<Card>> {
+    // TODO rank sorted order
     return Some(canonical_cards[0..5].to_vec());
 }
 
