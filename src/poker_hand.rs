@@ -73,33 +73,33 @@ fn make_sets(rank_map: &RankMap, set_sizes: &mut Vec<usize>) -> Option<Vec<Card>
     }
 }
 
-fn is_quads(_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
+fn as_quads(_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
     return make_sets(rank_map, &mut vec![4, 1]);
 }
 
-fn is_full_house(_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
+fn as_full_house(_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
     return make_sets(rank_map, &mut vec![3, 2]);
 }
 
-fn is_trips(_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
+fn as_trips(_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
     return make_sets(rank_map, &mut vec![3, 1, 1]);
 }
 
-fn is_two_pair(_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
+fn as_two_pair(_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
     return make_sets(rank_map, &mut vec![2, 2, 1]);
 }
 
-fn is_pair(_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
+fn as_pair(_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
     return make_sets(rank_map, &mut vec![2, 1, 1, 1]);
 }
 
-fn is_high_card(cards: &[Card], _rank_map: &RankMap) -> Option<Vec<Card>> {
+fn as_high_card(cards: &[Card], _rank_map: &RankMap) -> Option<Vec<Card>> {
     let mut sorted_cards = cards.to_vec();
     sort(&mut sorted_cards);
     return Some(sorted_cards[0..5].to_vec());
 }
 
-fn is_straight_simple(cards: &[Card]) -> Option<Vec<Card>> {
+fn as_straight_simple(cards: &[Card]) -> Option<Vec<Card>> {
     let mut vec: Vec<&Card> = Vec::new();
     for rank in Rank::iter() {
         match cards
@@ -130,11 +130,11 @@ fn is_straight_simple(cards: &[Card]) -> Option<Vec<Card>> {
     return None;
 }
 
-fn is_straight(cards: &[Card], _rank_map: &RankMap) -> Option<Vec<Card>> {
-    return is_straight_simple(cards);
+fn as_straight(cards: &[Card], _rank_map: &RankMap) -> Option<Vec<Card>> {
+    return as_straight_simple(cards);
 }
 
-fn is_flush(cards: &[Card], _rank_map: &RankMap) -> Option<Vec<Card>> {
+fn as_flush(cards: &[Card], _rank_map: &RankMap) -> Option<Vec<Card>> {
     for suit in Suit::iter() {
         let suited: Vec<&Card> = cards
             .iter()
@@ -156,7 +156,7 @@ fn is_flush(cards: &[Card], _rank_map: &RankMap) -> Option<Vec<Card>> {
     return None;
 }
 
-fn is_straight_flush(cards: &[Card], _rank_map: &RankMap) -> Option<Vec<Card>> {
+fn as_straight_flush(cards: &[Card], _rank_map: &RankMap) -> Option<Vec<Card>> {
     for suit in Suit::iter() {
         let suited: Vec<&Card> = cards
             .iter()
@@ -169,7 +169,7 @@ fn is_straight_flush(cards: &[Card], _rank_map: &RankMap) -> Option<Vec<Card>> {
                 .map(|card_ref| Card::copy(card_ref))
                 .collect::<Vec<Card>>();
 
-            if let Some(straight) = is_straight_simple(&suited_cards) {
+            if let Some(straight) = as_straight_simple(&suited_cards) {
                 return Some(straight);
             }
         }
@@ -177,19 +177,18 @@ fn is_straight_flush(cards: &[Card], _rank_map: &RankMap) -> Option<Vec<Card>> {
     return None;
 }
 
-
 impl HandCategory {
     fn get_test(&self) -> fn(&[Card], &RankMap) -> Option<Vec<Card>> {
         match self {
-            HandCategory::HighCard => is_high_card,
-            HandCategory::OnePair => is_pair,
-            HandCategory::TwoPair => is_two_pair,
-            HandCategory::Triplets => is_trips,
-            HandCategory::Straight => is_straight,
-            HandCategory::Flush => is_flush,
-            HandCategory::FullHouse => is_full_house,
-            HandCategory::Quads => is_quads,
-            HandCategory::StraightFlush => is_straight_flush
+            HandCategory::HighCard => as_high_card,
+            HandCategory::OnePair => as_pair,
+            HandCategory::TwoPair => as_two_pair,
+            HandCategory::Triplets => as_trips,
+            HandCategory::Straight => as_straight,
+            HandCategory::Flush => as_flush,
+            HandCategory::FullHouse => as_full_house,
+            HandCategory::Quads => as_quads,
+            HandCategory::StraightFlush => as_straight_flush
         }
     }
 }
