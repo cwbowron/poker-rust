@@ -135,6 +135,23 @@ fn sort(deck: &mut Vec<Card>) {
     rank_sort(deck);
 }
 
+type RankMap = HashMap<Rank, Vec<Card>>;
+
+fn make_rank_map(cards: &[Card]) -> RankMap {
+    let mut rank_map = HashMap::new();
+    for rank in Rank::iter() {
+        rank_map.insert(rank, Vec::new());
+    }
+    
+    for card in cards {
+        if let Some(mut rank_vector) = rank_map.get_mut(&card.rank) {
+            rank_vector.push(Card::copy(card));
+        }
+    }
+
+    return rank_map;
+}
+
 #[allow(dead_code)]
 #[derive(Copy, Clone, Debug, Eq, PartialEq, EnumIter, EnumString, ToString, Ord, PartialOrd)]
 enum HandCategory {
@@ -166,9 +183,7 @@ enum HandCategory {
     HighCard = 0
 }
 
-type RankMap = HashMap<Rank, Vec<Card>>;
-
-fn is_quads(canonical_cards: &[Card]) -> Option<Vec<Card>> {
+fn is_quads(canonical_cards: &[Card], rankMap: &RankMap) -> Option<Vec<Card>> {
     if canonical_cards[0].rank == canonical_cards[1].rank
         && canonical_cards[1].rank == canonical_cards[2].rank
         && canonical_cards[2].rank == canonical_cards[3].rank {
@@ -179,7 +194,7 @@ fn is_quads(canonical_cards: &[Card]) -> Option<Vec<Card>> {
         }
 }
 
-fn is_full_house(canonical_cards: &[Card]) -> Option<Vec<Card>> {
+fn is_full_house(canonical_cards: &[Card], rankMap: &RankMap) -> Option<Vec<Card>> {
     if canonical_cards[0].rank == canonical_cards[1].rank
         && canonical_cards[1].rank == canonical_cards[2].rank
         && canonical_cards[3].rank == canonical_cards[4].rank {
@@ -190,7 +205,7 @@ fn is_full_house(canonical_cards: &[Card]) -> Option<Vec<Card>> {
         }
 }
 
-fn is_trips(canonical_cards: &[Card]) -> Option<Vec<Card>> {
+fn is_trips(canonical_cards: &[Card], rankMap: &RankMap) -> Option<Vec<Card>> {
     if canonical_cards[0].rank == canonical_cards[1].rank
         && canonical_cards[1].rank == canonical_cards[2].rank {
             // TODO cards[0...3] + highest remaining cards
@@ -201,7 +216,7 @@ fn is_trips(canonical_cards: &[Card]) -> Option<Vec<Card>> {
         }
 }
 
-fn is_two_pair(canonical_cards: &[Card]) -> Option<Vec<Card>> {
+fn is_two_pair(canonical_cards: &[Card], rankMap: &RankMap) -> Option<Vec<Card>> {
     if canonical_cards[0].rank == canonical_cards[1].rank
         && canonical_cards[2].rank == canonical_cards[3].rank {
             // TODO highest pairs + highest remaining card
@@ -211,7 +226,7 @@ fn is_two_pair(canonical_cards: &[Card]) -> Option<Vec<Card>> {
         }
 }
 
-fn is_pair(canonical_cards: &[Card]) -> Option<Vec<Card>> {
+fn is_pair(canonical_cards: &[Card], rankMap: &RankMap) -> Option<Vec<Card>> {
     if canonical_cards[0].rank == canonical_cards[1].rank {
         // TODO highest pair + highest remaining cards
         return Some(canonical_cards[0..5].to_vec());
@@ -220,15 +235,15 @@ fn is_pair(canonical_cards: &[Card]) -> Option<Vec<Card>> {
     }
 }
 
-fn is_high_card(canonical_cards: &[Card]) -> Option<Vec<Card>> {
+fn is_high_card(canonical_cards: &[Card], rankMap: &RankMap) -> Option<Vec<Card>> {
     // TODO rank sorted order
     return Some(canonical_cards[0..5].to_vec());
 }
 
-fn is_straight(canonical_cards: &[Card]) -> Option<Vec<Card>> {
+fn is_straight_simple(cards: &[Card]) -> Option<Vec<Card>> {
     let mut vec: Vec<&Card> = Vec::new();
     for rank in Rank::iter() {
-        match canonical_cards
+        match cards
             .iter()
             .find(|card| card.rank == rank) {
                 Some(card) => {
@@ -239,7 +254,7 @@ fn is_straight(canonical_cards: &[Card]) -> Option<Vec<Card>> {
                                 .map(|card_ref| Card::copy(card_ref))
                                 .collect());
                     } else if vec.len() >= 4 && rank == Rank::Two {
-                        if let Some(ace) = canonical_cards.iter().find(|card| card.rank == Rank::Ace) {
+                        if let Some(ace) = cards.iter().find(|card| card.rank == Rank::Ace) {
                             let mut result = vec.iter()
                                 .map(|card_ref| Card::copy(card_ref))
                                 .collect::<Vec<Card>>();
@@ -256,7 +271,11 @@ fn is_straight(canonical_cards: &[Card]) -> Option<Vec<Card>> {
     return None;
 }
 
-fn is_flush(canonical_cards: &[Card]) -> Option<Vec<Card>> {
+fn is_straight(canonical_cards: &[Card], rankMap: &RankMap) -> Option<Vec<Card>> {
+    return is_straight_simple(canonical_cards);
+}
+
+fn is_flush(canonical_cards: &[Card], rankMap: &RankMap) -> Option<Vec<Card>> {
     for suit in Suit::iter() {
         let suited: Vec<&Card> = canonical_cards
             .iter()
@@ -273,7 +292,7 @@ fn is_flush(canonical_cards: &[Card]) -> Option<Vec<Card>> {
     return None;
 }
 
-fn is_straight_flush(canonical_cards: &[Card]) -> Option<Vec<Card>> {
+fn is_straight_flush(canonical_cards: &[Card], rankMap: &RankMap) -> Option<Vec<Card>> {
     for suit in Suit::iter() {
         let suited: Vec<&Card> = canonical_cards
             .iter()
@@ -285,8 +304,8 @@ fn is_straight_flush(canonical_cards: &[Card]) -> Option<Vec<Card>> {
                 .iter()
                 .map(|card_ref| Card::copy(card_ref))
                 .collect::<Vec<Card>>();
-            
-            if let Some(straight) = is_straight(&suited_cards) {
+
+            if let Some(straight) = is_straight_simple(&suited_cards) {
                 return Some(straight);
             }
         }
@@ -296,7 +315,7 @@ fn is_straight_flush(canonical_cards: &[Card]) -> Option<Vec<Card>> {
 
 
 impl HandCategory {
-    fn get_test(&self) -> fn(&[Card]) -> Option<Vec<Card>> {
+    fn get_test(&self) -> fn(&[Card], &RankMap) -> Option<Vec<Card>> {
         match self {
             HandCategory::HighCard => is_high_card,
             HandCategory::OnePair => is_pair,
@@ -352,21 +371,11 @@ fn canonical_order(rank_map: &RankMap) -> Vec<Card> {
 }
 
 fn evaluate(cards: &[Card]) -> (HandCategory, Vec<Card>) {
-    let mut rank_map = HashMap::new();
-    for rank in Rank::iter() {
-        rank_map.insert(rank, Vec::new());
-    }
-    
-    for card in cards {
-        if let Some(mut rank_vector) = rank_map.get_mut(&card.rank) {
-            rank_vector.push(Card::copy(card));
-        }
-    }
-
+    let rank_map = make_rank_map(&cards);
     let canonical_cards = canonical_order(&rank_map);
 
     for category in HandCategory::iter() {
-        if let Some(result_cards) = category.get_test()(&canonical_cards) {
+        if let Some(result_cards) = category.get_test()(&canonical_cards, &rank_map) {
             return (category, result_cards);
         }
     }
