@@ -75,3 +75,10 @@ impl PartialEq for Card {
     }
 }
 
+pub fn cmp_card_rank(a: &Card, b: &Card) -> std::cmp::Ordering {
+    b.rank.cmp(&a.rank)
+}
+
+pub fn cmp_card_suit(a: &Card, b: &Card) -> std::cmp::Ordering {
+    b.suit.cmp(&a.suit)
+}

@@ -12,17 +12,11 @@ mod card;
 use card::Suit;
 use card::Rank;
 use card::Card;
+use card::cmp_card_rank;
+use card::cmp_card_suit;
 
 mod deck;
 use deck::make_shuffled_deck;
-
-fn cmp_card_rank(a: &Card, b: &Card) -> std::cmp::Ordering {
-    b.rank.cmp(&a.rank)
-}
-
-fn cmp_card_suit(a: &Card, b: &Card) -> std::cmp::Ordering {
-    b.suit.cmp(&a.suit)
-}
 
 fn rank_sort(deck: &mut Vec<Card>) {
     deck.sort_by(cmp_card_rank);
