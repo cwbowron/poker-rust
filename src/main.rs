@@ -234,13 +234,21 @@ fn is_straight(canonical_cards: &[Card]) -> Option<Vec<Card>> {
                             vec.iter()
                                 .map(|card_ref| Card::copy(card_ref))
                                 .collect());
+                    } else if vec.len() >= 4 && rank == Rank::Two {
+                        if let Some(ace) = canonical_cards.iter().find(|card| card.rank == Rank::Ace) {
+                            let mut result = vec.iter()
+                                .map(|card_ref| Card::copy(card_ref))
+                                .collect::<Vec<Card>>();
+
+                            result.push(Card::new(Rank::LowAce, ace.suit));
+                            return Some(result);
+                        }
                     }
                 }
                 None => vec.clear()
             }
     }
 
-    // TODO 5432A
     return None;
 }
 
