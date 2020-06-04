@@ -386,12 +386,14 @@ fn deal(cards: &mut Vec<Card>, n: usize) {
 }
 
 fn main() {
-    let mut deck = make_shuffled_deck();
     // for card in &deck {
     //     println!("{}", card.to_string());
     // }
 
-    deal(&mut deck, 8);
+    for n in 0..100 {
+        let mut deck = make_shuffled_deck();
+        deal(&mut deck, 8);
+    }
     
     // let mut hand = &deck[..5].to_vec();
     // println!("Hand: {:#?}", hand);
