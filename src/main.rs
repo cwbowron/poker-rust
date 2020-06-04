@@ -393,7 +393,9 @@ fn canonical_order(rank_map: &RankMap) -> Vec<Card> {
     return canonical_cards;
 }
 
-fn evaluate(cards: &[Card]) -> (HandCategory, Vec<Card>) {
+type Score = (HandCategory, Vec<Card>);
+
+fn evaluate(cards: &[Card]) -> Score {
     let rank_map = make_rank_map(&cards);
     let canonical_cards = canonical_order(&rank_map);
 
@@ -404,6 +406,29 @@ fn evaluate(cards: &[Card]) -> (HandCategory, Vec<Card>) {
     }
 
     return (HandCategory::HighCard, canonical_cards);
+}
+
+fn cmp_ranks(a: &[Card], b: &[Card]) -> std::cmp::Ordering {
+    for n in 0..std::cmp::min(a.len(), b.len()) {
+        let card_a = &a[n];
+        let card_b = &b[n];
+        let cmp = card_a.rank.cmp(&card_b.rank);
+        if cmp != Ordering::Equal {
+            return cmp;
+        }
+    }
+    return Ordering::Equal;
+}
+
+fn cmp_score(a: &Score, b: &Score) -> std::cmp::Ordering {
+    let (category_a, cards_a) = a;
+    let (category_b, cards_b) = b;
+
+    match category_a.cmp(category_b) {
+        Ordering::Less => return Ordering::Less,
+        Ordering::Greater => return Ordering::Greater,
+        Ordering::Equal => return cmp_ranks(&cards_a, &cards_b)
+    }
 }
 
 fn deal(cards: &mut Vec<Card>, n: usize) {
@@ -434,16 +459,45 @@ fn deal(cards: &mut Vec<Card>, n: usize) {
     if let Some(card) = cards.pop() { board.push(card); }
 
     println!("Board: {}", fmt_cards(&board));
+
+    // let evals = pockets.iter()
+    //     .map(|pocket| {
+    //         let mut cards = pocket.to_vec();
+    //         cards.extend(board.to_vec());
+    //         (pocket, cards)
+    //     })
+    //     .map(|(pocket, cards)| {
+    //         let (category, sorted_cards) = evaluate(&cards);
+    //         (pocket, category, sorted_cards)
+    //     })
+    //     .collect();
+    
+    let mut evals = Vec::new();
     for pocket in &pockets {
         let mut cards = pocket.to_vec();
         cards.extend(board.to_vec());
 
-        let (category, sorted_cards) = evaluate(&cards);
-        println!("Pocket: {} -> {} -> {}", fmt_cards(&pocket), fmt_cards(&sorted_cards), category.to_string());
+        // let (category, sorted_cards) = evaluate(&cards);
+        let eval = evaluate(&cards);
+        evals.push((pocket, eval));
+        // println!("Pocket: {} -> {} -> {}", fmt_cards(&pocket), fmt_cards(&sorted_cards), category.to_string());
 
         // if category == HandCategory::FullHouse {
         //     panic!();
         // }
+    }
+
+    evals.sort_by(|a, b| {
+        let (pocket_a, score_a) = a;
+        let (pocket_b, score_b) = b;
+        cmp_score(score_a, score_b)
+    });
+    evals.reverse();
+
+    for eval in evals {
+        let (pocket, score) = eval;
+        let (category, sorted_cards) = score;
+        println!("Pocket: {} -> {} -> {}", fmt_cards(&pocket), fmt_cards(&sorted_cards), category.to_string());
     }
 }
 
