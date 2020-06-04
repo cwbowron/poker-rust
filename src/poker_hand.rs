@@ -13,31 +13,31 @@ use super::rank_map::RankMap;
 #[derive(Copy, Clone, Debug, Eq, PartialEq, EnumIter, EnumString, ToString, Ord, PartialOrd)]
 pub enum HandCategory {
     #[strum(to_string = "Straight Flush")]
-    StraightFlush = 8,
+    StraightFlush,
 
     #[strum(to_string = "Four of a Kind")]
-    Quads = 7,
+    Quads,
 
     #[strum(to_string = "Full House")]
-    FullHouse = 6,
+    FullHouse,
 
     #[strum(to_string = "Flush")]
-    Flush = 5,
+    Flush,
 
     #[strum(to_string = "Straight")]
-    Straight = 4,
+    Straight,
 
     #[strum(to_string = "Three of a Kind")]
-    Triplets = 3,
+    Triplets,
 
     #[strum(to_string = "Two Pair")]
-    TwoPair = 2,
+    TwoPair,
 
     #[strum(to_string = "Pair")]
-    OnePair = 1,
+    OnePair,
 
     #[strum(to_string = "High Card")]
-    HighCard = 0
+    HighCard
 }
 
 fn make_sets(rank_map: &RankMap, set_sizes: &mut Vec<usize>) -> Option<Vec<Card>> {
