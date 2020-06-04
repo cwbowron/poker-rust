@@ -228,46 +228,6 @@ impl HandCategory {
     }
 }
 
-// fn cmp_size<T>(a: &[T], b:&[T]) -> std::cmp::Ordering {
-//     return b.len().cmp(&a.len());
-// }
-
-// fn canonical_order(rank_map: &RankMap) -> Vec<Card> {
-//     let mut sorted_keys: Vec<&Rank> = rank_map.keys().collect();
-//     sorted_keys.sort_by(|a, b| {
-//         match cmp_size(rank_map.get(a).unwrap(), rank_map.get(b).unwrap()) {
-//             Ordering::Equal => b.cmp(a),
-//             Ordering::Less => Ordering::Less,
-//             Ordering::Greater => Ordering::Greater
-//         }
-//     });
-
-//     let mut canonical_cards: Vec<Card> = Vec::new();
-//     for rank in sorted_keys {
-//         if let Some(rank_cards) = rank_map.get(rank) {
-//             for card in rank_cards {
-//                 canonical_cards.push(card.copy());
-//             }
-//         }
-//     }
-
-//     return canonical_cards;
-// }
-
-// type Score = (HandCategory, Vec<Card>);
-
-// fn evaluate(cards: &[Card]) -> Score {
-//     let rank_map = make_rank_map(&cards);
-
-//     for category in HandCategory::iter() {
-//         if let Some(result_cards) = category.get_test()(&cards, &rank_map) {
-//             return (category, result_cards);
-//         }
-//     }
-
-//     panic!();
-// }
-
 fn cmp_ranks(a: &[Card], b: &[Card]) -> std::cmp::Ordering {
     for n in 0..std::cmp::min(a.len(), b.len()) {
         let card_a = &a[n];
@@ -360,32 +320,13 @@ fn deal(cards: &mut Vec<Card>, n: usize) {
 
     println!("Board: {}", Cards(&board));
 
-    // let evals = pockets.iter()
-    //     .map(|pocket| {
-    //         let mut cards = pocket.to_vec();
-    //         cards.extend(board.to_vec());
-    //         (pocket, cards)
-    //     })
-    //     .map(|(pocket, cards)| {
-    //         let (category, sorted_cards) = evaluate(&cards);
-    //         (pocket, category, sorted_cards)
-    //     })
-    //     .collect();
-    
     let mut evals = Vec::new();
     for pocket in &pockets {
         let mut cards = pocket.to_vec();
         cards.extend(board.to_vec());
 
-        // let (category, sorted_cards) = evaluate(&cards);
-        // let eval = evaluate(&cards);
         let poker_hand = PokerHand::new(&cards);
         evals.push((pocket, poker_hand));
-        // println!("Pocket: {} -> {} -> {}", fmt_cards(&pocket), fmt_cards(&sorted_cards), category.to_string());
-
-        // if category == HandCategory::FullHouse {
-        //     panic!();
-        // }
     }
 
     evals.sort_by(|a, b| {
@@ -404,24 +345,8 @@ fn deal(cards: &mut Vec<Card>, n: usize) {
 }
 
 fn main() {
-    // for card in &deck {
-    //     println!("{}", card.to_string());
-    // }
-
     for _n in 0..100 {
         let mut deck = make_shuffled_deck();
         deal(&mut deck, 8);
     }
-
-    // let mut hand = &deck[..5].to_vec();
-    // println!("Hand: {:#?}", hand);
-    // let mut hand = Vec::from_iter(deck[..5].iter().cloned());
-    // sort(&mut hand);
-    // println!("Hand: {}", foo(&hand));
-
-    // let mut sorted_deck = deck.to_vec();
-    // sort(&mut sorted_deck);
-    // for card in sorted_deck {
-    //     println!("{}", card.to_string());
-    // }
 }
