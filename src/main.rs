@@ -107,30 +107,30 @@ fn make_sets(rank_map: &RankMap, set_sizes: &mut Vec<usize>) -> Option<Vec<Card>
     }
 }
 
-fn is_quads(_canonical_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
+fn is_quads(_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
     return make_sets(rank_map, &mut vec![4, 1]);
 }
 
-fn is_full_house(_canonical_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
+fn is_full_house(_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
     return make_sets(rank_map, &mut vec![3, 2]);
 }
 
-fn is_trips(_canonical_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
+fn is_trips(_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
     return make_sets(rank_map, &mut vec![3, 1, 1]);
 }
 
-fn is_two_pair(_canonical_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
+fn is_two_pair(_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
     return make_sets(rank_map, &mut vec![2, 2, 1]);
 }
 
-fn is_pair(_canonical_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
+fn is_pair(_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
     return make_sets(rank_map, &mut vec![2, 1, 1, 1]);
 }
 
-fn is_high_card(canonical_cards: &[Card], _rank_map: &RankMap) -> Option<Vec<Card>> {
-    let mut cards = canonical_cards.to_vec();
-    sort(&mut cards);
-    return Some(cards[0..5].to_vec());
+fn is_high_card(cards: &[Card], _rank_map: &RankMap) -> Option<Vec<Card>> {
+    let mut sorted_cards = cards.to_vec();
+    sort(&mut sorted_cards);
+    return Some(sorted_cards[0..5].to_vec());
 }
 
 fn is_straight_simple(cards: &[Card]) -> Option<Vec<Card>> {
@@ -164,24 +164,24 @@ fn is_straight_simple(cards: &[Card]) -> Option<Vec<Card>> {
     return None;
 }
 
-fn is_straight(canonical_cards: &[Card], _rank_map: &RankMap) -> Option<Vec<Card>> {
-    return is_straight_simple(canonical_cards);
+fn is_straight(cards: &[Card], _rank_map: &RankMap) -> Option<Vec<Card>> {
+    return is_straight_simple(cards);
 }
 
-fn is_flush(canonical_cards: &[Card], _rank_map: &RankMap) -> Option<Vec<Card>> {
+fn is_flush(cards: &[Card], _rank_map: &RankMap) -> Option<Vec<Card>> {
     for suit in Suit::iter() {
-        let suited: Vec<&Card> = canonical_cards
+        let suited: Vec<&Card> = cards
             .iter()
             .filter(|card| card.suit == suit)
             .collect();
         
         if suited.len() >= 5 {
-            let mut cards = suited.iter()
+            let mut suited_cards = suited.iter()
                 .map(|card_ref| Card::copy(card_ref))
                 .collect();
 
-            sort(&mut cards);
-            return Some(cards.iter()
+            sort(&mut suited_cards);
+            return Some(suited_cards.iter()
                         .take(5)
                         .map(|card_ref| Card::copy(card_ref))
                         .collect());
@@ -190,9 +190,9 @@ fn is_flush(canonical_cards: &[Card], _rank_map: &RankMap) -> Option<Vec<Card>> 
     return None;
 }
 
-fn is_straight_flush(canonical_cards: &[Card], _rank_map: &RankMap) -> Option<Vec<Card>> {
+fn is_straight_flush(cards: &[Card], _rank_map: &RankMap) -> Option<Vec<Card>> {
     for suit in Suit::iter() {
-        let suited: Vec<&Card> = canonical_cards
+        let suited: Vec<&Card> = cards
             .iter()
             .filter(|card| card.suit == suit)
             .collect();
@@ -228,45 +228,44 @@ impl HandCategory {
     }
 }
 
-fn cmp_size<T>(a: &[T], b:&[T]) -> std::cmp::Ordering {
-    return b.len().cmp(&a.len());
-}
+// fn cmp_size<T>(a: &[T], b:&[T]) -> std::cmp::Ordering {
+//     return b.len().cmp(&a.len());
+// }
 
-fn canonical_order(rank_map: &RankMap) -> Vec<Card> {
-    let mut sorted_keys: Vec<&Rank> = rank_map.keys().collect();
-    sorted_keys.sort_by(|a, b| {
-        match cmp_size(rank_map.get(a).unwrap(), rank_map.get(b).unwrap()) {
-            Ordering::Equal => b.cmp(a),
-            Ordering::Less => Ordering::Less,
-            Ordering::Greater => Ordering::Greater
-        }
-    });
+// fn canonical_order(rank_map: &RankMap) -> Vec<Card> {
+//     let mut sorted_keys: Vec<&Rank> = rank_map.keys().collect();
+//     sorted_keys.sort_by(|a, b| {
+//         match cmp_size(rank_map.get(a).unwrap(), rank_map.get(b).unwrap()) {
+//             Ordering::Equal => b.cmp(a),
+//             Ordering::Less => Ordering::Less,
+//             Ordering::Greater => Ordering::Greater
+//         }
+//     });
 
-    let mut canonical_cards: Vec<Card> = Vec::new();
-    for rank in sorted_keys {
-        if let Some(rank_cards) = rank_map.get(rank) {
-            for card in rank_cards {
-                canonical_cards.push(card.copy());
-            }
-        }
-    }
+//     let mut canonical_cards: Vec<Card> = Vec::new();
+//     for rank in sorted_keys {
+//         if let Some(rank_cards) = rank_map.get(rank) {
+//             for card in rank_cards {
+//                 canonical_cards.push(card.copy());
+//             }
+//         }
+//     }
 
-    return canonical_cards;
-}
+//     return canonical_cards;
+// }
 
 type Score = (HandCategory, Vec<Card>);
 
 fn evaluate(cards: &[Card]) -> Score {
     let rank_map = make_rank_map(&cards);
-    let canonical_cards = canonical_order(&rank_map);
 
     for category in HandCategory::iter() {
-        if let Some(result_cards) = category.get_test()(&canonical_cards, &rank_map) {
+        if let Some(result_cards) = category.get_test()(&cards, &rank_map) {
             return (category, result_cards);
         }
     }
 
-    return (HandCategory::HighCard, canonical_cards);
+    panic!();
 }
 
 fn cmp_ranks(a: &[Card], b: &[Card]) -> std::cmp::Ordering {
