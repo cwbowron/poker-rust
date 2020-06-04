@@ -201,7 +201,6 @@ pub struct PokerHand {
 
 impl PokerHand {
     pub fn new(cards: &[Card]) -> PokerHand {
-        // let rank_map = make_rank_map(&cards);
         let rank_map = RankMap::new(&cards);
         for category in HandCategory::iter() {
             if let Some(result_cards) = category.get_test()(&cards, &rank_map) {
