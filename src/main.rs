@@ -254,19 +254,19 @@ impl HandCategory {
 //     return canonical_cards;
 // }
 
-type Score = (HandCategory, Vec<Card>);
+// type Score = (HandCategory, Vec<Card>);
 
-fn evaluate(cards: &[Card]) -> Score {
-    let rank_map = make_rank_map(&cards);
+// fn evaluate(cards: &[Card]) -> Score {
+//     let rank_map = make_rank_map(&cards);
 
-    for category in HandCategory::iter() {
-        if let Some(result_cards) = category.get_test()(&cards, &rank_map) {
-            return (category, result_cards);
-        }
-    }
+//     for category in HandCategory::iter() {
+//         if let Some(result_cards) = category.get_test()(&cards, &rank_map) {
+//             return (category, result_cards);
+//         }
+//     }
 
-    panic!();
-}
+//     panic!();
+// }
 
 fn cmp_ranks(a: &[Card], b: &[Card]) -> std::cmp::Ordering {
     for n in 0..std::cmp::min(a.len(), b.len()) {
@@ -280,14 +280,54 @@ fn cmp_ranks(a: &[Card], b: &[Card]) -> std::cmp::Ordering {
     return Ordering::Equal;
 }
 
-fn cmp_score(a: &Score, b: &Score) -> std::cmp::Ordering {
-    let (category_a, cards_a) = a;
-    let (category_b, cards_b) = b;
+#[derive(Eq)]
+struct PokerHand {
+    category: HandCategory,
+    cards: Vec<Card>
+}
 
-    match category_a.cmp(category_b) {
-        Ordering::Less => return Ordering::Less,
-        Ordering::Greater => return Ordering::Greater,
-        Ordering::Equal => return cmp_ranks(&cards_a, &cards_b)
+impl PokerHand {
+    fn new(cards: &[Card]) -> PokerHand {
+        let rank_map = make_rank_map(&cards);
+        for category in HandCategory::iter() {
+            if let Some(result_cards) = category.get_test()(&cards, &rank_map) {
+                return PokerHand {
+                    category: category,
+                    cards: result_cards
+                };
+            }
+        }
+        
+        panic!();
+    }
+}
+
+impl std::fmt::Display for PokerHand {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{} -> {}", Cards(&self.cards), self.category.to_string())
+    }
+}
+
+impl PartialEq for PokerHand {
+    fn eq(&self, other: &PokerHand) -> bool {
+        self.category == other.category
+            && self.cards[0] == other.cards[0]
+    }
+}
+
+impl std::cmp::Ord for PokerHand {
+    fn cmp(&self, other: &PokerHand) -> std::cmp::Ordering {
+        match self.category.cmp(&other.category) {
+            Ordering::Less => return Ordering::Less,
+            Ordering::Greater => return Ordering::Greater,
+            Ordering::Equal => return cmp_ranks(&self.cards, &other.cards)
+        }
+    }
+}
+
+impl PartialOrd for PokerHand {
+    fn partial_cmp(&self, other: &PokerHand) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }
 
@@ -338,8 +378,9 @@ fn deal(cards: &mut Vec<Card>, n: usize) {
         cards.extend(board.to_vec());
 
         // let (category, sorted_cards) = evaluate(&cards);
-        let eval = evaluate(&cards);
-        evals.push((pocket, eval));
+        // let eval = evaluate(&cards);
+        let poker_hand = PokerHand::new(&cards);
+        evals.push((pocket, poker_hand));
         // println!("Pocket: {} -> {} -> {}", fmt_cards(&pocket), fmt_cards(&sorted_cards), category.to_string());
 
         // if category == HandCategory::FullHouse {
@@ -348,16 +389,17 @@ fn deal(cards: &mut Vec<Card>, n: usize) {
     }
 
     evals.sort_by(|a, b| {
-        let (_pocket_a, score_a) = a;
-        let (_pocket_b, score_b) = b;
-        cmp_score(score_a, score_b)
+        let (_pocket_a, poker_hand_a) = a;
+        let (_pocket_b, poker_hand_b) = b;
+        poker_hand_a.cmp(&poker_hand_b)
+        // cmp_score(score_a, score_b)
     });
+    // evals.sort_by_key(|item| item.1);
     evals.reverse();
 
     for eval in evals {
-        let (pocket, score) = eval;
-        let (category, sorted_cards) = score;
-        println!("Pocket: {} -> {} -> {}", Cards(&pocket), Cards(&sorted_cards), category.to_string());
+        let (pocket, poker_hand) = eval;
+        println!("Pocket: {} -> {}", Cards(&pocket), poker_hand);
     }
 }
 

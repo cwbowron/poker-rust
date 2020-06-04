@@ -45,7 +45,8 @@ pub enum Rank {
     LowAce = 1
 }
 
-#[derive(Clone, Debug)]
+// TODO custom order
+#[derive(Clone, Debug, Eq, Ord, PartialOrd)]
 pub struct Card {
     pub rank: Rank,
     pub suit: Suit
