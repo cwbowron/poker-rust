@@ -53,7 +53,7 @@ enum Rank {
     Three = 3,
     #[strum(to_string = "2")]
     Two = 2,
-    #[strum(to_string = "2")]
+    #[strum(to_string = "A")]
     LowAce = 1
 }
 
