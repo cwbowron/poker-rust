@@ -102,3 +102,11 @@ pub fn fmt_cards(cards: &[Card]) -> String {
         .collect::<Vec<String>>()
         .join(" ");
 }
+
+pub struct Cards<'a>(pub &'a [Card]);
+
+impl std::fmt::Display for Cards<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}", fmt_cards(self.0))
+    }
+}

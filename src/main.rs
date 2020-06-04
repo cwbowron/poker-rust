@@ -9,8 +9,8 @@ mod card;
 use card::Suit;
 use card::Rank;
 use card::Card;
+use card::Cards;
 use card::sort;
-use card::fmt_cards;
 
 mod deck;
 use deck::make_shuffled_deck;
@@ -319,7 +319,7 @@ fn deal(cards: &mut Vec<Card>, n: usize) {
     if let Some(burn) = cards.pop() { burns.push(burn); }
     if let Some(card) = cards.pop() { board.push(card); }
 
-    println!("Board: {}", fmt_cards(&board));
+    println!("Board: {}", Cards(&board));
 
     // let evals = pockets.iter()
     //     .map(|pocket| {
@@ -358,7 +358,7 @@ fn deal(cards: &mut Vec<Card>, n: usize) {
     for eval in evals {
         let (pocket, score) = eval;
         let (category, sorted_cards) = score;
-        println!("Pocket: {} -> {} -> {}", fmt_cards(&pocket), fmt_cards(&sorted_cards), category.to_string());
+        println!("Pocket: {} -> {} -> {}", Cards(&pocket), Cards(&sorted_cards), category.to_string());
     }
 }
 
