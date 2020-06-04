@@ -3,7 +3,7 @@ extern crate strum;
 
 use strum::IntoEnumIterator;
 use std::string::String;
-use rand::Rng;
+// use rand::Rng;
 use std::collections::HashMap;
 use std::cmp::Ordering;
 // use std::iter::FromIterator;
@@ -13,37 +13,8 @@ use card::Suit;
 use card::Rank;
 use card::Card;
 
-fn make_deck() -> Vec<Card> {
-    let mut deck = Vec::with_capacity(52);
-    for rank in Rank::iter() {
-        if rank != Rank::LowAce {
-            for suit in Suit::iter() {
-                deck.push(Card::new(rank, suit));
-            }
-        }
-    }
-    
-    return deck;
-}
-
-fn shuffle(deck: &mut Vec<Card>) {
-    let mut rng = rand::thread_rng();
-    let n = deck.len();
-    for i in 0 .. n - 2 {
-        let j = rng.gen_range(i, n);
-        deck.swap(i, j);
-    }
-}
-
-fn shuffle_deck(deck: &Vec<Card>) -> Vec<Card> {
-    let mut copy = deck.to_vec();
-    shuffle(&mut copy);
-    return copy;
-}
-
-fn make_shuffled_deck() -> Vec<Card> {
-    shuffle_deck(&make_deck())
-}
+mod deck;
+use deck::make_shuffled_deck;
 
 fn cmp_card_rank(a: &Card, b: &Card) -> std::cmp::Ordering {
     b.rank.cmp(&a.rank)
