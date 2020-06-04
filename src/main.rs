@@ -217,10 +217,6 @@ fn is_high_card(canonical_cards: &[Card]) -> Option<Vec<Card>> {
     return Some(canonical_cards[0..5].to_vec());
 }
 
-fn is_straight_flush(canonical_cards: &[Card]) -> Option<Vec<Card>> {
-    None
-}
-
 fn is_straight(canonical_cards: &[Card]) -> Option<Vec<Card>> {
     let mut vec: Vec<&Card> = Vec::new();
     for rank in Rank::iter() {
@@ -268,6 +264,28 @@ fn is_flush(canonical_cards: &[Card]) -> Option<Vec<Card>> {
     }
     return None;
 }
+
+fn is_straight_flush(canonical_cards: &[Card]) -> Option<Vec<Card>> {
+    for suit in Suit::iter() {
+        let suited: Vec<&Card> = canonical_cards
+            .iter()
+            .filter(|card| card.suit == suit)
+            .collect();
+        
+        if suited.len() >= 5 {
+            let suited_cards = suited
+                .iter()
+                .map(|card_ref| Card::copy(card_ref))
+                .collect::<Vec<Card>>();
+            
+            if let Some(straight) = is_straight(&suited_cards) {
+                return Some(straight);
+            }
+        }
+    }
+    return None;
+}
+
 
 impl HandCategory {
     fn get_test(&self) -> fn(&[Card]) -> Option<Vec<Card>> {
@@ -382,6 +400,10 @@ fn deal(cards: &mut Vec<Card>, n: usize) {
 
         let (category, sorted_cards) = evaluate(&cards);
         println!("Pocket: {} -> {} -> {}", fmt_cards(&pocket), fmt_cards(&sorted_cards), category.to_string());
+
+        // if category == HandCategory::StraightFlush {
+        //     panic!();
+        // }
     }
 }
 
@@ -390,7 +412,7 @@ fn main() {
     //     println!("{}", card.to_string());
     // }
 
-    for n in 0..100 {
+    for n in 0..1000 {
         let mut deck = make_shuffled_deck();
         deal(&mut deck, 8);
     }
