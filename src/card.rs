@@ -168,6 +168,7 @@ impl std::str::FromStr for CardVector {
     type Err = ParseError;
     fn from_str(str: &str) -> Result<Self, Self::Err> {
         let cards = str.replace(" ", "")
+            .replace(",", "")
             .chars()
             .collect::<Vec<char>>()
             .chunks(2)
@@ -276,7 +277,20 @@ mod tests {
     #[test]
     fn test_cards_parsing() {
         let cards = "AcKd".parse::<CardVector>().unwrap();
-        println!("{}", cards);
+        assert_eq!(cards[0], Ace.of(Clubs));
+        assert_eq!(cards[1], King.of(Diamonds));
+    }
+
+    #[test]
+    fn test_cards_parsing_with_whitespace() {
+        let cards = "    Ac Kd   ".parse::<CardVector>().unwrap();
+        assert_eq!(cards[0], Ace.of(Clubs));
+        assert_eq!(cards[1], King.of(Diamonds));
+    }
+
+    #[test]
+    fn test_cards_parsing_with_commas() {
+        let cards = "Ac,Kd".parse::<CardVector>().unwrap();
         assert_eq!(cards[0], Ace.of(Clubs));
         assert_eq!(cards[1], King.of(Diamonds));
     }
