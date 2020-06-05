@@ -4,18 +4,22 @@ use strum::IntoEnumIterator;
 use super::card::Rank;
 use super::card::Card;
 
-pub struct RankMap(HashMap<Rank, Vec<Card>>);
+type _RankMap = HashMap<Rank, Vec<Card>>;
+
+pub struct RankMap(_RankMap);
 
 impl RankMap {
     pub fn new(cards: &[Card]) -> RankMap {
-        let mut rank_map = HashMap::new();
-        for rank in Rank::iter() {
-            rank_map.insert(rank, Vec::new());
-        }
+        let mut rank_map: _RankMap = HashMap::new();
         
         for card in cards {
-            if let Some(rank_vector) = rank_map.get_mut(&card.rank) {
-                rank_vector.push(Card::copy(card));
+            match rank_map.get_mut(&card.rank) {
+                Some(rank_vector) => rank_vector.push(Card::copy(card)),
+                None => {
+                    let mut vec = Vec::new();
+                    vec.push(Card::copy(card));
+                    rank_map.insert(card.rank, vec);
+                }
             }
         }
         
@@ -35,9 +39,10 @@ impl RankMap {
 
     pub fn take_set(&self, size: usize) -> Option<Vec<Card>> {
         for rank in Rank::iter() {
-            let ranked_cards = &self[&rank];
-            if ranked_cards.len() >= size {
-                return Some(ranked_cards[0..size].to_vec());
+            if let Some(ranked_cards) = &self.0.get(&rank) {
+                if ranked_cards.len() >= size {
+                    return Some(ranked_cards[0..size].to_vec());
+                }
             }
         }
 
@@ -56,10 +61,9 @@ impl RankMap {
     }
 }
 
-impl std::ops::Index<&Rank> for RankMap {
-    type Output = Vec<Card>;
-    fn index(&self, index: &Rank) -> &Self::Output {
-        &self.0.get(index).unwrap()
-    }
-}
-
+// impl std::ops::Index<&Rank> for RankMap {
+//     type Output = Vec<Card>;
+//     fn index(&self, index: &Rank) -> &Self::Output {
+//         &self.0.get(index).unwrap()
+//     }
+// }
