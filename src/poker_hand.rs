@@ -39,13 +39,12 @@ pub enum HandCategory {
     StraightFlush
 }
 
-fn make_sets(rank_map: &RankMap, set_sizes: &mut Vec<usize>) -> Option<Vec<Card>> {
-    if set_sizes.len() > 0 {
-        let set_size = set_sizes.remove(0);
+fn make_sets_worker(rank_map: &RankMap, sizes: &mut Vec<usize>, result: &mut Vec<Card>) -> bool {
+    if let Some(set_size) = sizes.pop() {
         for rank in Rank::iter() {
             if let Some(ranked_cards) = rank_map.get(&rank) {
                 if ranked_cards.len() >= set_size {
-                    let mut set = ranked_cards[0..set_size].to_vec();
+                    let set = ranked_cards[0..set_size].to_vec();
 
                     let cards = rank_map.flatten();
                     let mut filtered_cards = Vec::new();
@@ -55,41 +54,48 @@ fn make_sets(rank_map: &RankMap, set_sizes: &mut Vec<usize>) -> Option<Vec<Card>
                             filtered_cards.push(card);
                         }
                     }
-                    let next_rank_map = RankMap::new(&filtered_cards);
-                    if let Some(sets) = make_sets(&next_rank_map, set_sizes) {
-                        for card in sets {
-                            set.push(card);
-                        }
 
-                        return Some(set);
-                    }
+                    result.extend(set);
+                    let next_rank_map = RankMap::new(&filtered_cards);
+                    return make_sets_worker(&next_rank_map, sizes, result);
                 }
             }
         }
-        return None;
+        return false;
     } else {
-        return Some(Vec::new());
+        return true;
+    }
+}
+
+fn make_sets(rank_map: &RankMap, set_sizes: &Vec<usize>) -> Option<Vec<Card>> {
+    let mut sizes_copy = set_sizes.to_vec();
+    sizes_copy.reverse();
+    let mut cards = Vec::new();
+    if make_sets_worker(rank_map, &mut sizes_copy, &mut cards) {
+        return Some(cards);
+    } else {
+        return None;
     }
 }
 
 fn as_quads(_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
-    return make_sets(rank_map, &mut vec![4, 1]);
+    return make_sets(rank_map, &vec![4, 1]);
 }
 
 fn as_full_house(_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
-    return make_sets(rank_map, &mut vec![3, 2]);
+    return make_sets(rank_map, &vec![3, 2]);
 }
 
 fn as_trips(_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
-    return make_sets(rank_map, &mut vec![3, 1, 1]);
+    return make_sets(rank_map, &vec![3, 1, 1]);
 }
 
 fn as_two_pair(_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
-    return make_sets(rank_map, &mut vec![2, 2, 1]);
+    return make_sets(rank_map, &vec![2, 2, 1]);
 }
 
 fn as_pair(_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
-    return make_sets(rank_map, &mut vec![2, 1, 1, 1]);
+    return make_sets(rank_map, &vec![2, 1, 1, 1]);
 }
 
 fn as_high_card(cards: &[Card], _rank_map: &RankMap) -> Option<Vec<Card>> {
