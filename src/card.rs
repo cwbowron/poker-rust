@@ -111,6 +111,17 @@ impl std::fmt::Display for Card {
     }
 }
 
+impl std::str::FromStr for Card {
+    type Err = ParseError;
+    fn from_str(str: &str) -> Result<Self, Self::Err> {
+        let trimmed = str.trim();
+        let mut chars = trimmed.chars();
+        let rank = chars.next().unwrap().to_string().parse::<Rank>()?;
+        let suit = chars.next().unwrap().to_string().parse::<Suit>()?;
+        Ok(Card::new(rank, suit))
+    }
+}
+
 #[allow(dead_code)]
 impl Rank {
     pub fn of(&self, suit: Suit) -> Card {
@@ -151,14 +162,22 @@ impl std::fmt::Display for Cards<'_> {
     }
 }
 
-impl std::str::FromStr for Card {
+pub struct CardVector(pub Vec<Card>);
+
+impl std::str::FromStr for CardVector {
     type Err = ParseError;
     fn from_str(str: &str) -> Result<Self, Self::Err> {
-        let trimmed = str.trim();
-        let mut chars = trimmed.chars();
-        let rank = chars.next().unwrap().to_string().parse::<Rank>()?;
-        let suit = chars.next().unwrap().to_string().parse::<Suit>()?;
-        Ok(Card::new(rank, suit))
+        let cards = str.replace(" ", "")
+            .chars()
+            .collect::<Vec<char>>()
+            .chunks(2)
+            .map(|chunk| {
+                let rank = chunk[0].to_string().parse::<Rank>().unwrap();
+                let suit = chunk[1].to_string().parse::<Suit>().unwrap();
+                Card::new(rank, suit)
+            }).collect::<Vec<Card>>();
+
+        Ok(CardVector(cards))
     }
 }
 
@@ -233,5 +252,12 @@ mod tests {
         assert_eq!("4♦".parse::<Card>().unwrap(), Four.of(Diamonds));
         assert_eq!("3♥".parse::<Card>().unwrap(), Three.of(Hearts));
         assert_eq!("     2♠        ".parse::<Card>().unwrap(), Two.of(Spades));
+    }
+
+    #[test]
+    fn test_cards_parsing() {
+        let cards = "AcKd".parse::<CardVector>().unwrap().0;
+        assert_eq!(cards[0], Ace.of(Clubs));
+        assert_eq!(cards[1], King.of(Diamonds));
     }
 }
