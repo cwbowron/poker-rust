@@ -112,21 +112,23 @@ impl std::fmt::Display for Cards<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use Rank::*;
+    use Suit::*;
     
     #[test]
     fn test_card_to_string() {
-        assert_eq!(Card::new(Rank::Ace, Suit::Clubs).to_string(), "A♣");
-        assert_eq!(Card::new(Rank::King, Suit::Hearts).to_string(), "K♥");
-        assert_eq!(Card::new(Rank::Queen, Suit::Diamonds).to_string(), "Q♦");
-        assert_eq!(Card::new(Rank::Jack, Suit::Spades).to_string(), "J♠");
-        assert_eq!(Card::new(Rank::Ten, Suit::Diamonds).to_string(), "T♦");
+        assert_eq!(Card::new(Ace, Clubs).to_string(), "A♣");
+        assert_eq!(Card::new(King, Hearts).to_string(), "K♥");
+        assert_eq!(Card::new(Queen, Diamonds).to_string(), "Q♦");
+        assert_eq!(Card::new(Jack, Spades).to_string(), "J♠");
+        assert_eq!(Card::new(Ten, Diamonds).to_string(), "T♦");
     }
 
     #[test]
     fn test_card_cmp() {
-        let ace_clubs = Rank::Ace.of(Suit::Clubs);
-        let ace_diamonds = Rank::Ace.of(Suit::Diamonds);
-        let king_diamonds = Rank::King.of(Suit::Diamonds);
+        let ace_clubs = Ace.of(Clubs);
+        let ace_diamonds = Ace.of(Diamonds);
+        let king_diamonds = King.of(Diamonds);
 
         assert_eq!(ace_clubs.cmp(&ace_diamonds), std::cmp::Ordering::Equal);
         assert_eq!(ace_diamonds.cmp(&ace_clubs), std::cmp::Ordering::Equal);
