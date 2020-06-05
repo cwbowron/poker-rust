@@ -248,8 +248,10 @@ impl PartialOrd for PokerHand {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use HandCategory::*;
     use crate::card::CardVector;
+    use Rank::*;
+    use Suit::*;
+    use HandCategory::*;
 
     fn parse_hand(card_string: &str) -> PokerHand {
         let cards: Vec<Card> = card_string.parse::<CardVector>().unwrap().into();
@@ -266,20 +268,38 @@ mod tests {
     fn test_quads() {
         let poker_hand = parse_hand("Ac As Ad Ah Jd");
         assert_eq!(poker_hand.category, Quads);
+
+        assert_eq!(poker_hand.cards[0].rank, Ace);
+        assert_eq!(poker_hand.cards[1].rank, Ace);
+        assert_eq!(poker_hand.cards[2].rank, Ace);
+        assert_eq!(poker_hand.cards[3].rank, Ace);
+        assert_eq!(poker_hand.cards[4].rank, Jack);
     }
 
     #[test]
     fn test_full_house() {
         let poker_hand = parse_hand("Ac As Ad Jh Jd");
         assert_eq!(poker_hand.category, FullHouse);
+        
+        assert_eq!(poker_hand.cards[0].rank, Ace);
+        assert_eq!(poker_hand.cards[1].rank, Ace);
+        assert_eq!(poker_hand.cards[2].rank, Ace);
+        assert_eq!(poker_hand.cards[3].rank, Jack);
+        assert_eq!(poker_hand.cards[4].rank, Jack);
     }
 
     #[test]
     fn test_flush() {
         let poker_hand = parse_hand("Ac Kc 7c Tc Jc");
         assert_eq!(poker_hand.category, Flush);
+        
+        assert_eq!(poker_hand.cards[0].rank, Ace);
+        assert_eq!(poker_hand.cards[1].rank, King);
+        assert_eq!(poker_hand.cards[2].rank, Jack);
+        assert_eq!(poker_hand.cards[3].rank, Ten);
+        assert_eq!(poker_hand.cards[4].rank, Seven);
     }
-
+    
     #[test]
     fn test_straight() {
         let poker_hand = parse_hand("Ac Kc Qc Ts Jd");
@@ -308,5 +328,11 @@ mod tests {
     fn test_high_card() {
         let poker_hand = parse_hand("Ac Jh 9s 7d 5d");
         assert_eq!(poker_hand.category, HighCard);
+
+        assert_eq!(poker_hand.cards[0], Ace.of(Clubs));
+        assert_eq!(poker_hand.cards[1], Jack.of(Hearts));
+        assert_eq!(poker_hand.cards[2], Nine.of(Spades));
+        assert_eq!(poker_hand.cards[3], Seven.of(Diamonds));
+        assert_eq!(poker_hand.cards[4], Five.of(Diamonds));
     }
 }
