@@ -244,3 +244,33 @@ impl PartialOrd for PokerHand {
         Some(self.cmp(other))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use HandCategory::*;
+    use crate::card::CardVector;
+
+    fn parse_hand(card_string: &str) -> PokerHand {
+        let cards: Vec<Card> = card_string.parse::<CardVector>().unwrap().into();
+        PokerHand::new(&cards)
+    }
+    
+    #[test]
+    fn test_straight_flush() {
+        let poker_hand = parse_hand("Ac Kc Qc Tc Jc");
+        assert_eq!(poker_hand.category, StraightFlush);
+    }
+
+    #[test]
+    fn test_flush() {
+        let poker_hand = parse_hand("Ac Kc 7c Tc Jc");
+        assert_eq!(poker_hand.category, Flush);
+    }
+
+    #[test]
+    fn test_straight() {
+        let poker_hand = parse_hand("Ac Kc Qc Ts Jd");
+        assert_eq!(poker_hand.category, Straight);
+    }
+}
