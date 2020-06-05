@@ -25,14 +25,10 @@ impl RankMap {
     }
 
     pub fn flatten(&self) -> Vec<Card> {
-        let mut cards = Vec::new();
-        for ranked_cards in self.0.values() {
-            for card in ranked_cards {
-                cards.push(Card::copy(card));
-            }
-        }
-        
-        return cards;
+        return self.0.values()
+            .flatten()
+            .map(Card::copy)
+            .collect();
     }
 
     pub fn take_set(&self, size: usize) -> Option<Vec<Card>> {
