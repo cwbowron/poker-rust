@@ -42,21 +42,20 @@ pub enum HandCategory {
 fn make_sets_worker(rank_map: &RankMap, sizes: &mut Vec<usize>, result: &mut Vec<Card>) -> bool {
     if let Some(set_size) = sizes.pop() {
         for rank in Rank::iter() {
-            if let Some(ranked_cards) = rank_map.get(&rank) {
-                if ranked_cards.len() >= set_size {
-                    let set = ranked_cards[0..set_size].to_vec();
-
-                    let filtered_cards = rank_map
-                        .flatten()
-                        .iter()
-                        .filter(|card| !set.contains(card))
-                        .map(Card::copy)
-                        .collect::<Vec<Card>>();
-
-                    result.extend(set);
-                    let next_rank_map = RankMap::new(&filtered_cards);
-                    return make_sets_worker(&next_rank_map, sizes, result);
-                }
+            let ranked_cards = &rank_map[&rank];
+            if ranked_cards.len() >= set_size {
+                let set = ranked_cards[0..set_size].to_vec();
+                
+                let filtered_cards = rank_map
+                    .flatten()
+                    .iter()
+                    .filter(|card| !set.contains(card))
+                    .map(Card::copy)
+                    .collect::<Vec<Card>>();
+                
+                result.extend(set);
+                let next_rank_map = RankMap::new(&filtered_cards);
+                return make_sets_worker(&next_rank_map, sizes, result);
             }
         }
         return false;

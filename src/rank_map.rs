@@ -32,8 +32,12 @@ impl RankMap {
         
         return cards;
     }
+}
 
-    pub fn get(&self, rank: &Rank) -> Option<&Vec<Card>> {
-        self.0.get(rank)
+impl std::ops::Index<&Rank> for RankMap {
+    type Output = Vec<Card>;
+    fn index(&self, index: &Rank) -> &Self::Output {
+        &self.0.get(index).unwrap()
     }
 }
+
