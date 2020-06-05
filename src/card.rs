@@ -53,11 +53,11 @@ pub struct Card {
 
 #[allow(dead_code)]
 impl Card {
-    pub fn new(rank: Rank, suit: Suit) -> Card {
+    pub const fn new(rank: Rank, suit: Suit) -> Card {
         Card { rank: rank, suit: suit }
     }
 
-    pub fn copy(&self) -> Card {
+    pub const fn copy(&self) -> Card {
         Card { rank: self.rank, suit: self.suit }
     }
     
