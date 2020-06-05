@@ -32,6 +32,28 @@ impl RankMap {
         
         return cards;
     }
+
+    pub fn take_set(&self, size: usize) -> Option<Vec<Card>> {
+        for rank in Rank::iter() {
+            let ranked_cards = &self[&rank];
+            if ranked_cards.len() >= size {
+                return Some(ranked_cards[0..size].to_vec());
+            }
+        }
+
+        return None;
+    }
+
+    pub fn remove(&self, cards: &[Card]) -> RankMap {
+        let filtered_cards = self
+            .flatten()
+            .iter()
+            .filter(|card| !cards.contains(card))
+            .map(Card::copy)
+            .collect::<Vec<Card>>();
+        
+        return RankMap::new(&filtered_cards);
+    }
 }
 
 impl std::ops::Index<&Rank> for RankMap {
