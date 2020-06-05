@@ -56,7 +56,7 @@ fn deal(cards: &mut Vec<Card>, n: usize) {
         let (_pocket_b, poker_hand_b) = b;
         poker_hand_a.cmp(&poker_hand_b)
     });
-    // evals.reverse();
+    evals.reverse();
 
     for eval in evals {
         let (pocket, poker_hand) = eval;

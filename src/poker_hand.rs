@@ -11,32 +11,32 @@ use super::rank_map::RankMap;
 #[allow(dead_code)]
 #[derive(Copy, Clone, Debug, Eq, PartialEq, EnumIter, EnumString, ToString, Ord, PartialOrd)]
 pub enum HandCategory {
-    #[strum(to_string = "Straight Flush")]
-    StraightFlush,
-
-    #[strum(to_string = "Four of a Kind")]
-    Quads,
-
-    #[strum(to_string = "Full House")]
-    FullHouse,
-
-    #[strum(to_string = "Flush")]
-    Flush,
-
-    #[strum(to_string = "Straight")]
-    Straight,
-
-    #[strum(to_string = "Three of a Kind")]
-    Triplets,
-
-    #[strum(to_string = "Two Pair")]
-    TwoPair,
+    #[strum(to_string = "High Card")]
+    HighCard,
 
     #[strum(to_string = "Pair")]
     OnePair,
 
-    #[strum(to_string = "High Card")]
-    HighCard
+    #[strum(to_string = "Two Pair")]
+    TwoPair,
+
+    #[strum(to_string = "Three of a Kind")]
+    Triplets,
+
+    #[strum(to_string = "Straight")]
+    Straight,
+
+    #[strum(to_string = "Flush")]
+    Flush,
+
+    #[strum(to_string = "Full House")]
+    FullHouse,
+
+    #[strum(to_string = "Four of a Kind")]
+    Quads,
+
+    #[strum(to_string = "Straight Flush")]
+    StraightFlush
 }
 
 fn make_sets(rank_map: &RankMap, set_sizes: &mut Vec<usize>) -> Option<Vec<Card>> {
@@ -203,7 +203,7 @@ pub struct PokerHand {
 impl PokerHand {
     pub fn new(cards: &[Card]) -> PokerHand {
         let rank_map = RankMap::new(&cards);
-        for category in HandCategory::iter() {
+        for category in HandCategory::iter().rev() {
             if let Some(result_cards) = category.get_test()(&cards, &rank_map) {
                 return PokerHand {
                     category: category,
@@ -213,18 +213,6 @@ impl PokerHand {
         }
         
         panic!();
-    }
-
-    fn cmp_ranks(a: &[Card], b: &[Card]) -> std::cmp::Ordering {
-        for n in 0..std::cmp::min(a.len(), b.len()) {
-            let card_a = &a[n];
-            let card_b = &b[n];
-            let cmp = card_a.rank.cmp(&card_b.rank);
-            if cmp != Ordering::Equal {
-                return cmp;
-            }
-        }
-        return Ordering::Equal;
     }
 }
 
@@ -246,7 +234,7 @@ impl std::cmp::Ord for PokerHand {
         match self.category.cmp(&other.category) {
             Ordering::Less => return Ordering::Less,
             Ordering::Greater => return Ordering::Greater,
-            Ordering::Equal => return PokerHand::cmp_ranks(&self.cards, &other.cards)
+            Ordering::Equal => return self.cards.cmp(&other.cards)
         }
     }
 }
