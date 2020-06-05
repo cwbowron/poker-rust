@@ -1,4 +1,13 @@
-#[derive(Copy, Clone, Debug, Eq, PartialEq, EnumIter, EnumString, Ord, PartialOrd, Display)]
+#[derive(Debug, Clone)]
+pub struct ParseError;
+
+impl std::fmt::Display for ParseError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "Invalid strings")
+    }
+}
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq, EnumIter, Ord, PartialOrd, Display)]
 pub enum Suit {
     #[strum(to_string = "♣")]
     Clubs,
@@ -11,6 +20,23 @@ pub enum Suit {
     
     #[strum(to_string = "♠")]
     Spades
+}
+
+impl std::str::FromStr for Suit {
+    type Err = ParseError;
+    fn from_str(str: &str) -> Result<Self, Self::Err> {
+        if str == "h" || str == "♥" {
+            Ok(Suit::Hearts)
+        } else if str == "c" || str == "♣" {
+            Ok(Suit::Clubs)
+        } else if str == "d" || str == "♦" {
+            Ok(Suit::Diamonds)
+        } else if str == "s" || str == "♠" {
+            Ok(Suit::Spades)
+        } else {
+            Err(ParseError)
+        }
+    }
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, EnumIter, EnumString, Ord, PartialOrd, Hash, Display)]
@@ -133,5 +159,17 @@ mod tests {
         assert_eq!(ace_diamonds.cmp(&ace_clubs), std::cmp::Ordering::Equal);
         assert_eq!(ace_clubs.cmp(&king_diamonds), std::cmp::Ordering::Greater);
         assert_eq!(king_diamonds.cmp(&ace_diamonds), std::cmp::Ordering::Less);
+    }
+
+    #[test]
+    fn test_suit_parsing() {
+        assert_eq!("c".parse::<Suit>().unwrap(), Clubs);
+        assert_eq!("d".parse::<Suit>().unwrap(), Diamonds);
+        assert_eq!("h".parse::<Suit>().unwrap(), Hearts);
+        assert_eq!("s".parse::<Suit>().unwrap(), Spades);
+        assert_eq!("♣".parse::<Suit>().unwrap(), Clubs);
+        assert_eq!("♦".parse::<Suit>().unwrap(), Diamonds);
+        assert_eq!("♥".parse::<Suit>().unwrap(), Hearts);
+        assert_eq!("♠".parse::<Suit>().unwrap(), Spades);
     }
 }
