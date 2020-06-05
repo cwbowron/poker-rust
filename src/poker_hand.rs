@@ -263,6 +263,18 @@ mod tests {
     }
 
     #[test]
+    fn test_quads() {
+        let poker_hand = parse_hand("Ac As Ad Ah Jd");
+        assert_eq!(poker_hand.category, Quads);
+    }
+
+    #[test]
+    fn test_full_house() {
+        let poker_hand = parse_hand("Ac As Ad Jh Jd");
+        assert_eq!(poker_hand.category, FullHouse);
+    }
+
+    #[test]
     fn test_flush() {
         let poker_hand = parse_hand("Ac Kc 7c Tc Jc");
         assert_eq!(poker_hand.category, Flush);
@@ -272,5 +284,29 @@ mod tests {
     fn test_straight() {
         let poker_hand = parse_hand("Ac Kc Qc Ts Jd");
         assert_eq!(poker_hand.category, Straight);
+    }
+
+    #[test]
+    fn test_triplets() {
+        let poker_hand = parse_hand("Ac Ah As Ts Jd");
+        assert_eq!(poker_hand.category, Triplets);
+    }
+
+    #[test]
+    fn test_two_pair() {
+        let poker_hand = parse_hand("Ac Ah Qs Qd Jd");
+        assert_eq!(poker_hand.category, TwoPair);
+    }
+
+    #[test]
+    fn test_pair() {
+        let poker_hand = parse_hand("Ac Ah Qs Td Jd");
+        assert_eq!(poker_hand.category, OnePair);
+    }
+
+    #[test]
+    fn test_high_card() {
+        let poker_hand = parse_hand("Ac Jh 9s 7d 5d");
+        assert_eq!(poker_hand.category, HighCard);
     }
 }
