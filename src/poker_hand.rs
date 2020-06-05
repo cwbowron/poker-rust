@@ -5,7 +5,6 @@ use super::card::Suit;
 use super::card::Rank;
 use super::card::Card;
 use super::card::Cards;
-use super::card::sort;
 
 use super::rank_map::RankMap;
 
@@ -95,7 +94,8 @@ fn as_pair(_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
 
 fn as_high_card(cards: &[Card], _rank_map: &RankMap) -> Option<Vec<Card>> {
     let mut sorted_cards = cards.to_vec();
-    sort(&mut sorted_cards);
+    sorted_cards.sort();
+    sorted_cards.reverse();
     return Some(sorted_cards[0..5].to_vec());
 }
 
@@ -142,11 +142,12 @@ fn as_flush(cards: &[Card], _rank_map: &RankMap) -> Option<Vec<Card>> {
             .collect();
         
         if suited.len() >= 5 {
-            let mut suited_cards = suited.iter()
+            let mut suited_cards: Vec<Card> = suited.iter()
                 .map(|card_ref| Card::copy(card_ref))
                 .collect();
 
-            sort(&mut suited_cards);
+            suited_cards.sort();
+            suited_cards.reverse();
             return Some(suited_cards.iter()
                         .take(5)
                         .map(|card_ref| Card::copy(card_ref))

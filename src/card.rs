@@ -45,8 +45,7 @@ pub enum Rank {
     LowAce = 1
 }
 
-// TODO custom order
-#[derive(Clone, Debug, Eq, Ord, PartialOrd)]
+#[derive(Clone, Debug, Eq)]
 pub struct Card {
     pub rank: Rank,
     pub suit: Suit
@@ -76,25 +75,16 @@ impl PartialEq for Card {
     }
 }
 
-pub fn cmp_card_rank(a: &Card, b: &Card) -> std::cmp::Ordering {
-    b.rank.cmp(&a.rank)
+impl Ord for Card {
+    fn cmp(&self, other: &Card) -> std::cmp::Ordering {
+        self.rank.cmp(&other.rank)
+    }
 }
 
-pub fn cmp_card_suit(a: &Card, b: &Card) -> std::cmp::Ordering {
-    b.suit.cmp(&a.suit)
-}
-
-pub fn rank_sort(deck: &mut Vec<Card>) {
-    deck.sort_by(cmp_card_rank);
-}
-
-pub fn suit_sort(deck: &mut Vec<Card>) {
-    deck.sort_by(cmp_card_suit);
-}
-
-pub fn sort(deck: &mut Vec<Card>) {
-    suit_sort(deck);
-    rank_sort(deck);
+impl PartialOrd for Card {
+    fn partial_cmp(&self, other: &Card) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(&other))
+    }
 }
 
 pub fn fmt_cards(cards: &[Card]) -> String {
