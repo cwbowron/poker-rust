@@ -38,3 +38,31 @@ pub fn make_shuffled_deck() -> Vec<Card> {
     shuffle_deck(&make_deck())
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use Rank::*;
+    use Suit::*;
+
+    #[test]
+    fn test_make_deck() {
+        let deck = make_deck();
+        assert_eq!(deck.len(), 52);
+
+        assert!(deck.contains(&Ace.of(Clubs)));
+        assert!(deck.contains(&Ace.of(Diamonds)));
+        assert!(deck.contains(&Ace.of(Hearts)));
+        assert!(deck.contains(&Ace.of(Spades)));
+    }
+
+    #[test]
+    fn test_make_shuffled_deck() {
+        let deck = make_shuffled_deck();
+        assert_eq!(deck.len(), 52);
+
+        assert!(deck.contains(&Ace.of(Clubs)));
+        assert!(deck.contains(&Ace.of(Diamonds)));
+        assert!(deck.contains(&Ace.of(Hearts)));
+        assert!(deck.contains(&Ace.of(Spades)));
+    }
+}
