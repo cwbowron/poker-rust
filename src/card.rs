@@ -181,6 +181,13 @@ impl std::str::FromStr for CardVector {
     }
 }
 
+impl std::ops::Index<usize> for CardVector {
+    type Output = Card;
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.0[index]
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -256,7 +263,7 @@ mod tests {
 
     #[test]
     fn test_cards_parsing() {
-        let cards = "AcKd".parse::<CardVector>().unwrap().0;
+        let cards = "AcKd".parse::<CardVector>().unwrap();
         assert_eq!(cards[0], Ace.of(Clubs));
         assert_eq!(cards[1], King.of(Diamonds));
     }
