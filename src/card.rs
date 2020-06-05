@@ -114,4 +114,16 @@ mod tests {
         assert_eq!(Card::new(Rank::Jack, Suit::Spades).to_string(), "J♠");
         assert_eq!(Card::new(Rank::Ten, Suit::Diamonds).to_string(), "T♦");
     }
+
+    #[test]
+    fn test_card_cmp() {
+        let ace_clubs = Card::new(Rank::Ace, Suit::Clubs);
+        let ace_diamonds = Card::new(Rank::Ace, Suit::Diamonds);
+        let king_diamonds = Card::new(Rank::King, Suit::Diamonds);
+
+        assert_eq!(ace_clubs.cmp(&ace_diamonds), std::cmp::Ordering::Equal);
+        assert_eq!(ace_diamonds.cmp(&ace_clubs), std::cmp::Ordering::Equal);
+        assert_eq!(ace_clubs.cmp(&king_diamonds), std::cmp::Ordering::Greater);
+        assert_eq!(king_diamonds.cmp(&ace_diamonds), std::cmp::Ordering::Less);
+    }
 }
