@@ -1,3 +1,5 @@
+use strum::IntoEnumIterator;
+
 #[derive(Debug, Clone)]
 pub struct ParseError;
 
@@ -39,7 +41,7 @@ impl std::str::FromStr for Suit {
     }
 }
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq, EnumIter, EnumString, Ord, PartialOrd, Hash, Display)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, EnumIter, Ord, PartialOrd, Hash, Display)]
 pub enum Rank {
     #[strum(to_string = "A")]
     Ace = 14,
@@ -70,6 +72,22 @@ pub enum Rank {
     #[strum(to_string = "A")]
     LowAce = 1
 }
+
+impl std::str::FromStr for Rank {
+    type Err = ParseError;
+    fn from_str(str: &str) -> Result<Self, Self::Err> {
+        let lower_case = str.to_ascii_lowercase();
+        for rank in Self::iter() {
+            if rank != Rank::LowAce {
+                if lower_case == rank.to_string().to_ascii_lowercase() {
+                    return Ok(rank);
+                }
+            }
+        }
+        return Err(ParseError)
+    }
+}
+
 
 #[derive(Clone, Debug, Eq)]
 pub struct Card {
@@ -171,5 +189,22 @@ mod tests {
         assert_eq!("♦".parse::<Suit>().unwrap(), Diamonds);
         assert_eq!("♥".parse::<Suit>().unwrap(), Hearts);
         assert_eq!("♠".parse::<Suit>().unwrap(), Spades);
+    }
+
+    #[test]
+    fn test_rank_parsing() {
+        assert_eq!("a".parse::<Rank>().unwrap(), Ace);
+        assert_eq!("k".parse::<Rank>().unwrap(), King);
+        assert_eq!("q".parse::<Rank>().unwrap(), Queen);
+        assert_eq!("j".parse::<Rank>().unwrap(), Jack);
+        assert_eq!("t".parse::<Rank>().unwrap(), Ten);
+        assert_eq!("9".parse::<Rank>().unwrap(), Nine);
+        assert_eq!("8".parse::<Rank>().unwrap(), Eight);
+        assert_eq!("7".parse::<Rank>().unwrap(), Seven);
+        assert_eq!("6".parse::<Rank>().unwrap(), Six);
+        assert_eq!("5".parse::<Rank>().unwrap(), Five);
+        assert_eq!("4".parse::<Rank>().unwrap(), Four);
+        assert_eq!("3".parse::<Rank>().unwrap(), Three);
+        assert_eq!("2".parse::<Rank>().unwrap(), Two);
     }
 }
