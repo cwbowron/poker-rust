@@ -188,6 +188,12 @@ impl std::ops::Index<usize> for CardVector {
     }
 }
 
+impl From<CardVector> for Vec<Card> {
+    fn from(card_vector: CardVector) -> Vec<Card> {
+        card_vector.0
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -266,5 +272,21 @@ mod tests {
         let cards = "AcKd".parse::<CardVector>().unwrap();
         assert_eq!(cards[0], Ace.of(Clubs));
         assert_eq!(cards[1], King.of(Diamonds));
+    }
+
+    #[test]
+    fn test_card_vector_from() {
+        let cards = "AcKd".parse::<CardVector>().unwrap();
+        let vec = Vec::from(cards);
+        assert_eq!(vec[0], Ace.of(Clubs));
+        assert_eq!(vec[1], King.of(Diamonds));
+    }
+
+    #[test]
+    fn test_card_vector_into() {
+        let cards = "AcKd".parse::<CardVector>().unwrap();
+        let vec: Vec<Card> = cards.into();
+        assert_eq!(vec[0], Ace.of(Clubs));
+        assert_eq!(vec[1], King.of(Diamonds));
     }
 }
