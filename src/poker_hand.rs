@@ -50,7 +50,7 @@ fn make_sets_worker(rank_map: &RankMap, sizes: &mut Vec<usize>, result: &mut Vec
                         .flatten()
                         .iter()
                         .filter(|card| !set.contains(card))
-                        .map(|card_ref| Card::copy(card_ref))
+                        .map(Card::copy)
                         .collect::<Vec<Card>>();
 
                     result.extend(set);
