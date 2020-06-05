@@ -101,3 +101,17 @@ impl std::fmt::Display for Cards<'_> {
         write!(f, "{}", fmt_cards(self.0))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    #[test]
+    fn test_card_to_string() {
+        assert_eq!(Card::new(Rank::Ace, Suit::Clubs).to_string(), "A♣");
+        assert_eq!(Card::new(Rank::King, Suit::Hearts).to_string(), "K♥");
+        assert_eq!(Card::new(Rank::Queen, Suit::Diamonds).to_string(), "Q♦");
+        assert_eq!(Card::new(Rank::Jack, Suit::Spades).to_string(), "J♠");
+        assert_eq!(Card::new(Rank::Ten, Suit::Diamonds).to_string(), "T♦");
+    }
+}
