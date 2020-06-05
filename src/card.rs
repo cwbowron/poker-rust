@@ -69,6 +69,13 @@ impl Card {
     }
 }
 
+#[allow(dead_code)]
+impl Rank {
+    pub fn of(&self, suit: Suit) -> Card {
+        Card::new(*self, suit)
+    }
+}
+
 impl PartialEq for Card {
     fn eq(&self, other: &Self) -> bool {
         self.rank == other.rank && self.suit == other.suit
@@ -117,9 +124,9 @@ mod tests {
 
     #[test]
     fn test_card_cmp() {
-        let ace_clubs = Card::new(Rank::Ace, Suit::Clubs);
-        let ace_diamonds = Card::new(Rank::Ace, Suit::Diamonds);
-        let king_diamonds = Card::new(Rank::King, Suit::Diamonds);
+        let ace_clubs = Rank::Ace.of(Suit::Clubs);
+        let ace_diamonds = Rank::Ace.of(Suit::Diamonds);
+        let king_diamonds = Rank::King.of(Suit::Diamonds);
 
         assert_eq!(ace_clubs.cmp(&ace_diamonds), std::cmp::Ordering::Equal);
         assert_eq!(ace_diamonds.cmp(&ace_clubs), std::cmp::Ordering::Equal);
