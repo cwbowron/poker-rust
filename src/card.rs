@@ -194,6 +194,12 @@ impl From<CardVector> for Vec<Card> {
     }
 }
 
+impl std::fmt::Display for CardVector {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}", fmt_cards(&self.0))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -270,6 +276,7 @@ mod tests {
     #[test]
     fn test_cards_parsing() {
         let cards = "AcKd".parse::<CardVector>().unwrap();
+        println!("{}", cards);
         assert_eq!(cards[0], Ace.of(Clubs));
         assert_eq!(cards[1], King.of(Diamonds));
     }
