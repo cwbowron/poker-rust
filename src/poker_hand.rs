@@ -212,7 +212,7 @@ impl PokerHand {
             }
         }
         
-        panic!();
+        unreachable!();
     }
 }
 
