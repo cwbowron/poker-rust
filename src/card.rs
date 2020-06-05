@@ -1,4 +1,4 @@
-#[derive(Copy, Clone, Debug, Eq, PartialEq, EnumIter, EnumString, ToString, Ord, PartialOrd)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, EnumIter, EnumString, Ord, PartialOrd, Display)]
 pub enum Suit {
     #[strum(to_string = "♣")]
     Clubs,
@@ -13,7 +13,7 @@ pub enum Suit {
     Spades
 }
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq, EnumIter, EnumString, ToString, Ord, PartialOrd, Hash)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, EnumIter, EnumString, Ord, PartialOrd, Hash, Display)]
 pub enum Rank {
     #[strum(to_string = "A")]
     Ace = 14,
@@ -60,12 +60,11 @@ impl Card {
     pub const fn copy(&self) -> Card {
         Card { rank: self.rank, suit: self.suit }
     }
-    
-    pub fn to_string(&self) -> String {
-        let mut str = String::with_capacity(2);
-        str.push_str(&self.rank.to_string());
-        str.push_str(&self.suit.to_string());
-        return str;
+}
+
+impl std::fmt::Display for Card {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}{}", self.rank, self.suit)
     }
 }
 
