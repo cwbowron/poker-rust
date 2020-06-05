@@ -46,14 +46,12 @@ fn make_sets_worker(rank_map: &RankMap, sizes: &mut Vec<usize>, result: &mut Vec
                 if ranked_cards.len() >= set_size {
                     let set = ranked_cards[0..set_size].to_vec();
 
-                    let cards = rank_map.flatten();
-                    let mut filtered_cards = Vec::new();
-
-                    for card in cards {
-                        if !set.contains(&card) {
-                            filtered_cards.push(card);
-                        }
-                    }
+                    let filtered_cards = rank_map
+                        .flatten()
+                        .iter()
+                        .filter(|card| !set.contains(card))
+                        .map(|card_ref| Card::copy(card_ref))
+                        .collect::<Vec<Card>>();
 
                     result.extend(set);
                     let next_rank_map = RankMap::new(&filtered_cards);
