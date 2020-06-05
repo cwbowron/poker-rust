@@ -24,13 +24,6 @@ impl RankMap {
         return RankMap(rank_map);
     }
 
-    pub fn flatten(&self) -> Vec<Card> {
-        return self.0.values()
-            .flatten()
-            .map(Card::copy)
-            .collect();
-    }
-
     pub fn take_set(&self, size: usize) -> Option<Vec<Card>> {
         for rank in Rank::iter() {
             if let Some(ranked_cards) = &self.0.get(&rank) {
@@ -44,9 +37,9 @@ impl RankMap {
     }
 
     pub fn remove(&self, cards: &[Card]) -> RankMap {
-        let filtered_cards = self
+        let filtered_cards = self.0
+            .values()
             .flatten()
-            .iter()
             .filter(|card| !cards.contains(card))
             .map(Card::copy)
             .collect::<Vec<Card>>();
