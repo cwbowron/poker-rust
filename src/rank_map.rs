@@ -16,9 +16,7 @@ impl RankMap {
             match rank_map.get_mut(&card.rank) {
                 Some(rank_vector) => rank_vector.push(Card::copy(card)),
                 None => {
-                    let mut vec = Vec::new();
-                    vec.push(Card::copy(card));
-                    rank_map.insert(card.rank, vec);
+                    rank_map.insert(card.rank, vec![Card::copy(card)]);
                 }
             }
         }
