@@ -88,7 +88,6 @@ impl std::str::FromStr for Rank {
     }
 }
 
-
 #[derive(Clone, Debug, Eq)]
 pub struct Card {
     pub rank: Rank,
@@ -152,6 +151,17 @@ impl std::fmt::Display for Cards<'_> {
     }
 }
 
+impl std::str::FromStr for Card {
+    type Err = ParseError;
+    fn from_str(str: &str) -> Result<Self, Self::Err> {
+        let trimmed = str.trim();
+        let mut chars = trimmed.chars();
+        let rank = chars.next().unwrap().to_string().parse::<Rank>()?;
+        let suit = chars.next().unwrap().to_string().parse::<Suit>()?;
+        Ok(Card::new(rank, suit))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -206,5 +216,22 @@ mod tests {
         assert_eq!("4".parse::<Rank>().unwrap(), Four);
         assert_eq!("3".parse::<Rank>().unwrap(), Three);
         assert_eq!("2".parse::<Rank>().unwrap(), Two);
+    }
+
+    #[test]
+    fn test_card_parsing() {
+        assert_eq!("Ac".parse::<Card>().unwrap(), Ace.of(Clubs));
+        assert_eq!(" Kd".parse::<Card>().unwrap(), King.of(Diamonds));
+        assert_eq!("Qh ".parse::<Card>().unwrap(), Queen.of(Hearts));
+        assert_eq!("Js".parse::<Card>().unwrap(), Jack.of(Spades));
+        assert_eq!("Tc".parse::<Card>().unwrap(), Ten.of(Clubs));
+        assert_eq!("9s".parse::<Card>().unwrap(), Nine.of(Spades));
+        assert_eq!("8h".parse::<Card>().unwrap(), Eight.of(Hearts));
+        assert_eq!("7h".parse::<Card>().unwrap(), Seven.of(Hearts));
+        assert_eq!("6♥".parse::<Card>().unwrap(), Six.of(Hearts));
+        assert_eq!("5♣".parse::<Card>().unwrap(), Five.of(Clubs));
+        assert_eq!("4♦".parse::<Card>().unwrap(), Four.of(Diamonds));
+        assert_eq!("3♥".parse::<Card>().unwrap(), Three.of(Hearts));
+        assert_eq!("     2♠        ".parse::<Card>().unwrap(), Two.of(Spades));
     }
 }
