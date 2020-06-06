@@ -103,6 +103,15 @@ impl Card {
     pub const fn copy(&self) -> Card {
         Card { rank: self.rank, suit: self.suit }
     }
+
+    pub fn is_one_eyed_jack(card: &Card) -> bool {
+        card.rank == Rank::Jack
+            && (card.suit == Suit::Spades || card.suit == Suit::Hearts)
+    }
+
+    pub fn is_suicide_king(card: &Card) -> bool {
+        card.rank == Rank::King && card.suit == Suit::Hearts
+    }
 }
 
 impl std::fmt::Display for Card {
@@ -309,5 +318,26 @@ mod tests {
         let vec: Vec<Card> = cards.into();
         assert_eq!(vec[0], Ace.of(Clubs));
         assert_eq!(vec[1], King.of(Diamonds));
+    }
+
+    #[test]
+    fn test_is_one_eyed_jack() {
+        assert!(Card::is_one_eyed_jack(&Jack.of(Hearts)));
+        assert!(Card::is_one_eyed_jack(&Jack.of(Spades)));
+        assert!(!Card::is_one_eyed_jack(&Jack.of(Diamonds)));
+        assert!(!Card::is_one_eyed_jack(&Jack.of(Clubs)));
+        assert!(!Card::is_one_eyed_jack(&King.of(Spades)));
+        assert!(!Card::is_one_eyed_jack(&King.of(Hearts)));
+        
+    }
+
+    #[test]
+    fn test_is_suicide_king() {
+        assert!(Card::is_suicide_king(&King.of(Hearts)));
+        assert!(!Card::is_suicide_king(&King.of(Spades)));
+        assert!(!Card::is_suicide_king(&King.of(Diamonds)));
+        assert!(!Card::is_suicide_king(&King.of(Clubs)));
+        assert!(!Card::is_suicide_king(&Jack.of(Spades)));
+        assert!(!Card::is_suicide_king(&Jack.of(Hearts)));
     }
 }
