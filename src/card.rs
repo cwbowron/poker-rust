@@ -277,6 +277,7 @@ mod tests {
         assert_eq!("4".parse::<Rank>().unwrap(), Four);
         assert_eq!("3".parse::<Rank>().unwrap(), Three);
         assert_eq!("2".parse::<Rank>().unwrap(), Two);
+        assert_eq!("?".parse::<Rank>().unwrap(), Rank::Joker);
     }
 
     #[test]
@@ -294,6 +295,7 @@ mod tests {
         assert_eq!("4♦".parse::<Card>().unwrap(), Four.of(Diamonds));
         assert_eq!("3♥".parse::<Card>().unwrap(), Three.of(Hearts));
         assert_eq!("     2♠        ".parse::<Card>().unwrap(), Two.of(Spades));
+        assert_eq!("     ??        ".parse::<Card>().unwrap(), Rank::Joker.of(Suit::Joker));
     }
 
     #[test]
