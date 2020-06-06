@@ -174,6 +174,8 @@ pub fn fmt_cards(cards: &[Card]) -> String {
         .join(" ");
 }
 
+pub type IsWildCard = fn(&Card) -> bool;
+
 pub struct Cards<'a>(pub &'a [Card]);
 
 impl std::fmt::Display for Cards<'_> {

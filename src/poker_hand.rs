@@ -5,10 +5,9 @@ use super::card::Suit;
 use super::card::Rank;
 use super::card::Card;
 use super::card::Cards;
+use super::card::IsWildCard;
 
 use super::rank_map::RankMap;
-
-type IsWildCard = fn(&Card) -> bool;
 
 #[allow(dead_code)]
 #[derive(Copy, Clone, Debug, Eq, PartialEq, EnumIter, EnumString, ToString, Ord, PartialOrd)]
