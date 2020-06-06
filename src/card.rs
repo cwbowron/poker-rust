@@ -202,6 +202,13 @@ impl std::str::FromStr for CardVector {
     }
 }
 
+#[allow(dead_code)]
+impl CardVector {
+    pub fn parse(cards_string: &str) -> CardVector {
+        cards_string.parse::<CardVector>().unwrap()
+    }
+}
+
 impl std::ops::Deref for CardVector {
     type Target = Vec<Card>;
     fn deref(&self) -> &Self::Target {
@@ -216,11 +223,11 @@ impl std::ops::Deref for CardVector {
 //     }
 // }
 
-impl From<CardVector> for Vec<Card> {
-    fn from(card_vector: CardVector) -> Vec<Card> {
-        card_vector.0
-    }
-}
+// impl From<CardVector> for Vec<Card> {
+//     fn from(card_vector: CardVector) -> Vec<Card> {
+//         card_vector.0
+//     }
+// }
 
 impl std::fmt::Display for CardVector {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -327,21 +334,21 @@ mod tests {
         assert_eq!(cards[1], King.of(Diamonds));
     }
 
-    #[test]
-    fn test_card_vector_from() {
-        let cards = "AcKd".parse::<CardVector>().unwrap();
-        let vec = Vec::from(cards);
-        assert_eq!(vec[0], Ace.of(Clubs));
-        assert_eq!(vec[1], King.of(Diamonds));
-    }
+    // #[test]
+    // fn test_card_vector_from() {
+    //     let cards = "AcKd".parse::<CardVector>().unwrap();
+    //     let vec = Vec::from(cards);
+    //     assert_eq!(vec[0], Ace.of(Clubs));
+    //     assert_eq!(vec[1], King.of(Diamonds));
+    // }
 
-    #[test]
-    fn test_card_vector_into() {
-        let cards = "AcKd".parse::<CardVector>().unwrap();
-        let vec: Vec<Card> = cards.into();
-        assert_eq!(vec[0], Ace.of(Clubs));
-        assert_eq!(vec[1], King.of(Diamonds));
-    }
+    // #[test]
+    // fn test_card_vector_into() {
+    //     let cards = "AcKd".parse::<CardVector>().unwrap();
+    //     let vec: Vec<Card> = cards.into();
+    //     assert_eq!(vec[0], Ace.of(Clubs));
+    //     assert_eq!(vec[1], King.of(Diamonds));
+    // }
 
     #[test]
     fn test_convert_card_vector_into_cards() {
