@@ -8,6 +8,8 @@ use super::card::Cards;
 
 use super::rank_map::RankMap;
 
+type IsWildCard = fn(&Card) -> bool;
+
 #[allow(dead_code)]
 #[derive(Copy, Clone, Debug, Eq, PartialEq, EnumIter, EnumString, ToString, Ord, PartialOrd)]
 pub enum HandCategory {
@@ -63,27 +65,27 @@ fn make_sets(rank_map: &RankMap, set_sizes: &Vec<usize>) -> Option<Vec<Card>> {
     }
 }
 
-fn as_quads(_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
+fn as_quads(_cards: &[Card], rank_map: &RankMap, _is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     return make_sets(rank_map, &vec![4, 1]);
 }
 
-fn as_full_house(_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
+fn as_full_house(_cards: &[Card], rank_map: &RankMap, _is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     return make_sets(rank_map, &vec![3, 2]);
 }
 
-fn as_trips(_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
+fn as_trips(_cards: &[Card], rank_map: &RankMap, _is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     return make_sets(rank_map, &vec![3, 1, 1]);
 }
 
-fn as_two_pair(_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
+fn as_two_pair(_cards: &[Card], rank_map: &RankMap, _is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     return make_sets(rank_map, &vec![2, 2, 1]);
 }
 
-fn as_pair(_cards: &[Card], rank_map: &RankMap) -> Option<Vec<Card>> {
+fn as_pair(_cards: &[Card], rank_map: &RankMap, _is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     return make_sets(rank_map, &vec![2, 1, 1, 1]);
 }
 
-fn as_high_card(cards: &[Card], _rank_map: &RankMap) -> Option<Vec<Card>> {
+fn as_high_card(cards: &[Card], _rank_map: &RankMap, _is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     let mut sorted_cards = cards.to_vec();
     sorted_cards.sort();
     sorted_cards.reverse();
@@ -121,11 +123,11 @@ fn as_straight_simple(cards: &[Card]) -> Option<Vec<Card>> {
     return None;
 }
 
-fn as_straight(cards: &[Card], _rank_map: &RankMap) -> Option<Vec<Card>> {
+fn as_straight(cards: &[Card], _rank_map: &RankMap, _is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     return as_straight_simple(cards);
 }
 
-fn as_flush(cards: &[Card], _rank_map: &RankMap) -> Option<Vec<Card>> {
+fn as_flush(cards: &[Card], _rank_map: &RankMap, _is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     for suit in Suit::iter() {
         let suited: Vec<&Card> = cards
             .iter()
@@ -148,7 +150,7 @@ fn as_flush(cards: &[Card], _rank_map: &RankMap) -> Option<Vec<Card>> {
     return None;
 }
 
-fn as_straight_flush(cards: &[Card], _rank_map: &RankMap) -> Option<Vec<Card>> {
+fn as_straight_flush(cards: &[Card], _rank_map: &RankMap, _is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     for suit in Suit::iter() {
         let suited: Vec<&Card> = cards
             .iter()
@@ -170,7 +172,7 @@ fn as_straight_flush(cards: &[Card], _rank_map: &RankMap) -> Option<Vec<Card>> {
 }
 
 impl HandCategory {
-    fn get_test(&self) -> fn(&[Card], &RankMap) -> Option<Vec<Card>> {
+    fn get_test(&self) -> fn(&[Card], &RankMap, &Option<IsWildCard>) -> Option<Vec<Card>> {
         match self {
             HandCategory::HighCard => as_high_card,
             HandCategory::OnePair => as_pair,
@@ -195,7 +197,7 @@ impl PokerHand {
     pub fn new(cards: &[Card]) -> PokerHand {
         let rank_map = RankMap::new(&cards);
         for category in HandCategory::iter().rev() {
-            if let Some(result_cards) = category.get_test()(&cards, &rank_map) {
+            if let Some(result_cards) = category.get_test()(&cards, &rank_map, &None) {
                 return PokerHand {
                     category: category,
                     cards: result_cards
