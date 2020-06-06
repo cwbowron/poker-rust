@@ -119,6 +119,10 @@ impl Card {
     pub fn is_suicide_king(card: &Card) -> bool {
         card.rank == Rank::King && card.suit == Suit::Hearts
     }
+
+    pub fn is_joker(card: &Card) -> bool {
+        card.rank == Rank::Joker
+    }
 }
 
 impl std::fmt::Display for Card {
