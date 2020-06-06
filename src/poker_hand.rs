@@ -194,10 +194,10 @@ pub struct PokerHand {
 }
 
 impl PokerHand {
-    pub fn new(cards: &[Card]) -> PokerHand {
+    pub fn with_wild_cards(cards: &[Card], is_wild: &Option<IsWildCard>) -> PokerHand {
         let rank_map = RankMap::new(&cards);
         for category in HandCategory::iter().rev() {
-            if let Some(result_cards) = category.get_test()(&cards, &rank_map, &None) {
+            if let Some(result_cards) = category.get_test()(&cards, &rank_map, is_wild) {
                 return PokerHand {
                     category: category,
                     cards: result_cards
@@ -206,6 +206,10 @@ impl PokerHand {
         }
         
         unreachable!();
+    }
+
+    pub fn new(cards: &[Card]) -> PokerHand {
+        Self::with_wild_cards(cards, &None)
     }
 }
 
