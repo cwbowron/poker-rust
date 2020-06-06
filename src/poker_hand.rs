@@ -251,7 +251,7 @@ mod tests {
     use HandCategory::*;
 
     fn parse_hand(card_string: &str) -> PokerHand {
-        let cards: Vec<Card> = card_string.parse::<CardVector>().unwrap().into();
+        let cards = card_string.parse::<CardVector>().unwrap();
         PokerHand::new(&cards)
     }
     

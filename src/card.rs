@@ -202,12 +202,19 @@ impl std::str::FromStr for CardVector {
     }
 }
 
-impl std::ops::Index<usize> for CardVector {
-    type Output = Card;
-    fn index(&self, index: usize) -> &Self::Output {
-        &self.0[index]
+impl std::ops::Deref for CardVector {
+    type Target = Vec<Card>;
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
+
+// impl std::ops::Index<usize> for CardVector {
+//     type Output = Card;
+//     fn index(&self, index: usize) -> &Self::Output {
+//         &self.0[index]
+//     }
+// }
 
 impl From<CardVector> for Vec<Card> {
     fn from(card_vector: CardVector) -> Vec<Card> {
@@ -220,6 +227,7 @@ impl std::fmt::Display for CardVector {
         write!(f, "{}", fmt_cards(&self.0))
     }
 }
+
 
 #[cfg(test)]
 mod tests {
@@ -333,6 +341,12 @@ mod tests {
         let vec: Vec<Card> = cards.into();
         assert_eq!(vec[0], Ace.of(Clubs));
         assert_eq!(vec[1], King.of(Diamonds));
+    }
+
+    #[test]
+    fn test_convert_card_vector_into_cards() {
+        let card_vector = "AcKd".parse::<CardVector>().unwrap();
+        println!("{}", Cards(&card_vector));
     }
 
     #[test]
