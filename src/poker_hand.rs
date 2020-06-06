@@ -286,6 +286,15 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
+    fn test_joker() {
+        assert_eq!(parse_hand("Ac As Ad ?? Jd").category, Quads);
+        assert_eq!(parse_hand("Ac As ?? Jc Jd").category, FullHouse);
+        assert_eq!(parse_hand("Ac As ?? Jc Td").category, Triplets);
+        assert_eq!(parse_hand("Ac ?? Jc Td 7c").category, OnePair);
+    }
+
+    #[test]
     fn test_flush() {
         let poker_hand = parse_hand("Ac Kc 7c Tc Jc");
         assert_eq!(poker_hand.category, Flush);
