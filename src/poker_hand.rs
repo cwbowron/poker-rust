@@ -312,11 +312,17 @@ mod tests {
     }
 
     #[test]
-    fn test_joker() {
+    fn test_one_joker() {
         assert_eq!(parse_hand("Ac As Ad ?? Jd").category, Quads);
         assert_eq!(parse_hand("Ac As ?? Jc Jd").category, FullHouse);
         assert_eq!(parse_hand("Ac As ?? Jc Td").category, Triplets);
         assert_eq!(parse_hand("Ac ?? Jc Td 7c").category, OnePair);
+    }
+
+    #[test]
+    fn test_two_joker() {
+        assert_eq!(parse_hand("Ac As ?? ?? Jd").category, Quads);
+        assert_eq!(parse_hand("Ac ?? ?? Td 7c").category, Triplets);
     }
 
     #[test]
