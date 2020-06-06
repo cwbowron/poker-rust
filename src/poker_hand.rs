@@ -351,6 +351,13 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
+    fn test_straight_with_jokers() {
+        assert_eq!(parse_hand("Ac Kc Qc Jd ??").category, Straight);
+        assert_eq!(parse_hand("Ac Kc ?? ?? Ts").category, Straight);
+    }
+
+    #[test]
     fn test_triplets() {
         let poker_hand = parse_hand("Ac Ah As Ts Jd");
         assert_eq!(poker_hand.category, Triplets);
