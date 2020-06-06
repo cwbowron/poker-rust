@@ -126,9 +126,9 @@ impl Card {
         card.rank == Rank::Joker
     }
 
-    pub fn is_wild(card: &Card, is_wild_option: &Option<IsWildCard>) -> bool {
+    pub fn is_wild(&self, is_wild_option: &Option<IsWildCard>) -> bool {
         if let Some(is_wild) = is_wild_option {
-            is_wild(card)
+            is_wild(self)
         } else {
             true
         }
@@ -386,9 +386,9 @@ mod tests {
         assert!(!Card::is_suicide_king(&Jack.of(Spades)));
         assert!(!Card::is_suicide_king(&Jack.of(Hearts)));
 
-        assert!(Card::is_wild(&King.of(Hearts), &Some(Card::is_suicide_king)));
-        assert!(!Card::is_wild(&Jack.of(Hearts), &Some(Card::is_suicide_king)));
-        assert!(Card::is_wild(&Jack.of(Hearts), &None));
-        assert!(Card::is_wild(&Jack.of(Hearts), &None));
+        assert!(King.of(Hearts).is_wild(&Some(Card::is_suicide_king)));
+        assert!(!Jack.of(Hearts).is_wild(&Some(Card::is_suicide_king)));
+        assert!(King.of(Hearts).is_wild(&None));
+        assert!(Jack.of(Hearts).is_wild(&None));
     }
 }
