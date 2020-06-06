@@ -6,7 +6,7 @@ use super::card::Suit;
 use super::card::Rank;
 use super::card::Card;
 
-pub fn make_deck() -> Vec<Card> {
+pub fn make_deck_with_jokers(n: usize) -> Vec<Card> {
     let mut deck = Vec::with_capacity(52);
     for rank in Rank::iter() {
         if rank != Rank::LowAce && rank != Rank::Joker {
@@ -17,8 +17,17 @@ pub fn make_deck() -> Vec<Card> {
             }
         }
     }
+
+    for _i in 0..n {
+        deck.push(Card::new(Rank::Joker, Suit::Joker));
+    }
     
     return deck;
+    
+}
+
+pub fn make_deck() -> Vec<Card> {
+    make_deck_with_jokers(0)
 }
 
 pub fn shuffle(deck: &mut Vec<Card>) {
@@ -66,5 +75,11 @@ mod tests {
         assert!(deck.contains(&Ace.of(Diamonds)));
         assert!(deck.contains(&Ace.of(Hearts)));
         assert!(deck.contains(&Ace.of(Spades)));
+    }
+    
+    #[test]
+    fn test_make_deck_with_jokers() {
+        let deck = make_deck_with_jokers(2);
+        assert_eq!(deck.len(), 54);
     }
 }
