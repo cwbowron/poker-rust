@@ -69,7 +69,7 @@ mod tests {
     use Rank::*;
 
     #[test]
-    fn test_straight_flush() {
+    fn test_rank_map() {
         let cards = CardVector::parse("Ac Ad As Qc Tc Jc");
         let rank_map = RankMap::new(&cards);
 
