@@ -1,3 +1,5 @@
+// TODO handle wild cards in straight, flush, straight flush
+// TODO remove RankMap
 use strum::IntoEnumIterator;
 use std::cmp::Ordering;
 
@@ -40,12 +42,37 @@ pub enum HandCategory {
     StraightFlush
 }
 
-fn make_sets_worker(rank_map: &RankMap, sizes: &mut Vec<usize>, is_wild: &Option<IsWildCard>, result: &mut Vec<Card>) -> bool {
+fn remove_cards(a: &[Card], b: &[Card]) -> Vec<Card> {
+    return a.iter()
+        .filter(|card| !b.contains(card))
+        .map(Card::copy)
+        .collect::<Vec<Card>>();
+}
+
+fn find_set(cards: &[Card], n: usize, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
+    for rank in Rank::iter() {
+        if rank != Rank::LowAce && rank != Rank::Joker {
+            let filtered = cards.iter()
+                .filter(|card| card.rank == rank || card.is_wild(is_wild))
+                .collect::<Vec<&Card>>();
+
+            if filtered.len() >= n {
+                return Some(filtered.iter()
+                            .map(|card_ref_ref| Card::copy(*card_ref_ref))
+                            .collect::<Vec<Card>>());
+            }
+        }
+    }
+
+    return None;
+}
+
+fn make_sets_worker(cards: &[Card], sizes: &mut Vec<usize>, is_wild: &Option<IsWildCard>, result: &mut Vec<Card>) -> bool {
     if let Some(set_size) = sizes.pop() {
-        if let Some(set) = rank_map.take_set(set_size) {
-            let next_rank_map = rank_map.remove(&set);
+        if let Some(set) = find_set(cards, set_size, is_wild) {
+            let next_cards = remove_cards(cards, &set);
             result.extend(set);
-            return make_sets_worker(&next_rank_map, sizes, is_wild, result);
+            return make_sets_worker(&next_cards, sizes, is_wild, result);
         }
         return false;
     } else {
@@ -53,35 +80,35 @@ fn make_sets_worker(rank_map: &RankMap, sizes: &mut Vec<usize>, is_wild: &Option
     }
 }
 
-fn make_sets(rank_map: &RankMap, set_sizes: &Vec<usize>, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
+fn make_sets(cards: &[Card], set_sizes: &Vec<usize>, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     let mut sizes_copy = set_sizes.to_vec();
     sizes_copy.reverse();
-    let mut cards = Vec::new();
-    if make_sets_worker(rank_map, &mut sizes_copy, is_wild, &mut cards) {
-        return Some(cards);
+    let mut hand = Vec::new();
+    if make_sets_worker(cards, &mut sizes_copy, is_wild, &mut hand) {
+        return Some(hand);
     } else {
         return None;
     }
 }
 
-fn as_quads(_cards: &[Card], rank_map: &RankMap, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
-    return make_sets(rank_map, &vec![4, 1], is_wild);
+fn as_quads(cards: &[Card], _rank_map: &RankMap, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
+    return make_sets(cards, &vec![4, 1], is_wild);
 }
 
-fn as_full_house(_cards: &[Card], rank_map: &RankMap, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
-    return make_sets(rank_map, &vec![3, 2], is_wild);
+fn as_full_house(cards: &[Card], _rank_map: &RankMap, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
+    return make_sets(cards, &vec![3, 2], is_wild);
 }
 
-fn as_trips(_cards: &[Card], rank_map: &RankMap, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
-    return make_sets(rank_map, &vec![3, 1, 1], is_wild);
+fn as_trips(cards: &[Card], _rank_map: &RankMap, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
+    return make_sets(cards, &vec![3, 1, 1], is_wild);
 }
 
-fn as_two_pair(_cards: &[Card], rank_map: &RankMap, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
-    return make_sets(rank_map, &vec![2, 2, 1], is_wild);
+fn as_two_pair(cards: &[Card], _rank_map: &RankMap, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
+    return make_sets(cards, &vec![2, 2, 1], is_wild);
 }
 
-fn as_pair(_cards: &[Card], rank_map: &RankMap, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
-    return make_sets(rank_map, &vec![2, 1, 1, 1], is_wild);
+fn as_pair(cards: &[Card], _rank_map: &RankMap, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
+    return make_sets(cards, &vec![2, 1, 1, 1], is_wild);
 }
 
 fn as_high_card(cards: &[Card], _rank_map: &RankMap, _is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
@@ -251,7 +278,7 @@ mod tests {
     use HandCategory::*;
 
     fn parse_hand(card_string: &str) -> PokerHand {
-        PokerHand::new(&CardVector::parse(card_string))
+        PokerHand::with_wild_cards(&CardVector::parse(card_string), &Some(Card::is_joker))
     }
     
     #[test]
@@ -285,7 +312,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
     fn test_joker() {
         assert_eq!(parse_hand("Ac As Ad ?? Jd").category, Quads);
         assert_eq!(parse_hand("Ac As ?? Jc Jd").category, FullHouse);

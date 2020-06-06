@@ -10,19 +10,23 @@ type _RankMap = HashMap<Rank, Vec<Card>>;
 pub struct RankMap(_RankMap);
 
 impl RankMap {
+    fn _new() -> RankMap {
+        RankMap(HashMap::new())
+    }
+    
     pub fn with_wild_cards(cards: &[Card], _is_wild: &Option<IsWildCard>) -> RankMap {
-        let mut rank_map: _RankMap = HashMap::new();
+        let mut rank_map = Self::_new();
         
         for card in cards {
-            match rank_map.get_mut(&card.rank) {
+            match rank_map.0.get_mut(&card.rank) {
                 Some(rank_vector) => rank_vector.push(Card::copy(card)),
                 None => {
-                    rank_map.insert(card.rank, vec![Card::copy(card)]);
+                    rank_map.0.insert(card.rank, vec![Card::copy(card)]);
                 }
             }
         }
         
-        return RankMap(rank_map);
+        rank_map
     }
 
     pub fn new(cards: &[Card]) -> RankMap {
@@ -83,4 +87,15 @@ mod tests {
         assert_eq!(rank_map.0.get(&Jack).unwrap().len(), 1);
         assert_eq!(rank_map.0.get(&Ten).unwrap().len(), 1);
     }
+
+    // #[test]
+    // fn test_rank_map_with_wild_cards() {
+    //     let cards = CardVector::parse("Ac Ad As Qc Tc Jc");
+    //     let rank_map = RankMap::new(&cards);
+
+    //     assert_eq!(rank_map.0.get(&Ace).unwrap().len(), 3);
+    //     assert_eq!(rank_map.0.get(&Queen).unwrap().len(), 1);
+    //     assert_eq!(rank_map.0.get(&Jack).unwrap().len(), 1);
+    //     assert_eq!(rank_map.0.get(&Ten).unwrap().len(), 1);
+    // }
 }
