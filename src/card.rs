@@ -130,7 +130,7 @@ impl Card {
         if let Some(is_wild) = is_wild_option {
             is_wild(self)
         } else {
-            true
+            false
         }
     }
 }
@@ -388,7 +388,7 @@ mod tests {
 
         assert!(King.of(Hearts).is_wild(&Some(Card::is_suicide_king)));
         assert!(!Jack.of(Hearts).is_wild(&Some(Card::is_suicide_king)));
-        assert!(King.of(Hearts).is_wild(&None));
-        assert!(Jack.of(Hearts).is_wild(&None));
+        assert!(!King.of(Hearts).is_wild(&None));
+        assert!(!Jack.of(Hearts).is_wild(&None));
     }
 }
