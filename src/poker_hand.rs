@@ -1,5 +1,4 @@
 // TODO handle wild cards in straight, flush, straight flush
-// TODO remove RankMap
 use strum::IntoEnumIterator;
 use std::cmp::Ordering;
 
@@ -8,8 +7,6 @@ use super::card::Rank;
 use super::card::Card;
 use super::card::Cards;
 use super::card::IsWildCard;
-
-use super::rank_map::RankMap;
 
 #[allow(dead_code)]
 #[derive(Copy, Clone, Debug, Eq, PartialEq, EnumIter, EnumString, ToString, Ord, PartialOrd)]
@@ -91,27 +88,27 @@ fn make_sets(cards: &[Card], set_sizes: &Vec<usize>, is_wild: &Option<IsWildCard
     }
 }
 
-fn as_quads(cards: &[Card], _rank_map: &RankMap, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
+fn as_quads(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     return make_sets(cards, &vec![4, 1], is_wild);
 }
 
-fn as_full_house(cards: &[Card], _rank_map: &RankMap, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
+fn as_full_house(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     return make_sets(cards, &vec![3, 2], is_wild);
 }
 
-fn as_trips(cards: &[Card], _rank_map: &RankMap, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
+fn as_trips(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     return make_sets(cards, &vec![3, 1, 1], is_wild);
 }
 
-fn as_two_pair(cards: &[Card], _rank_map: &RankMap, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
+fn as_two_pair(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     return make_sets(cards, &vec![2, 2, 1], is_wild);
 }
 
-fn as_pair(cards: &[Card], _rank_map: &RankMap, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
+fn as_pair(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     return make_sets(cards, &vec![2, 1, 1, 1], is_wild);
 }
 
-fn as_high_card(cards: &[Card], _rank_map: &RankMap, _is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
+fn as_high_card(cards: &[Card], _is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     let mut sorted_cards = cards.to_vec();
     sorted_cards.sort();
     sorted_cards.reverse();
@@ -149,11 +146,11 @@ fn as_straight_simple(cards: &[Card], _is_wild: &Option<IsWildCard>) -> Option<V
     return None;
 }
 
-fn as_straight(cards: &[Card], _rank_map: &RankMap, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
+fn as_straight(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     return as_straight_simple(cards, is_wild);
 }
 
-fn as_flush(cards: &[Card], _rank_map: &RankMap, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
+fn as_flush(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     for suit in Suit::iter() {
         let suited: Vec<&Card> = cards
             .iter()
@@ -176,7 +173,7 @@ fn as_flush(cards: &[Card], _rank_map: &RankMap, is_wild: &Option<IsWildCard>) -
     return None;
 }
 
-fn as_straight_flush(cards: &[Card], _rank_map: &RankMap, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
+fn as_straight_flush(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     for suit in Suit::iter() {
         let suited: Vec<&Card> = cards
             .iter()
@@ -198,7 +195,7 @@ fn as_straight_flush(cards: &[Card], _rank_map: &RankMap, is_wild: &Option<IsWil
 }
 
 impl HandCategory {
-    fn get_test(&self) -> fn(&[Card], &RankMap, &Option<IsWildCard>) -> Option<Vec<Card>> {
+    fn get_test(&self) -> fn(&[Card], &Option<IsWildCard>) -> Option<Vec<Card>> {
         match self {
             HandCategory::HighCard => as_high_card,
             HandCategory::OnePair => as_pair,
@@ -221,9 +218,8 @@ pub struct PokerHand {
 
 impl PokerHand {
     pub fn with_wild_cards(cards: &[Card], is_wild: &Option<IsWildCard>) -> PokerHand {
-        let rank_map = RankMap::new(&cards);
         for category in HandCategory::iter().rev() {
-            if let Some(result_cards) = category.get_test()(&cards, &rank_map, is_wild) {
+            if let Some(result_cards) = category.get_test()(&cards, is_wild) {
                 return PokerHand {
                     category: category,
                     cards: result_cards
