@@ -153,11 +153,11 @@ fn as_straight(cards: &[Card], _rank_map: &RankMap, _is_wild: &Option<IsWildCard
     return as_straight_simple(cards);
 }
 
-fn as_flush(cards: &[Card], _rank_map: &RankMap, _is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
+fn as_flush(cards: &[Card], _rank_map: &RankMap, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     for suit in Suit::iter() {
         let suited: Vec<&Card> = cards
             .iter()
-            .filter(|card| card.suit == suit)
+            .filter(|card| card.suit == suit || card.is_wild(is_wild))
             .collect();
         
         if suited.len() >= 5 {
@@ -253,6 +253,7 @@ impl PartialEq for PokerHand {
 }
 
 impl std::cmp::Ord for PokerHand {
+    // TODO handle wild cards
     fn cmp(&self, other: &PokerHand) -> std::cmp::Ordering {
         match self.category.cmp(&other.category) {
             Ordering::Less => return Ordering::Less,
@@ -335,6 +336,12 @@ mod tests {
         assert_eq!(poker_hand.cards[2].rank, Jack);
         assert_eq!(poker_hand.cards[3].rank, Ten);
         assert_eq!(poker_hand.cards[4].rank, Seven);
+    }
+    
+    #[test]
+    fn test_flush_with_jokers() {
+        assert_eq!(parse_hand("Ac Kc 7c Tc ??").category, Flush);
+        assert_eq!(parse_hand("Ac Kc ?? ?? Jc").category, Flush);
     }
     
     #[test]
