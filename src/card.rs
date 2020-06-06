@@ -21,7 +21,10 @@ pub enum Suit {
     Hearts,
     
     #[strum(to_string = "♠")]
-    Spades
+    Spades,
+
+    #[strum(to_string = "?")]
+    Joker
 }
 
 impl std::str::FromStr for Suit {
@@ -35,6 +38,8 @@ impl std::str::FromStr for Suit {
             Ok(Suit::Diamonds)
         } else if str == "s" || str == "♠" {
             Ok(Suit::Spades)
+        } else if str == "?" {
+            Ok(Suit::Joker)
         } else {
             Err(ParseError)
         }
@@ -70,7 +75,9 @@ pub enum Rank {
     #[strum(to_string = "2")]
     Two = 2,
     #[strum(to_string = "A")]
-    LowAce = 1
+    LowAce = 1,
+    #[strum(to_string = "?")]
+    Joker = 0,
 }
 
 impl std::str::FromStr for Rank {
@@ -223,6 +230,8 @@ mod tests {
         assert_eq!(Card::new(Queen, Diamonds).to_string(), "Q♦");
         assert_eq!(Card::new(Jack, Spades).to_string(), "J♠");
         assert_eq!(Card::new(Ten, Diamonds).to_string(), "T♦");
+
+        assert_eq!(Rank::Joker.of(Suit::Joker).to_string(), "??");
     }
 
     #[test]

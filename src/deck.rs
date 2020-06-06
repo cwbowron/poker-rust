@@ -9,9 +9,11 @@ use super::card::Card;
 pub fn make_deck() -> Vec<Card> {
     let mut deck = Vec::with_capacity(52);
     for rank in Rank::iter() {
-        if rank != Rank::LowAce {
+        if rank != Rank::LowAce && rank != Rank::Joker {
             for suit in Suit::iter() {
-                deck.push(Card::new(rank, suit));
+                if suit != Suit::Joker {
+                    deck.push(Card::new(rank, suit));
+                }
             }
         }
     }
