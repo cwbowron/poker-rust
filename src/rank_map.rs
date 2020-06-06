@@ -3,13 +3,14 @@ use strum::IntoEnumIterator;
 
 use super::card::Rank;
 use super::card::Card;
+use super::card::IsWildCard;
 
 type _RankMap = HashMap<Rank, Vec<Card>>;
 
 pub struct RankMap(_RankMap);
 
 impl RankMap {
-    pub fn new(cards: &[Card]) -> RankMap {
+    pub fn with_wild_cards(cards: &[Card], _is_wild: &Option<IsWildCard>) -> RankMap {
         let mut rank_map: _RankMap = HashMap::new();
         
         for card in cards {
@@ -22,6 +23,10 @@ impl RankMap {
         }
         
         return RankMap(rank_map);
+    }
+
+    pub fn new(cards: &[Card]) -> RankMap {
+        Self::with_wild_cards(cards, &None)
     }
 
     pub fn take_set(&self, size: usize) -> Option<Vec<Card>> {
