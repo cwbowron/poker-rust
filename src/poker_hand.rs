@@ -41,12 +41,12 @@ pub enum HandCategory {
     StraightFlush
 }
 
-fn make_sets_worker(rank_map: &RankMap, sizes: &mut Vec<usize>, result: &mut Vec<Card>) -> bool {
+fn make_sets_worker(rank_map: &RankMap, sizes: &mut Vec<usize>, is_wild: &Option<IsWildCard>, result: &mut Vec<Card>) -> bool {
     if let Some(set_size) = sizes.pop() {
         if let Some(set) = rank_map.take_set(set_size) {
             let next_rank_map = rank_map.remove(&set);
             result.extend(set);
-            return make_sets_worker(&next_rank_map, sizes, result);
+            return make_sets_worker(&next_rank_map, sizes, is_wild, result);
         }
         return false;
     } else {
@@ -54,11 +54,11 @@ fn make_sets_worker(rank_map: &RankMap, sizes: &mut Vec<usize>, result: &mut Vec
     }
 }
 
-fn make_sets(rank_map: &RankMap, set_sizes: &Vec<usize>, _is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
+fn make_sets(rank_map: &RankMap, set_sizes: &Vec<usize>, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     let mut sizes_copy = set_sizes.to_vec();
     sizes_copy.reverse();
     let mut cards = Vec::new();
-    if make_sets_worker(rank_map, &mut sizes_copy, &mut cards) {
+    if make_sets_worker(rank_map, &mut sizes_copy, is_wild, &mut cards) {
         return Some(cards);
     } else {
         return None;
