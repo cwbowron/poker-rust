@@ -54,7 +54,7 @@ fn make_sets_worker(rank_map: &RankMap, sizes: &mut Vec<usize>, result: &mut Vec
     }
 }
 
-fn make_sets(rank_map: &RankMap, set_sizes: &Vec<usize>) -> Option<Vec<Card>> {
+fn make_sets(rank_map: &RankMap, set_sizes: &Vec<usize>, _is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     let mut sizes_copy = set_sizes.to_vec();
     sizes_copy.reverse();
     let mut cards = Vec::new();
@@ -65,24 +65,24 @@ fn make_sets(rank_map: &RankMap, set_sizes: &Vec<usize>) -> Option<Vec<Card>> {
     }
 }
 
-fn as_quads(_cards: &[Card], rank_map: &RankMap, _is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
-    return make_sets(rank_map, &vec![4, 1]);
+fn as_quads(_cards: &[Card], rank_map: &RankMap, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
+    return make_sets(rank_map, &vec![4, 1], is_wild);
 }
 
-fn as_full_house(_cards: &[Card], rank_map: &RankMap, _is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
-    return make_sets(rank_map, &vec![3, 2]);
+fn as_full_house(_cards: &[Card], rank_map: &RankMap, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
+    return make_sets(rank_map, &vec![3, 2], is_wild);
 }
 
-fn as_trips(_cards: &[Card], rank_map: &RankMap, _is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
-    return make_sets(rank_map, &vec![3, 1, 1]);
+fn as_trips(_cards: &[Card], rank_map: &RankMap, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
+    return make_sets(rank_map, &vec![3, 1, 1], is_wild);
 }
 
-fn as_two_pair(_cards: &[Card], rank_map: &RankMap, _is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
-    return make_sets(rank_map, &vec![2, 2, 1]);
+fn as_two_pair(_cards: &[Card], rank_map: &RankMap, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
+    return make_sets(rank_map, &vec![2, 2, 1], is_wild);
 }
 
-fn as_pair(_cards: &[Card], rank_map: &RankMap, _is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
-    return make_sets(rank_map, &vec![2, 1, 1, 1]);
+fn as_pair(_cards: &[Card], rank_map: &RankMap, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
+    return make_sets(rank_map, &vec![2, 1, 1, 1], is_wild);
 }
 
 fn as_high_card(cards: &[Card], _rank_map: &RankMap, _is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
