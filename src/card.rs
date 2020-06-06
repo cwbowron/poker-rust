@@ -101,6 +101,8 @@ pub struct Card {
     pub suit: Suit
 }
 
+pub type IsWildCard = fn(&Card) -> bool;
+
 #[allow(dead_code)]
 impl Card {
     pub const fn new(rank: Rank, suit: Suit) -> Card {
@@ -122,6 +124,14 @@ impl Card {
 
     pub fn is_joker(card: &Card) -> bool {
         card.rank == Rank::Joker
+    }
+
+    pub fn is_wild(card: &Card, is_wild_option: &Option<IsWildCard>) -> bool {
+        if let Some(is_wild) = is_wild_option {
+            is_wild(card)
+        } else {
+            true
+        }
     }
 }
 
@@ -173,8 +183,6 @@ pub fn fmt_cards(cards: &[Card]) -> String {
         .collect::<Vec<String>>()
         .join(" ");
 }
-
-pub type IsWildCard = fn(&Card) -> bool;
 
 pub struct Cards<'a>(pub &'a [Card]);
 
@@ -377,5 +385,10 @@ mod tests {
         assert!(!Card::is_suicide_king(&King.of(Clubs)));
         assert!(!Card::is_suicide_king(&Jack.of(Spades)));
         assert!(!Card::is_suicide_king(&Jack.of(Hearts)));
+
+        assert!(Card::is_wild(&King.of(Hearts), &Some(Card::is_suicide_king)));
+        assert!(!Card::is_wild(&Jack.of(Hearts), &Some(Card::is_suicide_king)));
+        assert!(Card::is_wild(&Jack.of(Hearts), &None));
+        assert!(Card::is_wild(&Jack.of(Hearts), &None));
     }
 }
