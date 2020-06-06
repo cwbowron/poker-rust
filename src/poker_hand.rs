@@ -115,7 +115,7 @@ fn as_high_card(cards: &[Card], _is_wild: &Option<IsWildCard>) -> Option<Vec<Car
     return Some(sorted_cards[0..5].to_vec());
 }
 
-fn as_straight_simple(cards: &[Card], _is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
+fn as_straight(cards: &[Card], _is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     let mut vec: Vec<&Card> = Vec::new();
     for rank in Rank::iter() {
         match cards
@@ -144,10 +144,6 @@ fn as_straight_simple(cards: &[Card], _is_wild: &Option<IsWildCard>) -> Option<V
     }
 
     return None;
-}
-
-fn as_straight(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
-    return as_straight_simple(cards, is_wild);
 }
 
 fn as_flush(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
@@ -186,7 +182,7 @@ fn as_straight_flush(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec
                 .map(|card_ref| Card::copy(card_ref))
                 .collect::<Vec<Card>>();
 
-            if let Some(straight) = as_straight_simple(&suited_cards, is_wild) {
+            if let Some(straight) = as_straight(&suited_cards, is_wild) {
                 return Some(straight);
             }
         }
