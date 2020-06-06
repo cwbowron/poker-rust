@@ -46,6 +46,13 @@ fn remove_cards(a: &[Card], b: &[Card]) -> Vec<Card> {
         .collect::<Vec<Card>>();
 }
 
+fn remove_card(a: &[Card], b: &Card) -> Vec<Card> {
+    return a.iter()
+        .filter(|card| *card != b)
+        .map(Card::copy)
+        .collect::<Vec<Card>>();
+}
+
 fn find_set(cards: &[Card], n: usize, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     for rank in Rank::iter() {
         if rank != Rank::LowAce && rank != Rank::Joker {
@@ -115,32 +122,59 @@ fn as_high_card(cards: &[Card], _is_wild: &Option<IsWildCard>) -> Option<Vec<Car
     return Some(sorted_cards[0..5].to_vec());
 }
 
-fn as_straight(cards: &[Card], _is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
-    let mut vec: Vec<&Card> = Vec::new();
-    for rank in Rank::iter() {
-        match cards
-            .iter()
-            .find(|card| card.rank == rank) {
-                Some(card) => {
-                    vec.push(card);
-                    if vec.len() >= 5 {
-                        return Some(
-                            vec.iter()
-                                .map(|card_ref| Card::copy(card_ref))
-                                .collect());
-                    } else if vec.len() >= 4 && rank == Rank::Two {
-                        if let Some(ace) = cards.iter().find(|card| card.rank == Rank::Ace) {
-                            let mut result = vec.iter()
-                                .map(|card_ref| Card::copy(card_ref))
-                                .collect::<Vec<Card>>();
-
-                            result.push(Card::new(Rank::LowAce, ace.suit));
-                            return Some(result);
-                        }
-                    }
+// TODO do this better
+fn build_straight(cards: &[Card], is_wild:&Option<IsWildCard>, ranks: &[Rank], rank_index: usize, result: &mut Vec<Card>) -> bool {
+    if rank_index >= ranks.len() {
+        return true;
+    } else {
+        let rank = ranks[rank_index];
+        if let Some(card) = cards.iter()
+            .filter(|card| !card.is_wild(is_wild))
+            .find(|card| card.rank == rank || (card.rank == Rank::Ace && rank == Rank::LowAce)) {
+                result.push(Card::copy(card));
+                let remaining_cards = remove_card(cards, card);
+                if build_straight(&remaining_cards, is_wild, ranks, rank_index + 1, result) {
+                return true;
+                } else {
+                    result.pop();
                 }
-                None => vec.clear()
             }
+        
+        if let Some(card) = cards.iter()
+            .find(|card| card.is_wild(is_wild)) {
+                result.push(Card::copy(card));
+                let remaining_cards = remove_card(cards, card);
+                if build_straight(&remaining_cards, is_wild, ranks, rank_index + 1, result) {
+                    return true;
+                } else {
+                    result.pop();
+                }
+            }
+        
+        return false;
+    }
+}
+
+// TODO do this better
+fn as_straight(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
+    let straights = vec![
+        vec![Rank::Ace, Rank::King, Rank::Queen, Rank::Jack, Rank::Ten],
+        vec![Rank::King, Rank::Queen, Rank::Jack, Rank::Ten, Rank::Nine],
+        vec![Rank::Queen, Rank::Jack, Rank::Ten, Rank::Nine, Rank::Eight],
+        vec![Rank::Jack, Rank::Ten, Rank::Nine, Rank::Eight, Rank::Seven],
+        vec![Rank::Ten, Rank::Nine, Rank::Eight, Rank::Seven, Rank::Six],
+        vec![Rank::Nine, Rank::Eight, Rank::Seven, Rank::Six, Rank::Five],
+        vec![Rank::Eight, Rank::Seven, Rank::Six, Rank::Five, Rank::Four],
+        vec![Rank::Seven, Rank::Six, Rank::Five, Rank::Four, Rank::Three],
+        vec![Rank::Six, Rank::Five, Rank::Four, Rank::Three, Rank::Two],
+        vec![Rank::Five, Rank::Four, Rank::Three, Rank::Two, Rank::LowAce],
+    ];
+
+    for ranks in straights {
+        let mut result = Vec::with_capacity(5);
+        if build_straight(&cards, is_wild, &ranks, 0, &mut result) {
+            return Some(result);
+        }
     }
 
     return None;
@@ -273,7 +307,8 @@ mod tests {
     fn parse_hand(card_string: &str) -> PokerHand {
         PokerHand::with_wild_cards(&CardVector::parse(card_string), &Some(Card::is_joker))
     }
-    
+
+    // TODO test_straight_flush_with_jokers
     #[test]
     fn test_straight_flush() {
         let poker_hand = parse_hand("Ac Kc Qc Tc Jc");
@@ -340,6 +375,12 @@ mod tests {
     fn test_straight() {
         let poker_hand = parse_hand("Ac Kc Qc Ts Jd");
         assert_eq!(poker_hand.category, Straight);
+    }
+
+    #[test]
+    #[ignore]
+    fn test_low_straight() {
+        assert_eq!(parse_hand("Ac 5c 4s 3s 2d").category, Straight);
     }
 
     #[test]
