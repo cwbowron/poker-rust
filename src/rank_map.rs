@@ -48,9 +48,34 @@ impl RankMap {
     }
 }
 
+impl std::ops::Deref for RankMap {
+    type Target = _RankMap;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 // impl std::ops::Index<&Rank> for RankMap {
 //     type Output = Vec<Card>;
 //     fn index(&self, index: &Rank) -> &Self::Output {
 //         &self.0.get(index).unwrap()
 //     }
 // }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::card::CardVector;
+    use Rank::*;
+
+    #[test]
+    fn test_straight_flush() {
+        let cards = CardVector::parse("Ac Ad As Qc Tc Jc");
+        let rank_map = RankMap::new(&cards);
+
+        assert_eq!(rank_map.0.get(&Ace).unwrap().len(), 3);
+        assert_eq!(rank_map.0.get(&Queen).unwrap().len(), 1);
+        assert_eq!(rank_map.0.get(&Jack).unwrap().len(), 1);
+        assert_eq!(rank_map.0.get(&Ten).unwrap().len(), 1);
+    }
+}
