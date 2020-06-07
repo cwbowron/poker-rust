@@ -1,4 +1,4 @@
-// TODO handle wild cards in straight, flush, straight flush
+// TODO handle sorting cards with wild cards
 use strum::IntoEnumIterator;
 use std::cmp::Ordering;
 
