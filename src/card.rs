@@ -80,6 +80,14 @@ pub enum Rank {
     Joker = 0,
 }
 
+#[allow(dead_code)]
+impl Rank {
+    pub fn is_ordinal (&self, ordinal: usize) -> bool {
+        *self as usize == ordinal
+            || (self == &Rank::Ace && Rank::LowAce as usize == ordinal)
+    }
+}
+
 impl std::str::FromStr for Rank {
     type Err = ParseError;
     fn from_str(str: &str) -> Result<Self, Self::Err> {
@@ -252,6 +260,13 @@ mod tests {
     use Rank::*;
     use Suit::*;
     
+    #[test]
+    fn test_rank_is_ordinal() {
+        assert!(Ace.is_ordinal(14));
+        assert!(!Ace.is_ordinal(13));
+        assert!(Ace.is_ordinal(1));
+    }
+
     #[test]
     fn test_card_to_string() {
         assert_eq!(Card::new(Ace, Clubs).to_string(), "A♣");

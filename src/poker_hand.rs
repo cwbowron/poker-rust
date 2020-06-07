@@ -138,58 +138,40 @@ fn as_high_card(cards: &[Card], _is_wild: &Option<IsWildCard>) -> Option<Vec<Car
     return Some(sorted_cards[0..5].to_vec());
 }
 
-// TODO do this better
-fn build_straight(cards: &[Card], is_wild:&Option<IsWildCard>, ranks: &[Rank], rank_index: usize, result: &mut Vec<Card>) -> bool {
-    if rank_index >= ranks.len() {
+fn fill_straight(cards: &[Card], is_wild:&Option<IsWildCard>, rank_ordinal: usize, result: &mut Vec<Card>) -> bool {
+    if result.len() >= 5 {
         return true;
     } else {
-        let rank = ranks[rank_index];
         if let Some(card) = cards.iter()
             .filter(|card| !card.is_wild(is_wild))
-            .find(|card| card.rank == rank || (card.rank == Rank::Ace && rank == Rank::LowAce)) {
+            .find(|card| card.rank.is_ordinal(rank_ordinal)) {
                 result.push(Card::copy(card));
-                let remaining_cards = remove_card(cards, card);
-                if build_straight(&remaining_cards, is_wild, ranks, rank_index + 1, result) {
-                return true;
-                } else {
-                    result.pop();
-                }
-            }
-        
-        if let Some(card) = cards.iter()
-            .find(|card| card.is_wild(is_wild)) {
-                result.push(Card::copy(card));
-                let remaining_cards = remove_card(cards, card);
-                if build_straight(&remaining_cards, is_wild, ranks, rank_index + 1, result) {
+
+                if fill_straight(cards, is_wild, rank_ordinal - 1, result) {
                     return true;
-                } else {
-                    result.pop();
                 }
+                result.pop();
             }
-        
+
+        if let Some(wild) = cards.iter()
+            .find(|card| card.is_wild(is_wild)) {
+                result.push(Card::copy(wild));
+                let remaining_cards = remove_card(cards, wild);
+                if fill_straight(&remaining_cards, is_wild, rank_ordinal - 1, result) {
+                    return true;
+                }
+                result.pop();
+            }
+
         return false;
     }
 }
 
-// TODO do this better
 fn as_straight(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
-    let straights = vec![
-        vec![Rank::Ace, Rank::King, Rank::Queen, Rank::Jack, Rank::Ten],
-        vec![Rank::King, Rank::Queen, Rank::Jack, Rank::Ten, Rank::Nine],
-        vec![Rank::Queen, Rank::Jack, Rank::Ten, Rank::Nine, Rank::Eight],
-        vec![Rank::Jack, Rank::Ten, Rank::Nine, Rank::Eight, Rank::Seven],
-        vec![Rank::Ten, Rank::Nine, Rank::Eight, Rank::Seven, Rank::Six],
-        vec![Rank::Nine, Rank::Eight, Rank::Seven, Rank::Six, Rank::Five],
-        vec![Rank::Eight, Rank::Seven, Rank::Six, Rank::Five, Rank::Four],
-        vec![Rank::Seven, Rank::Six, Rank::Five, Rank::Four, Rank::Three],
-        vec![Rank::Six, Rank::Five, Rank::Four, Rank::Three, Rank::Two],
-        vec![Rank::Five, Rank::Four, Rank::Three, Rank::Two, Rank::LowAce],
-    ];
-
-    for ranks in straights {
+    for rank_ordinal in (Rank::Five as usize .. Rank::Ace as usize + 1).rev() {
         let mut result = Vec::with_capacity(5);
-        if build_straight(&cards, is_wild, &ranks, 0, &mut result) {
-            return Some(result);
+        if fill_straight(cards, is_wild, rank_ordinal, &mut result) {
+            return Some(result);   
         }
     }
 
@@ -406,7 +388,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
     fn test_straight_with_jokers() {
         assert_eq!(parse_hand("Ac Kc Qc Jd ??").category, Straight);
         assert_eq!(parse_hand("Ac Kc ?? ?? Ts").category, Straight);
