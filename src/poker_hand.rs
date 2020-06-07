@@ -289,8 +289,16 @@ mod tests {
     use Suit::*;
     use HandCategory::*;
 
+    fn _parse_hand(card_string: &str, is_wild: &Option<IsWildCard>) -> PokerHand {
+        PokerHand::with_wild_cards(&CardVector::parse(card_string), is_wild)
+    }
+
     fn parse_hand(card_string: &str) -> PokerHand {
-        PokerHand::with_wild_cards(&CardVector::parse(card_string), &Some(Card::is_joker))
+        _parse_hand(card_string, &Some(Card::is_joker))
+    }
+
+    fn parse_hand_suicide_king(card_string: &str) -> PokerHand {
+        _parse_hand(card_string, &Some(Card::is_suicide_king))
     }
 
     #[test]
@@ -421,5 +429,16 @@ mod tests {
         assert_eq!(poker_hand.cards[2], Nine.of(Spades));
         assert_eq!(poker_hand.cards[3], Seven.of(Diamonds));
         assert_eq!(poker_hand.cards[4], Five.of(Diamonds));
+    }
+
+    #[test]
+    fn test_suicide_king() {
+        assert_eq!(parse_hand_suicide_king("9c Kh 7c 6c 5c").category, StraightFlush);
+        assert_eq!(parse_hand_suicide_king("Ac Kh As Ad 7d").category, Quads);
+        assert_eq!(parse_hand_suicide_king("Kc Kh 7c 6c 5c").category, Flush);
+        assert_eq!(parse_hand_suicide_king("9c Kh 7s 6d 5d").category, Straight);
+        assert_eq!(parse_hand_suicide_king("Ac Kh As 7c 7d").category, FullHouse);
+        assert_eq!(parse_hand_suicide_king("Ac Kh As 6c 7d").category, Triplets);
+        assert_eq!(parse_hand_suicide_king("Ac Kh 5c 6c 7d").category, OnePair);
     }
 }
