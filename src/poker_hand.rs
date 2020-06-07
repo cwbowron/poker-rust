@@ -61,6 +61,14 @@ fn remove_card(a: &[Card], b: &Card) -> Vec<Card> {
         .collect::<Vec<_>>();
 }
 
+fn filter_suit(cards: &[Card], suit: Suit, is_wild: &Option<IsWildCard>) -> Vec<Card> {
+    return cards
+        .iter()
+        .filter(|card| card.suit == suit || card.is_wild(is_wild))
+        .map(|card_ref| Card::copy(card_ref))
+        .collect();
+}
+
 fn find_set(cards: &[Card], n: usize, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     for rank in Rank::iter() {
         if rank != Rank::LowAce && rank != Rank::Joker {
@@ -190,45 +198,32 @@ fn as_straight(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>
 
 fn as_flush(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     for suit in Suit::iter() {
-        let suited: Vec<&Card> = cards
-            .iter()
-            .filter(|card| card.suit == suit || card.is_wild(is_wild))
-            .collect();
+        let mut suited = filter_suit(cards, suit, is_wild);
         
         if suited.len() >= 5 {
-            let mut suited_cards: Vec<Card> = suited.iter()
-                .map(|card_ref| Card::copy(card_ref))
-                .collect();
-
-            suited_cards.sort();
-            suited_cards.reverse();
-            return Some(suited_cards.iter()
+            suited.sort();
+            suited.reverse();
+            return Some(suited.iter()
                         .take(5)
                         .map(|card_ref| Card::copy(card_ref))
                         .collect());
         }
     }
+
     return None;
 }
 
 fn as_straight_flush(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     for suit in Suit::iter() {
-        let suited: Vec<&Card> = cards
-            .iter()
-            .filter(|card| card.suit == suit || card.is_wild(is_wild))
-            .collect();
+        let suited = filter_suit(cards, suit, is_wild);
         
         if suited.len() >= 5 {
-            let suited_cards = suited
-                .iter()
-                .map(|card_ref| Card::copy(card_ref))
-                .collect::<Vec<Card>>();
-
-            if let Some(straight) = as_straight(&suited_cards, is_wild) {
+            if let Some(straight) = as_straight(&suited, is_wild) {
                 return Some(straight);
             }
         }
     }
+    
     return None;
 }
 
