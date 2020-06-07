@@ -47,10 +47,18 @@ fn remove_cards(a: &[Card], b: &[Card]) -> Vec<Card> {
 }
 
 fn remove_card(a: &[Card], b: &Card) -> Vec<Card> {
+    let mut found = false;
     return a.iter()
-        .filter(|card| *card != b)
+        .filter(|card| {
+            if found || *card != b {
+                true
+            } else {
+                found = true;
+                false
+            }
+        })
         .map(Card::copy)
-        .collect::<Vec<Card>>();
+        .collect::<Vec<_>>();
 }
 
 fn find_set(cards: &[Card], n: usize, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
@@ -207,7 +215,7 @@ fn as_straight_flush(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec
     for suit in Suit::iter() {
         let suited: Vec<&Card> = cards
             .iter()
-            .filter(|card| card.suit == suit)
+            .filter(|card| card.suit == suit || card.is_wild(is_wild))
             .collect();
         
         if suited.len() >= 5 {
@@ -308,11 +316,28 @@ mod tests {
         PokerHand::with_wild_cards(&CardVector::parse(card_string), &Some(Card::is_joker))
     }
 
-    // TODO test_straight_flush_with_jokers
+    #[test]
+    fn test_remove_card() {
+        let cards0 = CardVector::parse("Kc ?? ??");
+        assert_eq!(cards0.len(), 3);
+
+        let cards1 = remove_card(&cards0, &Rank::Joker.of(Suit::Joker));
+        assert_eq!(cards1.len(), 2);
+
+        let cards2 = remove_card(&cards1, &Rank::Joker.of(Suit::Joker));
+        assert_eq!(cards2.len(), 1);
+    }
+
     #[test]
     fn test_straight_flush() {
         let poker_hand = parse_hand("Ac Kc Qc Tc Jc");
         assert_eq!(poker_hand.category, StraightFlush);
+    }
+
+    #[test]
+    fn test_straight_flush_with_jokers() {
+        assert_eq!(parse_hand("Ac Kc Qc ?? Jc").category, StraightFlush);
+        assert_eq!(parse_hand("Ac Kc ?? ?? Jc").category, StraightFlush);
     }
 
     #[test]
@@ -368,7 +393,7 @@ mod tests {
     #[test]
     fn test_flush_with_jokers() {
         assert_eq!(parse_hand("Ac Kc 7c Tc ??").category, Flush);
-        assert_eq!(parse_hand("Ac Kc ?? ?? Jc").category, Flush);
+        assert_eq!(parse_hand("Ac Kc ?? Jc 7c").category, Flush);
     }
     
     #[test]
@@ -381,6 +406,8 @@ mod tests {
     #[ignore]
     fn test_low_straight() {
         assert_eq!(parse_hand("Ac 5c 4s 3s 2d").category, Straight);
+        assert_eq!(parse_hand("5c 4s 3s 2d ??").category, Straight);
+        assert_eq!(parse_hand("?? 4s 3s 2d Ac").category, Straight);
     }
 
     #[test]
