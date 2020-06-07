@@ -65,7 +65,7 @@ fn filter_suit(cards: &[Card], suit: Suit, is_wild: &Option<IsWildCard>) -> Vec<
     return cards
         .iter()
         .filter(|card| card.suit == suit || card.is_wild(is_wild))
-        .map(|card_ref| Card::copy(card_ref))
+        .map(Card::copy)
         .collect();
 }
 
