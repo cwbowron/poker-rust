@@ -8,8 +8,6 @@ use card::Cards;
 mod deck;
 use deck::make_shuffled_deck;
 
-mod rank_map;
-
 mod poker_hand;
 use poker_hand::PokerHand;
 
