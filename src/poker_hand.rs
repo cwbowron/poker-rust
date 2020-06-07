@@ -43,7 +43,7 @@ fn remove_cards(a: &[Card], b: &[Card]) -> Vec<Card> {
     return a.iter()
         .filter(|card| !b.contains(card))
         .map(Card::copy)
-        .collect::<Vec<Card>>();
+        .collect();
 }
 
 fn remove_card(a: &[Card], b: &Card) -> Vec<Card> {
@@ -58,7 +58,7 @@ fn remove_card(a: &[Card], b: &Card) -> Vec<Card> {
             }
         })
         .map(Card::copy)
-        .collect::<Vec<_>>();
+        .collect();
 }
 
 fn filter_suit(cards: &[Card], suit: Suit, is_wild: &Option<IsWildCard>) -> Vec<Card> {
@@ -74,12 +74,12 @@ fn find_set(cards: &[Card], n: usize, is_wild: &Option<IsWildCard>) -> Option<Ve
         if rank != Rank::LowAce && rank != Rank::Joker {
             let filtered = cards.iter()
                 .filter(|card| card.rank == rank || card.is_wild(is_wild))
-                .collect::<Vec<&Card>>();
+                .collect::<Vec<_>>();
 
             if filtered.len() >= n {
                 return Some(filtered.iter()
                             .map(|card_ref_ref| Card::copy(*card_ref_ref))
-                            .collect::<Vec<Card>>());
+                            .collect());
             }
         }
     }
