@@ -290,126 +290,124 @@ mod tests {
         _parse_hand(card_string, &Some(Card::is_joker))
     }
 
-    // fn parse_hand_suicide_king(card_string: &str) -> PokerHand {
-    //     _parse_hand(card_string, &Some(Card::is_suicide_king))
-    // }
+    fn parse_hand_suicide_king(card_string: &str) -> Box<dyn PokerHand> {
+        _parse_hand(card_string, &Some(Card::is_suicide_king))
+    }
 
-    // #[test]
-    // fn test_remove_card() {
-    //     let cards0 = CardVector::parse("Kc ?? ??");
-    //     assert_eq!(cards0.len(), 3);
+    #[test]
+    fn test_remove_card() {
+        let cards0 = CardVector::parse("Kc ?? ??");
+        assert_eq!(cards0.len(), 3);
 
-    //     let cards1 = remove_card(&cards0, &Rank::Joker.of(Suit::Joker));
-    //     assert_eq!(cards1.len(), 2);
+        let cards1 = remove_card(&cards0, &Rank::Joker.of(Suit::Joker));
+        assert_eq!(cards1.len(), 2);
 
-    //     let cards2 = remove_card(&cards1, &Rank::Joker.of(Suit::Joker));
-    //     assert_eq!(cards2.len(), 1);
-    // }
+        let cards2 = remove_card(&cards1, &Rank::Joker.of(Suit::Joker));
+        assert_eq!(cards2.len(), 1);
+    }
 
     #[test]
     fn test_straight_flush() {
         assert_eq!(parse_hand("Ac Kc Qc Tc Jc").rank(), STRAIGHT_FLUSH);
     }
 
-    // #[test]
-    // fn test_straight_flush_with_jokers() {
-    //     assert_eq!(parse_hand("Ac Kc Qc ?? Jc").category, StraightFlush);
-    //     assert_eq!(parse_hand("Ac Kc ?? ?? Jc").category, StraightFlush);
-    // }
+    #[test]
+    fn test_straight_flush_with_jokers() {
+        assert_eq!(parse_hand("Ac Kc Qc ?? Jc").rank(), STRAIGHT_FLUSH);
+        assert_eq!(parse_hand("Ac Kc ?? ?? Jc").rank(), STRAIGHT_FLUSH);
+    }
 
-    // #[test]
-    // fn test_quads() {
-    //     let poker_hand = parse_hand("Ac As Ad Ah Jd");
-    //     assert_eq!(poker_hand.category, Quads);
+    #[test]
+    fn test_quads() {
+        let poker_hand = parse_hand("Ac As Ad Ah Jd");
+        let cards = poker_hand.cards();
+        assert_eq!(poker_hand.rank(), QUADS);
 
-    //     assert_eq!(poker_hand.cards[0].rank, Ace);
-    //     assert_eq!(poker_hand.cards[1].rank, Ace);
-    //     assert_eq!(poker_hand.cards[2].rank, Ace);
-    //     assert_eq!(poker_hand.cards[3].rank, Ace);
-    //     assert_eq!(poker_hand.cards[4].rank, Jack);
-    // }
+        assert_eq!(cards[0].rank, Ace);
+        assert_eq!(cards[1].rank, Ace);
+        assert_eq!(cards[2].rank, Ace);
+        assert_eq!(cards[3].rank, Ace);
+        assert_eq!(cards[4].rank, Jack);
+    }
 
-    // #[test]
-    // fn test_full_house() {
-    //     let poker_hand = parse_hand("Ac As Ad Jh Jd");
-    //     assert_eq!(poker_hand.category, FullHouse);
+    #[test]
+    fn test_full_house() {
+        let poker_hand = parse_hand("Ac As Ad Jh Jd");
+        let cards = poker_hand.cards();
+        assert_eq!(poker_hand.rank(), FULL_HOUSE);
         
-    //     assert_eq!(poker_hand.cards[0].rank, Ace);
-    //     assert_eq!(poker_hand.cards[1].rank, Ace);
-    //     assert_eq!(poker_hand.cards[2].rank, Ace);
-    //     assert_eq!(poker_hand.cards[3].rank, Jack);
-    //     assert_eq!(poker_hand.cards[4].rank, Jack);
-    // }
+        assert_eq!(cards[0].rank, Ace);
+        assert_eq!(cards[1].rank, Ace);
+        assert_eq!(cards[2].rank, Ace);
+        assert_eq!(cards[3].rank, Jack);
+        assert_eq!(cards[4].rank, Jack);
+    }
 
-    // #[test]
-    // fn test_one_joker() {
-    //     assert_eq!(parse_hand("Ac As Ad ?? Jd").category, Quads);
-    //     assert_eq!(parse_hand("Ac As ?? Jc Jd").category, FullHouse);
-    //     assert_eq!(parse_hand("Ac As ?? Jc Td").category, Triplets);
-    //     assert_eq!(parse_hand("Ac ?? Jc Td 7c").category, OnePair);
-    // }
+    #[test]
+    fn test_one_joker() {
+        assert_eq!(parse_hand("Ac As Ad ?? Jd").rank(), QUADS);
+        assert_eq!(parse_hand("Ac As ?? Jc Jd").rank(), FULL_HOUSE);
+        assert_eq!(parse_hand("Ac As ?? Jc Td").rank(), TRIPLETS);
+        assert_eq!(parse_hand("Ac ?? Jc Td 7c").rank(), ONE_PAIR);
+    }
 
-    // #[test]
-    // fn test_two_joker() {
-    //     assert_eq!(parse_hand("Ac As ?? ?? Jd").category, Quads);
-    //     assert_eq!(parse_hand("Ac ?? ?? Td 7c").category, Triplets);
-    // }
+    #[test]
+    fn test_two_joker() {
+        assert_eq!(parse_hand("Ac As ?? ?? Jd").rank(), QUADS);
+        assert_eq!(parse_hand("Ac ?? ?? Td 7c").rank(), TRIPLETS);
+    }
 
-    // #[test]
-    // fn test_flush() {
-    //     let poker_hand = parse_hand("Ac Kc 7c Tc Jc");
-    //     assert_eq!(poker_hand.category, Flush);
+    #[test]
+    fn test_flush() {
+        let poker_hand = parse_hand("Ac Kc 7c Tc Jc");
+        let cards = poker_hand.cards();
+        assert_eq!(poker_hand.rank(), FLUSH);
         
-    //     assert_eq!(poker_hand.cards[0].rank, Ace);
-    //     assert_eq!(poker_hand.cards[1].rank, King);
-    //     assert_eq!(poker_hand.cards[2].rank, Jack);
-    //     assert_eq!(poker_hand.cards[3].rank, Ten);
-    //     assert_eq!(poker_hand.cards[4].rank, Seven);
-    // }
+        assert_eq!(cards[0].rank, Ace);
+        assert_eq!(cards[1].rank, King);
+        assert_eq!(cards[2].rank, Jack);
+        assert_eq!(cards[3].rank, Ten);
+        assert_eq!(cards[4].rank, Seven);
+    }
     
-    // #[test]
-    // fn test_flush_with_jokers() {
-    //     assert_eq!(parse_hand("Ac Kc 7c Tc ??").category, Flush);
-    //     assert_eq!(parse_hand("Ac Kc ?? Jc 7c").category, Flush);
-    // }
+    #[test]
+    fn test_flush_with_jokers() {
+        assert_eq!(parse_hand("Ac Kc 7c Tc ??").rank(), FLUSH);
+        assert_eq!(parse_hand("Ac Kc ?? Jc 7c").rank(), FLUSH);
+    }
     
-    // #[test]
-    // fn test_straight() {
-    //     let poker_hand = parse_hand("Ac Kc Qc Ts Jd");
-    //     assert_eq!(poker_hand.category, Straight);
-    // }
+    #[test]
+    fn test_straight() {
+        assert_eq!(parse_hand("Ac Kc Qc Ts Jd").rank(), STRAIGHT);
+    }
 
-    // #[test]
-    // #[ignore]
-    // fn test_low_straight() {
-    //     assert_eq!(parse_hand("Ac 5c 4s 3s 2d").category, Straight);
-    //     assert_eq!(parse_hand("5c 4s 3s 2d ??").category, Straight);
-    //     assert_eq!(parse_hand("?? 4s 3s 2d Ac").category, Straight);
-    // }
+    #[test]
+    fn test_low_straight() {
+        assert_eq!(parse_hand("Ac 5c 4s 3s 2d").rank(), STRAIGHT);
+        assert_eq!(parse_hand("5c 4s 3s 2d ??").rank(), STRAIGHT);
+        assert_eq!(parse_hand("?? 4s 3s 2d Ac").rank(), STRAIGHT);
+    }
 
-    // #[test]
-    // fn test_straight_with_jokers() {
-    //     assert_eq!(parse_hand("Ac Kc Qc Jd ??").category, Straight);
-    //     assert_eq!(parse_hand("Ac Kc ?? ?? Ts").category, Straight);
-    // }
+    #[test]
+    fn test_straight_with_jokers() {
+        assert_eq!(parse_hand("Ac Kc Qc Jd ??").rank(), STRAIGHT);
+        assert_eq!(parse_hand("Ac Kc ?? ?? Ts").rank(), STRAIGHT);
+    }
 
-    // #[test]
-    // fn test_triplets() {
-    //     let poker_hand = parse_hand("Ac Ah As Ts Jd");
-    //     assert_eq!(poker_hand.category, Triplets);
-    // }
+    #[test]
+    fn test_triplets() {
+        assert_eq!(parse_hand("Ac Ah As Ts Jd").rank(), TRIPLETS);
+    }
 
-    // #[test]
-    // fn test_two_pair() {
-    //     let poker_hand = parse_hand("Ac Ah Qs Qd Jd");
-    //     assert_eq!(poker_hand.category, TwoPair);
-    // }
+    #[test]
+    fn test_two_pair() {
+        assert_eq!(parse_hand("Ac Ah Qs Qd Jd").rank(), TWO_PAIR);
+    }
 
-    // #[test]
-    // fn test_pair() {
-    //     let poker_hand = parse_hand("Ac Ah Qs Td Jd");
-    //     assert_eq!(poker_hand.category, OnePair);
-    // }
+    #[test]
+    fn test_pair() {
+        assert_eq!(parse_hand("Ac Ah Qs Td Jd").rank(), ONE_PAIR);
+    }
 
     // #[test]
     // fn test_high_card() {
