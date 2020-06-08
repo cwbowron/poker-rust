@@ -48,6 +48,7 @@ fn find_set(cards: &[Card], n: usize, is_wild: &Option<IsWildCard>) -> Option<Ve
 
             if filtered.len() >= n {
                 return Some(filtered.iter()
+                            .take(n)
                             .map(|card_ref_ref| Card::copy(*card_ref_ref))
                             .collect());
             }
@@ -437,5 +438,14 @@ mod tests {
         assert_eq!(parse_hand_suicide_king("Ac Kh As 7c 7d").ord(), FullHouse::ORDINAL);
         assert_eq!(parse_hand_suicide_king("Ac Kh As 6c 7d").ord(), Triplets::ORDINAL);
         assert_eq!(parse_hand_suicide_king("Ac Kh 5c 6c 7d").ord(), OnePair::ORDINAL);
+    }
+
+    #[test]
+    fn test_two_pair_edge_case() {
+        let poker_hand = parse_hand("K♣ K♦ 5♠ 5♣ 3♥ 3♣");
+        assert_eq!(poker_hand.ord(), TwoPair::ORDINAL);
+
+        println!("two_pair_edge_case: {}", poker_hand);
+        assert_eq!(poker_hand.cards().len(), 5);
     }
 }
