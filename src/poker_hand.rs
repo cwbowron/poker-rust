@@ -9,39 +9,6 @@ use super::card::Cards;
 use super::card::IsWildCard;
 use super::card::fmt_cards;
 
-// type HandBuilder = fn(&[Card], &Option<IsWildCard>) -> Option<Vec<Card>>;
-
-// #[allow(dead_code)]
-// #[derive(Copy, Clone, Debug, Eq, PartialEq, EnumIter, EnumString, ToString, Ord, PartialOrd)]
-// pub enum HandCategory {
-//     #[strum(to_string = "High Card")]
-//     HighCard,
-
-//     #[strum(to_string = "Pair")]
-//     OnePair,
-
-//     #[strum(to_string = "Two Pair")]
-//     TwoPair,
-
-//     #[strum(to_string = "Three of a Kind")]
-//     Triplets,
-
-//     #[strum(to_string = "Straight")]
-//     Straight,
-
-//     #[strum(to_string = "Flush")]
-//     Flush,
-
-//     #[strum(to_string = "Full House")]
-//     FullHouse,
-
-//     #[strum(to_string = "Four of a Kind")]
-//     Quads,
-
-//     #[strum(to_string = "Straight Flush")]
-//     StraightFlush
-// }
-
 fn remove_cards(a: &[Card], b: &[Card]) -> Vec<Card> {
     return a.iter()
         .filter(|card| !b.contains(card))
@@ -212,122 +179,69 @@ fn as_straight_flush(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec
     return None;
 }
 
-// impl HandCategory {
-//     fn get_test(&self) -> fn(&[Card], &Option<IsWildCard>) -> Option<Vec<Card>> {
-//         match self {
-//             HandCategory::HighCard => as_high_card,
-//             HandCategory::OnePair => as_pair,
-//             HandCategory::TwoPair => as_two_pair,
-//             HandCategory::Triplets => as_trips,
-//             HandCategory::Straight => as_straight,
-//             HandCategory::Flush => as_flush,
-//             HandCategory::FullHouse => as_full_house,
-//             HandCategory::Quads => as_quads,
-//             HandCategory::StraightFlush => as_straight_flush
-//         }
-//     }
-// }
-
-
-pub trait PokerHand where Self: std::marker::Sized  {
-    fn new(name: &'static str, cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Self>;
+pub trait PokerHand {
+    fn new(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Box<dyn PokerHand>> where Self: Sized;
     
     fn name(&self) -> &'static str;
-    fn rank(&self) -> usize;
+    fn rank(&self) -> i32;
     fn cards(&self) -> &[Card];
     fn to_string(&self) -> std::string::String {
         format!("{} -> {}", fmt_cards(self.cards()), self.name())
     }
 }
 
-// struct HighCard(Vec<Card>);
-
-// impl PokerHand for HighCard {
-//     fn new(_name: &'static str, cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<HighCard> {
-//         let mut sorted_cards = cards.to_vec();
-//         sorted_cards.sort();
-//         sorted_cards.reverse();
-//         Some(HighCard(sorted_cards[0..5].to_vec()))
-//     }
-    
-//     fn name(&self) -> &'static str { "High Card" }
-//     fn rank(&self) -> usize { 0 }
-//     fn cards(&self) -> &[Card] { &self.0 }
-// }
-
-// struct Quads(Vec<Card>);
-
-// impl PokerHand for Quads  {
-//     fn new(_name: &'static str, cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Quads> {
-//         if let Some(hand) = make_sets(cards, &vec![4, 1], is_wild) {
-//             Some(Quads(hand))
-//         } else {
-//             None
-//         }
-//     }
-    
-//     fn name(&self) -> &'static str { "Four of a Kind" }
-//     fn rank(&self) -> usize { 10 }
-//     fn cards(&self) -> &[Card] { &self.0 }
-// }
 macro_rules! define_hand {
-    ($symbol: ident, $score: literal, $string: literal, $as_fn: expr) => {
-        struct $symbol(Vec<Card>);
+    ($symbol_ordinal_score: ident, $score: literal, $symbol_struct: ident, $string: literal, $as_fn: expr) => {
+        pub const $symbol_ordinal_score: i32 = $score;
+        pub struct $symbol_struct(Vec<Card>);
 
-        impl PokerHand for $symbol {
-            fn new(_name: &'static str, cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Self> {
+        impl PokerHand for $symbol_struct {
+            fn new(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Box<dyn PokerHand>> where Self: Sized {
                 if let Some(hand) = $as_fn(cards, is_wild) {
-                    Some($symbol(hand))
+                    Some(Box::new($symbol_struct(hand)))
                 } else {
                     None
                 }
             }
             
             fn name(&self) -> &'static str { $string }
-            fn rank(&self) -> usize { $score }
+            fn rank(&self) -> i32 { $symbol_ordinal_score }
             fn cards(&self) -> &[Card] { &self.0 }
         }
     }
 }
-    
-define_hand!(HighCard, 0, "High Card", as_high_card);
-define_hand!(OnePair, 1, "Pair", as_pair);
-define_hand!(TwoPair, 2, "Two Pair", as_two_pair);
-define_hand!(Triplets, 3, "Three of a Kind", as_trips);
-define_hand!(Straight, 4, "Straight", as_straight);
-define_hand!(Flush, 5, "Flush", as_flush);
-define_hand!(FullHouse, 6, "Full House", as_full_house);
-define_hand!(Quads, 7, "Four of a Kind", as_quads);
-define_hand!(StraightFlush, 8, "Straight Flush", as_straight_flush);
 
-pub fn make_poker_hand(cards: &[Card], is_wild: &Option<IsWildCard>) -> impl PokerHand {
-    return HighCard::new("Fuck", cards, is_wild).unwrap();
+define_hand!(HIGH_CARD, 0, HighCard, "High Card", as_high_card);
+define_hand!(ONE_PAIR, 1, OnePair, "Pair", as_pair);
+define_hand!(TWO_PAIR, 2, TwoPair, "Two Pair", as_two_pair);
+define_hand!(TRIPLETS, 3, Triplets, "Three of a Kind", as_trips);
+define_hand!(STRAIGHT, 4, Straight, "Straight", as_straight);
+define_hand!(FLUSH, 5, Flush, "Flush", as_flush);
+define_hand!(FULL_HOUSE, 6, FullHouse, "Full House", as_full_house);
+define_hand!(QUADS, 7, Quads, "Four of a Kind", as_quads);
+define_hand!(STRAIGHT_FLUSH, 8, StraightFlush, "Straight Flush", as_straight_flush);
+
+pub fn make_poker_hand(cards: &[Card], is_wild: &Option<IsWildCard>) -> Box<dyn PokerHand> {
+    let constructors = [
+        StraightFlush::new,
+        Quads::new,
+        FullHouse::new,
+        Flush::new,
+        Straight::new,
+        Triplets::new,
+        TwoPair::new,
+        OnePair::new,
+        HighCard::new
+    ];
+
+    for constructor in constructors.iter() {
+        if let Some(boxed_hand) = constructor(cards, is_wild) {
+            return boxed_hand;
+        }
+    }
+
+    unreachable!();
 }
-
-// #[derive(Eq)]
-// pub struct PokerHand {
-//     category: HandCategory,
-//     cards: Vec<Card>
-// }
-
-// impl PokerHand {
-//     pub fn with_wild_cards(cards: &[Card], is_wild: &Option<IsWildCard>) -> PokerHand {
-//         for category in HandCategory::iter().rev() {
-//             if let Some(result_cards) = category.get_test()(&cards, is_wild) {
-//                 return PokerHand {
-//                     category: category,
-//                     cards: result_cards
-//                 };
-//             }
-//         }
-        
-//         unreachable!();
-//     }
-
-//     pub fn new(cards: &[Card]) -> PokerHand {
-//         Self::with_wild_cards(cards, &None)
-//     }
-// }
 
 // impl std::fmt::Display for PokerHand {
 //     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -366,15 +280,15 @@ mod tests {
     use crate::card::CardVector;
     use Rank::*;
     use Suit::*;
-    // use HandCategory::*;
 
-    // fn _parse_hand(card_string: &str, is_wild: &Option<IsWildCard>) -> PokerHand {
-    //     PokerHand::with_wild_cards(&CardVector::parse(card_string), is_wild)
-    // }
+    fn _parse_hand(card_string: &str, is_wild: &Option<IsWildCard>) -> Box<dyn PokerHand> {
+        let card_vector = &CardVector::parse(card_string);
+        return make_poker_hand(card_vector, is_wild);
+    }
 
-    // fn parse_hand(card_string: &str) -> PokerHand {
-    //     _parse_hand(card_string, &Some(Card::is_joker))
-    // }
+    fn parse_hand(card_string: &str) -> Box<dyn PokerHand> {
+        _parse_hand(card_string, &Some(Card::is_joker))
+    }
 
     // fn parse_hand_suicide_king(card_string: &str) -> PokerHand {
     //     _parse_hand(card_string, &Some(Card::is_suicide_king))
@@ -392,11 +306,10 @@ mod tests {
     //     assert_eq!(cards2.len(), 1);
     // }
 
-    // #[test]
-    // fn test_straight_flush() {
-    //     let poker_hand = parse_hand("Ac Kc Qc Tc Jc");
-    //     assert_eq!(poker_hand.category, StraightFlush);
-    // }
+    #[test]
+    fn test_straight_flush() {
+        assert_eq!(parse_hand("Ac Kc Qc Tc Jc").rank(), STRAIGHT_FLUSH);
+    }
 
     // #[test]
     // fn test_straight_flush_with_jokers() {
