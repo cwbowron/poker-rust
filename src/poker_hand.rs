@@ -179,15 +179,12 @@ fn as_straight_flush(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec
     return None;
 }
 
-pub trait PokerHand {
+pub trait PokerHand: std::fmt::Display {
     fn new(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Box<dyn PokerHand>> where Self: Sized;
     
     fn name(&self) -> &'static str;
     fn ord(&self) -> i32;
     fn cards(&self) -> &[Card];
-    fn to_string(&self) -> std::string::String {
-        format!("{} -> {}", fmt_cards(self.cards()), self.name())
-    }
 }
 
 macro_rules! define_hand {
@@ -210,6 +207,12 @@ macro_rules! define_hand {
             fn name(&self) -> &'static str { $string }
             fn ord(&self) -> i32 { Self::ORDINAL }
             fn cards(&self) -> &[Card] { &self.0 }
+        }
+
+        impl std::fmt::Display for $symbol_struct {
+            fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+                write!(f, "{} -> {}", fmt_cards(self.cards()), self.name())
+            }
         }
     }
 }
@@ -307,6 +310,12 @@ mod tests {
 
         let cards2 = remove_card(&cards1, &Rank::Joker.of(Suit::Joker));
         assert_eq!(cards2.len(), 1);
+    }
+
+    #[test]
+    fn test_println() {
+        let poker_hand = parse_hand("Ac As Ad Ah Jd");
+        println!("{}", poker_hand);
     }
 
     #[test]
