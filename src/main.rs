@@ -49,8 +49,8 @@ fn deal(cards: &mut Vec<Card>, n: usize) {
         evals.push((pocket, poker_hand));
     }
 
-    // evals.sort_by(|a, b| a.1.cmp(&b.1));
-    // evals.reverse();
+    evals.sort_by(|a, b| a.1.cmp(&b.1));
+    evals.reverse();
 
     for eval in evals {
         let (pocket, poker_hand) = eval;

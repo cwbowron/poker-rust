@@ -5,7 +5,6 @@ use std::cmp::Ordering;
 use super::card::Suit;
 use super::card::Rank;
 use super::card::Card;
-use super::card::Cards;
 use super::card::IsWildCard;
 use super::card::fmt_cards;
 
@@ -250,30 +249,30 @@ pub fn make_poker_hand(cards: &[Card], is_wild: &Option<IsWildCard>) -> Box<dyn 
     unreachable!();
 }
 
-// impl PartialEq for PokerHand {
-//     fn eq(&self, other: &PokerHand) -> bool {
-//         self.category == other.category
-//             && self.cards[0] == other.cards[0]
-//     }
-// }
+impl PartialEq for dyn PokerHand {
+    fn eq(&self, other: &dyn PokerHand) -> bool {
+        return self.ord() == other.ord();
+    }
+}
 
-// impl std::cmp::Ord for PokerHand {
-//     // TODO handle wild cards
-//     fn cmp(&self, other: &PokerHand) -> std::cmp::Ordering {
-//         match self.category.cmp(&other.category) {
-//             Ordering::Less => return Ordering::Less,
-//             Ordering::Greater => return Ordering::Greater,
-//             Ordering::Equal => return self.cards.cmp(&other.cards)
-//         }
-//     }
-// }
+impl Eq for dyn PokerHand {}
 
-// impl PartialOrd for PokerHand {
-//     fn partial_cmp(&self, other: &PokerHand) -> Option<Ordering> {
-//         Some(self.cmp(other))
-//     }
-// }
+impl std::cmp::Ord for dyn PokerHand {
+    // TODO handle wild cards
+    fn cmp(&self, other: &dyn PokerHand) -> Ordering {
+        self.ord().cmp(&other.ord())
+    }
+}
 
+impl PartialOrd for dyn PokerHand {
+    fn partial_cmp(&self, other: &dyn PokerHand) -> Option<Ordering> {
+        match self.ord().cmp(&other.ord()) {
+            Ordering::Less => Some(Ordering::Less),
+            Ordering::Greater => Some(Ordering::Greater),
+            Ordering::Equal => Some(Ordering::Equal)
+        }
+    }
+}
 
 #[cfg(test)]
 mod tests {
