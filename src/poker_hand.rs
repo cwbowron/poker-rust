@@ -193,6 +193,7 @@ macro_rules! define_hand {
 
         impl $symbol_struct {
             const ORDINAL: i32 = $ordinal;
+            const NAME: &'static str = $string;
         }
         
         impl PokerHand for $symbol_struct {
@@ -204,7 +205,7 @@ macro_rules! define_hand {
                 }
             }
             
-            fn name(&self) -> &'static str { $string }
+            fn name(&self) -> &'static str { Self::NAME }
             fn ord(&self) -> i32 { Self::ORDINAL }
             fn cards(&self) -> &[Card] { &self.0 }
         }
