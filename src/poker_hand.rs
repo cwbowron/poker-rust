@@ -141,18 +141,50 @@ fn as_straight(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>
     return None;
 }
 
-// TODO scoring_rank for wilds
+fn contains_scoring_rank(cards: &[Card], rank: Rank) -> bool {
+    for card in cards {
+        if card.scoring_rank == rank {
+            return true;
+        }
+    }
+    return false;
+}
+
+fn build_flush(partition: (Vec<&Card>, Vec<&Card>)) -> Vec<Card> {
+    let mut r = Vec::new();
+    
+    for n in partition.1 {
+        r.push(n.copy());
+    }
+    
+    for w in partition.0 {
+        for rank in Rank::iter() {
+            if !contains_scoring_rank(&r, rank) {
+                r.push(w.scored_as(rank));
+                println!("{} scored as {}", w.rank, rank);
+                break;
+            }
+        }
+    }
+    
+    r.sort_by_key(|card| card.scoring_rank);
+    r.reverse();
+    
+    return r.iter()
+        .take(5)
+        .map(|card_ref| Card::copy(card_ref))
+        .collect();
+}
+
 fn as_flush(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     for suit in Suit::iter() {
-        let mut suited = filter_suit(cards, suit, is_wild);
+        let suited = filter_suit(cards, suit, is_wild);
         
         if suited.len() >= 5 {
-            suited.sort();
-            suited.reverse();
-            return Some(suited.iter()
-                        .take(5)
-                        .map(|card_ref| Card::copy(card_ref))
-                        .collect());
+            return Some(
+                build_flush(
+                    suited.iter()
+                        .partition(|card| card.is_wild(is_wild))));
         }
     }
 
@@ -462,6 +494,26 @@ mod tests {
         assert_eq!(natural.ord(), Straight::ORDINAL);
         assert_eq!(wild_one.ord(), Straight::ORDINAL);
         assert_eq!(wild_two.ord(), Straight::ORDINAL);
+
+        assert_eq!(natural.cmp(&wild_one), Ordering::Equal);
+        assert_eq!(natural.cmp(&wild_two), Ordering::Equal);
+
+        assert_eq!(wild_one.cmp(&natural), Ordering::Equal);
+        assert_eq!(wild_one.cmp(&wild_two), Ordering::Equal);
+
+        assert_eq!(wild_two.cmp(&natural), Ordering::Equal);
+        assert_eq!(wild_two.cmp(&wild_one), Ordering::Equal);
+    }
+
+    #[test]
+    fn test_cmp_wild_flush() {
+        let natural = parse_hand("Ac Kc Qc 7c 6c");
+        let wild_one = parse_hand("Ac ?? Qc 7c 6c");
+        let wild_two = parse_hand("Ac ?? ?? 7c 6c");
+
+        assert_eq!(natural.ord(), Flush::ORDINAL);
+        assert_eq!(wild_one.ord(), Flush::ORDINAL);
+        assert_eq!(wild_two.ord(), Flush::ORDINAL);
 
         assert_eq!(natural.cmp(&wild_one), Ordering::Equal);
         assert_eq!(natural.cmp(&wild_two), Ordering::Equal);
