@@ -7,37 +7,40 @@ use super::card::Rank;
 use super::card::Card;
 use super::card::Cards;
 use super::card::IsWildCard;
+use super::card::fmt_cards;
 
-#[allow(dead_code)]
-#[derive(Copy, Clone, Debug, Eq, PartialEq, EnumIter, EnumString, ToString, Ord, PartialOrd)]
-pub enum HandCategory {
-    #[strum(to_string = "High Card")]
-    HighCard,
+// type HandBuilder = fn(&[Card], &Option<IsWildCard>) -> Option<Vec<Card>>;
 
-    #[strum(to_string = "Pair")]
-    OnePair,
+// #[allow(dead_code)]
+// #[derive(Copy, Clone, Debug, Eq, PartialEq, EnumIter, EnumString, ToString, Ord, PartialOrd)]
+// pub enum HandCategory {
+//     #[strum(to_string = "High Card")]
+//     HighCard,
 
-    #[strum(to_string = "Two Pair")]
-    TwoPair,
+//     #[strum(to_string = "Pair")]
+//     OnePair,
 
-    #[strum(to_string = "Three of a Kind")]
-    Triplets,
+//     #[strum(to_string = "Two Pair")]
+//     TwoPair,
 
-    #[strum(to_string = "Straight")]
-    Straight,
+//     #[strum(to_string = "Three of a Kind")]
+//     Triplets,
 
-    #[strum(to_string = "Flush")]
-    Flush,
+//     #[strum(to_string = "Straight")]
+//     Straight,
 
-    #[strum(to_string = "Full House")]
-    FullHouse,
+//     #[strum(to_string = "Flush")]
+//     Flush,
 
-    #[strum(to_string = "Four of a Kind")]
-    Quads,
+//     #[strum(to_string = "Full House")]
+//     FullHouse,
 
-    #[strum(to_string = "Straight Flush")]
-    StraightFlush
-}
+//     #[strum(to_string = "Four of a Kind")]
+//     Quads,
+
+//     #[strum(to_string = "Straight Flush")]
+//     StraightFlush
+// }
 
 fn remove_cards(a: &[Card], b: &[Card]) -> Vec<Card> {
     return a.iter()
@@ -209,76 +212,152 @@ fn as_straight_flush(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec
     return None;
 }
 
-impl HandCategory {
-    fn get_test(&self) -> fn(&[Card], &Option<IsWildCard>) -> Option<Vec<Card>> {
-        match self {
-            HandCategory::HighCard => as_high_card,
-            HandCategory::OnePair => as_pair,
-            HandCategory::TwoPair => as_two_pair,
-            HandCategory::Triplets => as_trips,
-            HandCategory::Straight => as_straight,
-            HandCategory::Flush => as_flush,
-            HandCategory::FullHouse => as_full_house,
-            HandCategory::Quads => as_quads,
-            HandCategory::StraightFlush => as_straight_flush
-        }
+// impl HandCategory {
+//     fn get_test(&self) -> fn(&[Card], &Option<IsWildCard>) -> Option<Vec<Card>> {
+//         match self {
+//             HandCategory::HighCard => as_high_card,
+//             HandCategory::OnePair => as_pair,
+//             HandCategory::TwoPair => as_two_pair,
+//             HandCategory::Triplets => as_trips,
+//             HandCategory::Straight => as_straight,
+//             HandCategory::Flush => as_flush,
+//             HandCategory::FullHouse => as_full_house,
+//             HandCategory::Quads => as_quads,
+//             HandCategory::StraightFlush => as_straight_flush
+//         }
+//     }
+// }
+
+
+pub trait PokerHand where Self: std::marker::Sized  {
+    fn new(name: &'static str, cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Self>;
+    
+    fn name(&self) -> &'static str;
+    fn rank(&self) -> usize;
+    fn cards(&self) -> &[Card];
+    fn to_string(&self) -> std::string::String {
+        format!("{} -> {}", fmt_cards(self.cards()), self.name())
     }
 }
 
-#[derive(Eq)]
-pub struct PokerHand {
-    category: HandCategory,
-    cards: Vec<Card>
-}
+// struct HighCard(Vec<Card>);
 
-impl PokerHand {
-    pub fn with_wild_cards(cards: &[Card], is_wild: &Option<IsWildCard>) -> PokerHand {
-        for category in HandCategory::iter().rev() {
-            if let Some(result_cards) = category.get_test()(&cards, is_wild) {
-                return PokerHand {
-                    category: category,
-                    cards: result_cards
-                };
+// impl PokerHand for HighCard {
+//     fn new(_name: &'static str, cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<HighCard> {
+//         let mut sorted_cards = cards.to_vec();
+//         sorted_cards.sort();
+//         sorted_cards.reverse();
+//         Some(HighCard(sorted_cards[0..5].to_vec()))
+//     }
+    
+//     fn name(&self) -> &'static str { "High Card" }
+//     fn rank(&self) -> usize { 0 }
+//     fn cards(&self) -> &[Card] { &self.0 }
+// }
+
+// struct Quads(Vec<Card>);
+
+// impl PokerHand for Quads  {
+//     fn new(_name: &'static str, cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Quads> {
+//         if let Some(hand) = make_sets(cards, &vec![4, 1], is_wild) {
+//             Some(Quads(hand))
+//         } else {
+//             None
+//         }
+//     }
+    
+//     fn name(&self) -> &'static str { "Four of a Kind" }
+//     fn rank(&self) -> usize { 10 }
+//     fn cards(&self) -> &[Card] { &self.0 }
+// }
+macro_rules! define_hand {
+    ($symbol: ident, $score: literal, $string: literal, $as_fn: expr) => {
+        struct $symbol(Vec<Card>);
+
+        impl PokerHand for $symbol {
+            fn new(_name: &'static str, cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Self> {
+                if let Some(hand) = $as_fn(cards, is_wild) {
+                    Some($symbol(hand))
+                } else {
+                    None
+                }
             }
+            
+            fn name(&self) -> &'static str { $string }
+            fn rank(&self) -> usize { $score }
+            fn cards(&self) -> &[Card] { &self.0 }
         }
+    }
+}
+    
+define_hand!(HighCard, 0, "High Card", as_high_card);
+define_hand!(OnePair, 1, "Pair", as_pair);
+define_hand!(TwoPair, 2, "Two Pair", as_two_pair);
+define_hand!(Triplets, 3, "Three of a Kind", as_trips);
+define_hand!(Straight, 4, "Straight", as_straight);
+define_hand!(Flush, 5, "Flush", as_flush);
+define_hand!(FullHouse, 6, "Full House", as_full_house);
+define_hand!(Quads, 7, "Four of a Kind", as_quads);
+define_hand!(StraightFlush, 8, "Straight Flush", as_straight_flush);
+
+pub fn make_poker_hand(cards: &[Card], is_wild: &Option<IsWildCard>) -> impl PokerHand {
+    return HighCard::new("Fuck", cards, is_wild).unwrap();
+}
+
+// #[derive(Eq)]
+// pub struct PokerHand {
+//     category: HandCategory,
+//     cards: Vec<Card>
+// }
+
+// impl PokerHand {
+//     pub fn with_wild_cards(cards: &[Card], is_wild: &Option<IsWildCard>) -> PokerHand {
+//         for category in HandCategory::iter().rev() {
+//             if let Some(result_cards) = category.get_test()(&cards, is_wild) {
+//                 return PokerHand {
+//                     category: category,
+//                     cards: result_cards
+//                 };
+//             }
+//         }
         
-        unreachable!();
-    }
+//         unreachable!();
+//     }
 
-    pub fn new(cards: &[Card]) -> PokerHand {
-        Self::with_wild_cards(cards, &None)
-    }
-}
+//     pub fn new(cards: &[Card]) -> PokerHand {
+//         Self::with_wild_cards(cards, &None)
+//     }
+// }
 
-impl std::fmt::Display for PokerHand {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{} -> {}", Cards(&self.cards), self.category.to_string())
-    }
-}
+// impl std::fmt::Display for PokerHand {
+//     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+//         write!(f, "{} -> {}", Cards(&self.cards), self.category.to_string())
+//     }
+// }
 
-impl PartialEq for PokerHand {
-    fn eq(&self, other: &PokerHand) -> bool {
-        self.category == other.category
-            && self.cards[0] == other.cards[0]
-    }
-}
+// impl PartialEq for PokerHand {
+//     fn eq(&self, other: &PokerHand) -> bool {
+//         self.category == other.category
+//             && self.cards[0] == other.cards[0]
+//     }
+// }
 
-impl std::cmp::Ord for PokerHand {
-    // TODO handle wild cards
-    fn cmp(&self, other: &PokerHand) -> std::cmp::Ordering {
-        match self.category.cmp(&other.category) {
-            Ordering::Less => return Ordering::Less,
-            Ordering::Greater => return Ordering::Greater,
-            Ordering::Equal => return self.cards.cmp(&other.cards)
-        }
-    }
-}
+// impl std::cmp::Ord for PokerHand {
+//     // TODO handle wild cards
+//     fn cmp(&self, other: &PokerHand) -> std::cmp::Ordering {
+//         match self.category.cmp(&other.category) {
+//             Ordering::Less => return Ordering::Less,
+//             Ordering::Greater => return Ordering::Greater,
+//             Ordering::Equal => return self.cards.cmp(&other.cards)
+//         }
+//     }
+// }
 
-impl PartialOrd for PokerHand {
-    fn partial_cmp(&self, other: &PokerHand) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
+// impl PartialOrd for PokerHand {
+//     fn partial_cmp(&self, other: &PokerHand) -> Option<Ordering> {
+//         Some(self.cmp(other))
+//     }
+// }
 
 
 #[cfg(test)]
@@ -287,158 +366,158 @@ mod tests {
     use crate::card::CardVector;
     use Rank::*;
     use Suit::*;
-    use HandCategory::*;
+    // use HandCategory::*;
 
-    fn _parse_hand(card_string: &str, is_wild: &Option<IsWildCard>) -> PokerHand {
-        PokerHand::with_wild_cards(&CardVector::parse(card_string), is_wild)
-    }
+    // fn _parse_hand(card_string: &str, is_wild: &Option<IsWildCard>) -> PokerHand {
+    //     PokerHand::with_wild_cards(&CardVector::parse(card_string), is_wild)
+    // }
 
-    fn parse_hand(card_string: &str) -> PokerHand {
-        _parse_hand(card_string, &Some(Card::is_joker))
-    }
+    // fn parse_hand(card_string: &str) -> PokerHand {
+    //     _parse_hand(card_string, &Some(Card::is_joker))
+    // }
 
-    fn parse_hand_suicide_king(card_string: &str) -> PokerHand {
-        _parse_hand(card_string, &Some(Card::is_suicide_king))
-    }
+    // fn parse_hand_suicide_king(card_string: &str) -> PokerHand {
+    //     _parse_hand(card_string, &Some(Card::is_suicide_king))
+    // }
 
-    #[test]
-    fn test_remove_card() {
-        let cards0 = CardVector::parse("Kc ?? ??");
-        assert_eq!(cards0.len(), 3);
+    // #[test]
+    // fn test_remove_card() {
+    //     let cards0 = CardVector::parse("Kc ?? ??");
+    //     assert_eq!(cards0.len(), 3);
 
-        let cards1 = remove_card(&cards0, &Rank::Joker.of(Suit::Joker));
-        assert_eq!(cards1.len(), 2);
+    //     let cards1 = remove_card(&cards0, &Rank::Joker.of(Suit::Joker));
+    //     assert_eq!(cards1.len(), 2);
 
-        let cards2 = remove_card(&cards1, &Rank::Joker.of(Suit::Joker));
-        assert_eq!(cards2.len(), 1);
-    }
+    //     let cards2 = remove_card(&cards1, &Rank::Joker.of(Suit::Joker));
+    //     assert_eq!(cards2.len(), 1);
+    // }
 
-    #[test]
-    fn test_straight_flush() {
-        let poker_hand = parse_hand("Ac Kc Qc Tc Jc");
-        assert_eq!(poker_hand.category, StraightFlush);
-    }
+    // #[test]
+    // fn test_straight_flush() {
+    //     let poker_hand = parse_hand("Ac Kc Qc Tc Jc");
+    //     assert_eq!(poker_hand.category, StraightFlush);
+    // }
 
-    #[test]
-    fn test_straight_flush_with_jokers() {
-        assert_eq!(parse_hand("Ac Kc Qc ?? Jc").category, StraightFlush);
-        assert_eq!(parse_hand("Ac Kc ?? ?? Jc").category, StraightFlush);
-    }
+    // #[test]
+    // fn test_straight_flush_with_jokers() {
+    //     assert_eq!(parse_hand("Ac Kc Qc ?? Jc").category, StraightFlush);
+    //     assert_eq!(parse_hand("Ac Kc ?? ?? Jc").category, StraightFlush);
+    // }
 
-    #[test]
-    fn test_quads() {
-        let poker_hand = parse_hand("Ac As Ad Ah Jd");
-        assert_eq!(poker_hand.category, Quads);
+    // #[test]
+    // fn test_quads() {
+    //     let poker_hand = parse_hand("Ac As Ad Ah Jd");
+    //     assert_eq!(poker_hand.category, Quads);
 
-        assert_eq!(poker_hand.cards[0].rank, Ace);
-        assert_eq!(poker_hand.cards[1].rank, Ace);
-        assert_eq!(poker_hand.cards[2].rank, Ace);
-        assert_eq!(poker_hand.cards[3].rank, Ace);
-        assert_eq!(poker_hand.cards[4].rank, Jack);
-    }
+    //     assert_eq!(poker_hand.cards[0].rank, Ace);
+    //     assert_eq!(poker_hand.cards[1].rank, Ace);
+    //     assert_eq!(poker_hand.cards[2].rank, Ace);
+    //     assert_eq!(poker_hand.cards[3].rank, Ace);
+    //     assert_eq!(poker_hand.cards[4].rank, Jack);
+    // }
 
-    #[test]
-    fn test_full_house() {
-        let poker_hand = parse_hand("Ac As Ad Jh Jd");
-        assert_eq!(poker_hand.category, FullHouse);
+    // #[test]
+    // fn test_full_house() {
+    //     let poker_hand = parse_hand("Ac As Ad Jh Jd");
+    //     assert_eq!(poker_hand.category, FullHouse);
         
-        assert_eq!(poker_hand.cards[0].rank, Ace);
-        assert_eq!(poker_hand.cards[1].rank, Ace);
-        assert_eq!(poker_hand.cards[2].rank, Ace);
-        assert_eq!(poker_hand.cards[3].rank, Jack);
-        assert_eq!(poker_hand.cards[4].rank, Jack);
-    }
+    //     assert_eq!(poker_hand.cards[0].rank, Ace);
+    //     assert_eq!(poker_hand.cards[1].rank, Ace);
+    //     assert_eq!(poker_hand.cards[2].rank, Ace);
+    //     assert_eq!(poker_hand.cards[3].rank, Jack);
+    //     assert_eq!(poker_hand.cards[4].rank, Jack);
+    // }
 
-    #[test]
-    fn test_one_joker() {
-        assert_eq!(parse_hand("Ac As Ad ?? Jd").category, Quads);
-        assert_eq!(parse_hand("Ac As ?? Jc Jd").category, FullHouse);
-        assert_eq!(parse_hand("Ac As ?? Jc Td").category, Triplets);
-        assert_eq!(parse_hand("Ac ?? Jc Td 7c").category, OnePair);
-    }
+    // #[test]
+    // fn test_one_joker() {
+    //     assert_eq!(parse_hand("Ac As Ad ?? Jd").category, Quads);
+    //     assert_eq!(parse_hand("Ac As ?? Jc Jd").category, FullHouse);
+    //     assert_eq!(parse_hand("Ac As ?? Jc Td").category, Triplets);
+    //     assert_eq!(parse_hand("Ac ?? Jc Td 7c").category, OnePair);
+    // }
 
-    #[test]
-    fn test_two_joker() {
-        assert_eq!(parse_hand("Ac As ?? ?? Jd").category, Quads);
-        assert_eq!(parse_hand("Ac ?? ?? Td 7c").category, Triplets);
-    }
+    // #[test]
+    // fn test_two_joker() {
+    //     assert_eq!(parse_hand("Ac As ?? ?? Jd").category, Quads);
+    //     assert_eq!(parse_hand("Ac ?? ?? Td 7c").category, Triplets);
+    // }
 
-    #[test]
-    fn test_flush() {
-        let poker_hand = parse_hand("Ac Kc 7c Tc Jc");
-        assert_eq!(poker_hand.category, Flush);
+    // #[test]
+    // fn test_flush() {
+    //     let poker_hand = parse_hand("Ac Kc 7c Tc Jc");
+    //     assert_eq!(poker_hand.category, Flush);
         
-        assert_eq!(poker_hand.cards[0].rank, Ace);
-        assert_eq!(poker_hand.cards[1].rank, King);
-        assert_eq!(poker_hand.cards[2].rank, Jack);
-        assert_eq!(poker_hand.cards[3].rank, Ten);
-        assert_eq!(poker_hand.cards[4].rank, Seven);
-    }
+    //     assert_eq!(poker_hand.cards[0].rank, Ace);
+    //     assert_eq!(poker_hand.cards[1].rank, King);
+    //     assert_eq!(poker_hand.cards[2].rank, Jack);
+    //     assert_eq!(poker_hand.cards[3].rank, Ten);
+    //     assert_eq!(poker_hand.cards[4].rank, Seven);
+    // }
     
-    #[test]
-    fn test_flush_with_jokers() {
-        assert_eq!(parse_hand("Ac Kc 7c Tc ??").category, Flush);
-        assert_eq!(parse_hand("Ac Kc ?? Jc 7c").category, Flush);
-    }
+    // #[test]
+    // fn test_flush_with_jokers() {
+    //     assert_eq!(parse_hand("Ac Kc 7c Tc ??").category, Flush);
+    //     assert_eq!(parse_hand("Ac Kc ?? Jc 7c").category, Flush);
+    // }
     
-    #[test]
-    fn test_straight() {
-        let poker_hand = parse_hand("Ac Kc Qc Ts Jd");
-        assert_eq!(poker_hand.category, Straight);
-    }
+    // #[test]
+    // fn test_straight() {
+    //     let poker_hand = parse_hand("Ac Kc Qc Ts Jd");
+    //     assert_eq!(poker_hand.category, Straight);
+    // }
 
-    #[test]
-    #[ignore]
-    fn test_low_straight() {
-        assert_eq!(parse_hand("Ac 5c 4s 3s 2d").category, Straight);
-        assert_eq!(parse_hand("5c 4s 3s 2d ??").category, Straight);
-        assert_eq!(parse_hand("?? 4s 3s 2d Ac").category, Straight);
-    }
+    // #[test]
+    // #[ignore]
+    // fn test_low_straight() {
+    //     assert_eq!(parse_hand("Ac 5c 4s 3s 2d").category, Straight);
+    //     assert_eq!(parse_hand("5c 4s 3s 2d ??").category, Straight);
+    //     assert_eq!(parse_hand("?? 4s 3s 2d Ac").category, Straight);
+    // }
 
-    #[test]
-    fn test_straight_with_jokers() {
-        assert_eq!(parse_hand("Ac Kc Qc Jd ??").category, Straight);
-        assert_eq!(parse_hand("Ac Kc ?? ?? Ts").category, Straight);
-    }
+    // #[test]
+    // fn test_straight_with_jokers() {
+    //     assert_eq!(parse_hand("Ac Kc Qc Jd ??").category, Straight);
+    //     assert_eq!(parse_hand("Ac Kc ?? ?? Ts").category, Straight);
+    // }
 
-    #[test]
-    fn test_triplets() {
-        let poker_hand = parse_hand("Ac Ah As Ts Jd");
-        assert_eq!(poker_hand.category, Triplets);
-    }
+    // #[test]
+    // fn test_triplets() {
+    //     let poker_hand = parse_hand("Ac Ah As Ts Jd");
+    //     assert_eq!(poker_hand.category, Triplets);
+    // }
 
-    #[test]
-    fn test_two_pair() {
-        let poker_hand = parse_hand("Ac Ah Qs Qd Jd");
-        assert_eq!(poker_hand.category, TwoPair);
-    }
+    // #[test]
+    // fn test_two_pair() {
+    //     let poker_hand = parse_hand("Ac Ah Qs Qd Jd");
+    //     assert_eq!(poker_hand.category, TwoPair);
+    // }
 
-    #[test]
-    fn test_pair() {
-        let poker_hand = parse_hand("Ac Ah Qs Td Jd");
-        assert_eq!(poker_hand.category, OnePair);
-    }
+    // #[test]
+    // fn test_pair() {
+    //     let poker_hand = parse_hand("Ac Ah Qs Td Jd");
+    //     assert_eq!(poker_hand.category, OnePair);
+    // }
 
-    #[test]
-    fn test_high_card() {
-        let poker_hand = parse_hand("Ac Jh 9s 7d 5d");
-        assert_eq!(poker_hand.category, HighCard);
+    // #[test]
+    // fn test_high_card() {
+    //     let poker_hand = parse_hand("Ac Jh 9s 7d 5d");
+    //     assert_eq!(poker_hand.category, HighCard);
 
-        assert_eq!(poker_hand.cards[0], Ace.of(Clubs));
-        assert_eq!(poker_hand.cards[1], Jack.of(Hearts));
-        assert_eq!(poker_hand.cards[2], Nine.of(Spades));
-        assert_eq!(poker_hand.cards[3], Seven.of(Diamonds));
-        assert_eq!(poker_hand.cards[4], Five.of(Diamonds));
-    }
+    //     assert_eq!(poker_hand.cards[0], Ace.of(Clubs));
+    //     assert_eq!(poker_hand.cards[1], Jack.of(Hearts));
+    //     assert_eq!(poker_hand.cards[2], Nine.of(Spades));
+    //     assert_eq!(poker_hand.cards[3], Seven.of(Diamonds));
+    //     assert_eq!(poker_hand.cards[4], Five.of(Diamonds));
+    // }
 
-    #[test]
-    fn test_suicide_king() {
-        assert_eq!(parse_hand_suicide_king("9c Kh 7c 6c 5c").category, StraightFlush);
-        assert_eq!(parse_hand_suicide_king("Ac Kh As Ad 7d").category, Quads);
-        assert_eq!(parse_hand_suicide_king("Kc Kh 7c 6c 5c").category, Flush);
-        assert_eq!(parse_hand_suicide_king("9c Kh 7s 6d 5d").category, Straight);
-        assert_eq!(parse_hand_suicide_king("Ac Kh As 7c 7d").category, FullHouse);
-        assert_eq!(parse_hand_suicide_king("Ac Kh As 6c 7d").category, Triplets);
-        assert_eq!(parse_hand_suicide_king("Ac Kh 5c 6c 7d").category, OnePair);
-    }
+    // #[test]
+    // fn test_suicide_king() {
+    //     assert_eq!(parse_hand_suicide_king("9c Kh 7c 6c 5c").category, StraightFlush);
+    //     assert_eq!(parse_hand_suicide_king("Ac Kh As Ad 7d").category, Quads);
+    //     assert_eq!(parse_hand_suicide_king("Kc Kh 7c 6c 5c").category, Flush);
+    //     assert_eq!(parse_hand_suicide_king("9c Kh 7s 6d 5d").category, Straight);
+    //     assert_eq!(parse_hand_suicide_king("Ac Kh As 7c 7d").category, FullHouse);
+    //     assert_eq!(parse_hand_suicide_king("Ac Kh As 6c 7d").category, Triplets);
+    //     assert_eq!(parse_hand_suicide_king("Ac Kh 5c 6c 7d").category, OnePair);
+    // }
 }
