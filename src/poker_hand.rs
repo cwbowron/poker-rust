@@ -260,7 +260,11 @@ impl<'a> Eq for dyn PokerHand + 'a {}
 impl<'a> Ord for dyn PokerHand + 'a {
     // TODO handle wild cards
     fn cmp(&self, other: &dyn PokerHand) -> Ordering {
-        self.ord().cmp(&other.ord())
+        match self.ord().cmp(&other.ord()) {
+            Ordering::Greater => Ordering::Greater,
+            Ordering::Less => Ordering::Less,
+            Ordering::Equal => self.cards().cmp(&other.cards())
+        }
     }
 }
 
