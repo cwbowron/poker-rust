@@ -106,7 +106,8 @@ impl std::str::FromStr for Rank {
 #[derive(Clone, Debug, Eq)]
 pub struct Card {
     pub rank: Rank,
-    pub suit: Suit
+    pub suit: Suit,
+    pub scoring_rank: Rank,
 }
 
 pub type IsWildCard = fn(&Card) -> bool;
@@ -114,11 +115,15 @@ pub type IsWildCard = fn(&Card) -> bool;
 #[allow(dead_code)]
 impl Card {
     pub const fn new(rank: Rank, suit: Suit) -> Card {
-        Card { rank: rank, suit: suit }
+        Card { rank: rank, suit: suit, scoring_rank: rank }
     }
 
     pub const fn copy(&self) -> Card {
-        Card { rank: self.rank, suit: self.suit }
+        Card { rank: self.rank, suit: self.suit, scoring_rank: self.rank }
+    }
+
+    pub const fn scored_as(&self, rank: Rank) -> Card {
+        Card { rank: self.rank, suit: self.suit, scoring_rank: rank }
     }
 
     pub fn is_one_eyed_jack(card: &Card) -> bool {
@@ -175,7 +180,7 @@ impl PartialEq for Card {
 
 impl Ord for Card {
     fn cmp(&self, other: &Card) -> std::cmp::Ordering {
-        self.rank.cmp(&other.rank)
+        self.scoring_rank.cmp(&other.scoring_rank)
     }
 }
 
