@@ -422,26 +422,27 @@ mod tests {
         assert_eq!(parse_hand("Ac Ah Qs Td Jd").ord(), OnePair::ORDINAL);
     }
 
-    // #[test]
-    // fn test_high_card() {
-    //     let poker_hand = parse_hand("Ac Jh 9s 7d 5d");
-    //     assert_eq!(poker_hand.category, HighCard);
+    #[test]
+    fn test_high_card() {
+        let poker_hand = parse_hand("Ac Jh 9s 7d 5d");
+        let cards = poker_hand.cards();
+        assert_eq!(poker_hand.ord(), HighCard::ORDINAL);
 
-    //     assert_eq!(poker_hand.cards[0], Ace.of(Clubs));
-    //     assert_eq!(poker_hand.cards[1], Jack.of(Hearts));
-    //     assert_eq!(poker_hand.cards[2], Nine.of(Spades));
-    //     assert_eq!(poker_hand.cards[3], Seven.of(Diamonds));
-    //     assert_eq!(poker_hand.cards[4], Five.of(Diamonds));
-    // }
+        assert_eq!(cards[0], Ace.of(Clubs));
+        assert_eq!(cards[1], Jack.of(Hearts));
+        assert_eq!(cards[2], Nine.of(Spades));
+        assert_eq!(cards[3], Seven.of(Diamonds));
+        assert_eq!(cards[4], Five.of(Diamonds));
+    }
 
-    // #[test]
-    // fn test_suicide_king() {
-    //     assert_eq!(parse_hand_suicide_king("9c Kh 7c 6c 5c").category, StraightFlush);
-    //     assert_eq!(parse_hand_suicide_king("Ac Kh As Ad 7d").category, Quads);
-    //     assert_eq!(parse_hand_suicide_king("Kc Kh 7c 6c 5c").category, Flush);
-    //     assert_eq!(parse_hand_suicide_king("9c Kh 7s 6d 5d").category, Straight);
-    //     assert_eq!(parse_hand_suicide_king("Ac Kh As 7c 7d").category, FullHouse);
-    //     assert_eq!(parse_hand_suicide_king("Ac Kh As 6c 7d").category, Triplets);
-    //     assert_eq!(parse_hand_suicide_king("Ac Kh 5c 6c 7d").category, OnePair);
-    // }
+    #[test]
+    fn test_suicide_king() {
+        assert_eq!(parse_hand_suicide_king("9c Kh 7c 6c 5c").ord(), StraightFlush::ORDINAL);
+        assert_eq!(parse_hand_suicide_king("Ac Kh As Ad 7d").ord(), Quads::ORDINAL);
+        assert_eq!(parse_hand_suicide_king("Kc Kh 7c 6c 5c").ord(), Flush::ORDINAL);
+        assert_eq!(parse_hand_suicide_king("9c Kh 7s 6d 5d").ord(), Straight::ORDINAL);
+        assert_eq!(parse_hand_suicide_king("Ac Kh As 7c 7d").ord(), FullHouse::ORDINAL);
+        assert_eq!(parse_hand_suicide_king("Ac Kh As 6c 7d").ord(), Triplets::ORDINAL);
+        assert_eq!(parse_hand_suicide_king("Ac Kh 5c 6c 7d").ord(), OnePair::ORDINAL);
+    }
 }
