@@ -86,6 +86,16 @@ impl Rank {
         *self as usize == ordinal
             || (self == &Rank::Ace && Rank::LowAce as usize == ordinal)
     }
+
+    pub fn for_ordinal(ordinal: usize) -> Self {
+        for rank in Self::iter() {
+            if rank as usize == ordinal {
+                return rank;
+            }
+        }
+
+        panic!("Invalid ordinal for Rank!");
+    }
 }
 
 impl std::str::FromStr for Rank {

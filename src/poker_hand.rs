@@ -1,4 +1,3 @@
-// TODO handle sorting cards with wild cards
 use strum::IntoEnumIterator;
 use std::cmp::Ordering;
 
@@ -48,7 +47,7 @@ fn find_set(cards: &[Card], n: usize, is_wild: &Option<IsWildCard>) -> Option<Ve
             if filtered.len() >= n {
                 return Some(filtered.iter()
                             .take(n)
-                            .map(|card_ref_ref| Card::copy(*card_ref_ref))
+                            .map(|card_ref_ref| card_ref_ref.scored_as(rank))
                             .collect());
             }
         }
@@ -109,8 +108,7 @@ fn fill_straight(cards: &[Card], is_wild:&Option<IsWildCard>, rank_ordinal: usiz
         if let Some(card) = cards.iter()
             .filter(|card| !card.is_wild(is_wild))
             .find(|card| card.rank.is_ordinal(rank_ordinal)) {
-                result.push(Card::copy(card));
-
+                result.push(card.copy());
                 if fill_straight(cards, is_wild, rank_ordinal - 1, result) {
                     return true;
                 }
@@ -119,7 +117,8 @@ fn fill_straight(cards: &[Card], is_wild:&Option<IsWildCard>, rank_ordinal: usiz
 
         if let Some(wild) = cards.iter()
             .find(|card| card.is_wild(is_wild)) {
-                result.push(Card::copy(wild));
+                let rank = Rank::for_ordinal(rank_ordinal);
+                result.push(wild.scored_as(rank));
                 let remaining_cards = remove_card(cards, wild);
                 if fill_straight(&remaining_cards, is_wild, rank_ordinal - 1, result) {
                     return true;
@@ -142,6 +141,7 @@ fn as_straight(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>
     return None;
 }
 
+// TODO scoring_rank for wilds
 fn as_flush(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     for suit in Suit::iter() {
         let mut suited = filter_suit(cards, suit, is_wild);
@@ -252,7 +252,6 @@ impl<'a> PartialEq for dyn PokerHand + 'a {
 impl<'a> Eq for dyn PokerHand + 'a {}
 
 impl<'a> Ord for dyn PokerHand + 'a {
-    // TODO handle wild cards
     fn cmp(&self, other: &dyn PokerHand) -> Ordering {
         match self.ord().cmp(&other.ord()) {
             Ordering::Greater => Ordering::Greater,
@@ -440,5 +439,37 @@ mod tests {
 
         println!("two_pair_edge_case: {}", poker_hand);
         assert_eq!(poker_hand.cards().len(), 5);
+    }
+
+    #[test]
+    fn test_cmp_wild_full_house() {
+        let natural = parse_hand("Ac As Ad Jh Jd");
+        let wild = parse_hand("Ac As ?? Jh Jd");
+
+        assert_eq!(natural.ord(), FullHouse::ORDINAL);
+        assert_eq!(wild.ord(), FullHouse::ORDINAL);
+
+        assert_eq!(wild.cmp(&natural), Ordering::Equal);
+        assert_eq!(natural.cmp(&wild), Ordering::Equal);
+    }
+
+    #[test]
+    fn test_cmp_wild_straight() {
+        let natural = parse_hand("Ac Ks Qd Jh Td");
+        let wild_one = parse_hand("Ac Ks ?? Jh Td");
+        let wild_two = parse_hand("Ac Ks ?? ?? Td");
+
+        assert_eq!(natural.ord(), Straight::ORDINAL);
+        assert_eq!(wild_one.ord(), Straight::ORDINAL);
+        assert_eq!(wild_two.ord(), Straight::ORDINAL);
+
+        assert_eq!(natural.cmp(&wild_one), Ordering::Equal);
+        assert_eq!(natural.cmp(&wild_two), Ordering::Equal);
+
+        assert_eq!(wild_one.cmp(&natural), Ordering::Equal);
+        assert_eq!(wild_one.cmp(&wild_two), Ordering::Equal);
+
+        assert_eq!(wild_two.cmp(&natural), Ordering::Equal);
+        assert_eq!(wild_two.cmp(&wild_one), Ordering::Equal);
     }
 }
