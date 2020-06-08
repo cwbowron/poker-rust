@@ -180,7 +180,7 @@ fn as_straight_flush(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec
 }
 
 pub trait PokerHand: std::fmt::Display {
-    fn new(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Box<dyn PokerHand>> where Self: Sized;
+    fn new(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Self> where Self: Sized;
     
     fn name(&self) -> &'static str;
     fn ord(&self) -> i32;
@@ -197,9 +197,9 @@ macro_rules! define_hand {
         }
         
         impl PokerHand for $symbol_struct {
-            fn new(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Box<dyn PokerHand>> where Self: Sized {
+            fn new(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Self> {
                 if let Some(hand) = $as_fn(cards, is_wild) {
-                    Some(Box::new($symbol_struct(hand)))
+                    Some($symbol_struct(hand))
                 } else {
                     None
                 }
@@ -228,33 +228,26 @@ define_hand!(6, FullHouse, "Full House", as_full_house);
 define_hand!(7, Quads, "Four of a Kind", as_quads);
 define_hand!(8, StraightFlush, "Straight Flush", as_straight_flush);
 
-pub fn make_poker_hand(cards: &[Card], is_wild: &Option<IsWildCard>) -> Box<dyn PokerHand> {
-    let constructors = [
-        StraightFlush::new,
-        Quads::new,
-        FullHouse::new,
-        Flush::new,
-        Straight::new,
-        Triplets::new,
-        TwoPair::new,
-        OnePair::new,
-        HighCard::new
-    ];
-
-    for constructor in constructors.iter() {
-        if let Some(boxed_hand) = constructor(cards, is_wild) {
-            return boxed_hand;
+macro_rules! try_make_hand {
+    ($struct_type: ident, $cards: ident, $is_wild: ident) => {
+        if let Some(hand) = $struct_type::new($cards, $is_wild) {
+            return Box::new(hand);
         }
     }
-
-    unreachable!();
 }
 
-// impl std::fmt::Display for PokerHand {
-//     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-//         write!(f, "{} -> {}", Cards(&self.cards), self.category.to_string())
-//     }
-// }
+pub fn make_poker_hand(cards: &[Card], is_wild: &Option<IsWildCard>) -> Box<dyn PokerHand> {
+    try_make_hand!(StraightFlush, cards, is_wild);
+    try_make_hand!(Quads, cards, is_wild);
+    try_make_hand!(FullHouse, cards, is_wild);
+    try_make_hand!(Flush, cards, is_wild);
+    try_make_hand!(Straight, cards, is_wild);
+    try_make_hand!(Triplets, cards, is_wild);
+    try_make_hand!(TwoPair, cards, is_wild);
+    try_make_hand!(OnePair, cards, is_wild);
+    try_make_hand!(HighCard, cards, is_wild);
+    unreachable!();
+}
 
 // impl PartialEq for PokerHand {
 //     fn eq(&self, other: &PokerHand) -> bool {
