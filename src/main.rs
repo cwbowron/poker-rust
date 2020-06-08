@@ -9,7 +9,7 @@ mod deck;
 use deck::make_shuffled_deck;
 
 mod poker_hand;
-use poker_hand::PokerHand;
+use poker_hand::make_poker_hand;
 
 fn deal(cards: &mut Vec<Card>, n: usize) {
     let mut pockets = Vec::new();
@@ -45,7 +45,7 @@ fn deal(cards: &mut Vec<Card>, n: usize) {
         let mut cards = pocket.to_vec();
         cards.extend(board.to_vec());
 
-        let poker_hand = PokerHand::new(&cards);
+        let poker_hand = make_poker_hand(&cards, &None);
         evals.push((pocket, poker_hand));
     }
 
