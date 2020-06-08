@@ -82,18 +82,18 @@ fn make_sets(cards: &[Card], set_sizes: &Vec<usize>, is_wild: &Option<IsWildCard
 }
 
 macro_rules! define_set_maker {
-    ($fn_name: ident, $set: expr) => {
+    ($fn_name: ident, $set: tt) => {
         fn $fn_name(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
-            return make_sets(cards, &$set, is_wild);
+            return make_sets(cards, &vec!$set, is_wild);
         }
     }
 }
 
-define_set_maker!(as_quads, vec![4, 1]);
-define_set_maker!(as_full_house, vec![3, 2]);
-define_set_maker!(as_trips, vec![3, 1, 1]);
-define_set_maker!(as_two_pair, vec![2, 2, 1]);
-define_set_maker!(as_pair, vec![2, 1, 1, 1]);
+define_set_maker!(as_quads, [4, 1]);
+define_set_maker!(as_full_house, [3, 2]);
+define_set_maker!(as_trips, [3, 1, 1]);
+define_set_maker!(as_two_pair, [2, 2, 1]);
+define_set_maker!(as_pair, [2, 1, 1, 1]);
 
 fn as_high_card(cards: &[Card], _is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     let mut sorted_cards = cards.to_vec();
