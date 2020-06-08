@@ -183,7 +183,7 @@ pub trait PokerHand {
     fn new(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Box<dyn PokerHand>> where Self: Sized;
     
     fn name(&self) -> &'static str;
-    fn rank(&self) -> i32;
+    fn ord(&self) -> i32;
     fn cards(&self) -> &[Card];
     fn to_string(&self) -> std::string::String {
         format!("{} -> {}", fmt_cards(self.cards()), self.name())
@@ -191,10 +191,13 @@ pub trait PokerHand {
 }
 
 macro_rules! define_hand {
-    ($symbol_ordinal_score: ident, $score: literal, $symbol_struct: ident, $string: literal, $as_fn: expr) => {
-        pub const $symbol_ordinal_score: i32 = $score;
+    ($ordinal: literal, $symbol_struct: ident, $string: literal, $as_fn: expr) => {
         pub struct $symbol_struct(Vec<Card>);
 
+        impl $symbol_struct {
+            const ORDINAL: i32 = $ordinal;
+        }
+        
         impl PokerHand for $symbol_struct {
             fn new(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Box<dyn PokerHand>> where Self: Sized {
                 if let Some(hand) = $as_fn(cards, is_wild) {
@@ -205,21 +208,21 @@ macro_rules! define_hand {
             }
             
             fn name(&self) -> &'static str { $string }
-            fn rank(&self) -> i32 { $symbol_ordinal_score }
+            fn ord(&self) -> i32 { Self::ORDINAL }
             fn cards(&self) -> &[Card] { &self.0 }
         }
     }
 }
 
-define_hand!(HIGH_CARD, 0, HighCard, "High Card", as_high_card);
-define_hand!(ONE_PAIR, 1, OnePair, "Pair", as_pair);
-define_hand!(TWO_PAIR, 2, TwoPair, "Two Pair", as_two_pair);
-define_hand!(TRIPLETS, 3, Triplets, "Three of a Kind", as_trips);
-define_hand!(STRAIGHT, 4, Straight, "Straight", as_straight);
-define_hand!(FLUSH, 5, Flush, "Flush", as_flush);
-define_hand!(FULL_HOUSE, 6, FullHouse, "Full House", as_full_house);
-define_hand!(QUADS, 7, Quads, "Four of a Kind", as_quads);
-define_hand!(STRAIGHT_FLUSH, 8, StraightFlush, "Straight Flush", as_straight_flush);
+define_hand!(0, HighCard, "High Card", as_high_card);
+define_hand!(1, OnePair, "Pair", as_pair);
+define_hand!(2, TwoPair, "Two Pair", as_two_pair);
+define_hand!(3, Triplets, "Three of a Kind", as_trips);
+define_hand!(4, Straight, "Straight", as_straight);
+define_hand!(5, Flush, "Flush", as_flush);
+define_hand!(6, FullHouse, "Full House", as_full_house);
+define_hand!(7, Quads, "Four of a Kind", as_quads);
+define_hand!(8, StraightFlush, "Straight Flush", as_straight_flush);
 
 pub fn make_poker_hand(cards: &[Card], is_wild: &Option<IsWildCard>) -> Box<dyn PokerHand> {
     let constructors = [
@@ -308,20 +311,20 @@ mod tests {
 
     #[test]
     fn test_straight_flush() {
-        assert_eq!(parse_hand("Ac Kc Qc Tc Jc").rank(), STRAIGHT_FLUSH);
+        assert_eq!(parse_hand("Ac Kc Qc Tc Jc").ord(), StraightFlush::ORDINAL);
     }
 
     #[test]
     fn test_straight_flush_with_jokers() {
-        assert_eq!(parse_hand("Ac Kc Qc ?? Jc").rank(), STRAIGHT_FLUSH);
-        assert_eq!(parse_hand("Ac Kc ?? ?? Jc").rank(), STRAIGHT_FLUSH);
+        assert_eq!(parse_hand("Ac Kc Qc ?? Jc").ord(), StraightFlush::ORDINAL);
+        assert_eq!(parse_hand("Ac Kc ?? ?? Jc").ord(), StraightFlush::ORDINAL);
     }
 
     #[test]
     fn test_quads() {
         let poker_hand = parse_hand("Ac As Ad Ah Jd");
         let cards = poker_hand.cards();
-        assert_eq!(poker_hand.rank(), QUADS);
+        assert_eq!(poker_hand.ord(), Quads::ORDINAL);
 
         assert_eq!(cards[0].rank, Ace);
         assert_eq!(cards[1].rank, Ace);
@@ -334,7 +337,7 @@ mod tests {
     fn test_full_house() {
         let poker_hand = parse_hand("Ac As Ad Jh Jd");
         let cards = poker_hand.cards();
-        assert_eq!(poker_hand.rank(), FULL_HOUSE);
+        assert_eq!(poker_hand.ord(), FullHouse::ORDINAL);
         
         assert_eq!(cards[0].rank, Ace);
         assert_eq!(cards[1].rank, Ace);
@@ -345,23 +348,23 @@ mod tests {
 
     #[test]
     fn test_one_joker() {
-        assert_eq!(parse_hand("Ac As Ad ?? Jd").rank(), QUADS);
-        assert_eq!(parse_hand("Ac As ?? Jc Jd").rank(), FULL_HOUSE);
-        assert_eq!(parse_hand("Ac As ?? Jc Td").rank(), TRIPLETS);
-        assert_eq!(parse_hand("Ac ?? Jc Td 7c").rank(), ONE_PAIR);
+        assert_eq!(parse_hand("Ac As Ad ?? Jd").ord(), Quads::ORDINAL);
+        assert_eq!(parse_hand("Ac As ?? Jc Jd").ord(), FullHouse::ORDINAL);
+        assert_eq!(parse_hand("Ac As ?? Jc Td").ord(), Triplets::ORDINAL);
+        assert_eq!(parse_hand("Ac ?? Jc Td 7c").ord(), OnePair::ORDINAL);
     }
 
     #[test]
     fn test_two_joker() {
-        assert_eq!(parse_hand("Ac As ?? ?? Jd").rank(), QUADS);
-        assert_eq!(parse_hand("Ac ?? ?? Td 7c").rank(), TRIPLETS);
+        assert_eq!(parse_hand("Ac As ?? ?? Jd").ord(), Quads::ORDINAL);
+        assert_eq!(parse_hand("Ac ?? ?? Td 7c").ord(), Triplets::ORDINAL);
     }
 
     #[test]
     fn test_flush() {
         let poker_hand = parse_hand("Ac Kc 7c Tc Jc");
         let cards = poker_hand.cards();
-        assert_eq!(poker_hand.rank(), FLUSH);
+        assert_eq!(poker_hand.ord(), Flush::ORDINAL);
         
         assert_eq!(cards[0].rank, Ace);
         assert_eq!(cards[1].rank, King);
@@ -372,41 +375,41 @@ mod tests {
     
     #[test]
     fn test_flush_with_jokers() {
-        assert_eq!(parse_hand("Ac Kc 7c Tc ??").rank(), FLUSH);
-        assert_eq!(parse_hand("Ac Kc ?? Jc 7c").rank(), FLUSH);
+        assert_eq!(parse_hand("Ac Kc 7c Tc ??").ord(), Flush::ORDINAL);
+        assert_eq!(parse_hand("Ac Kc ?? Jc 7c").ord(), Flush::ORDINAL);
     }
     
     #[test]
     fn test_straight() {
-        assert_eq!(parse_hand("Ac Kc Qc Ts Jd").rank(), STRAIGHT);
+        assert_eq!(parse_hand("Ac Kc Qc Ts Jd").ord(), Straight::ORDINAL);
     }
 
     #[test]
     fn test_low_straight() {
-        assert_eq!(parse_hand("Ac 5c 4s 3s 2d").rank(), STRAIGHT);
-        assert_eq!(parse_hand("5c 4s 3s 2d ??").rank(), STRAIGHT);
-        assert_eq!(parse_hand("?? 4s 3s 2d Ac").rank(), STRAIGHT);
+        assert_eq!(parse_hand("Ac 5c 4s 3s 2d").ord(), Straight::ORDINAL);
+        assert_eq!(parse_hand("5c 4s 3s 2d ??").ord(), Straight::ORDINAL);
+        assert_eq!(parse_hand("?? 4s 3s 2d Ac").ord(), Straight::ORDINAL);
     }
 
     #[test]
     fn test_straight_with_jokers() {
-        assert_eq!(parse_hand("Ac Kc Qc Jd ??").rank(), STRAIGHT);
-        assert_eq!(parse_hand("Ac Kc ?? ?? Ts").rank(), STRAIGHT);
+        assert_eq!(parse_hand("Ac Kc Qc Jd ??").ord(), Straight::ORDINAL);
+        assert_eq!(parse_hand("Ac Kc ?? ?? Ts").ord(), Straight::ORDINAL);
     }
 
     #[test]
     fn test_triplets() {
-        assert_eq!(parse_hand("Ac Ah As Ts Jd").rank(), TRIPLETS);
+        assert_eq!(parse_hand("Ac Ah As Ts Jd").ord(), Triplets::ORDINAL);
     }
 
     #[test]
     fn test_two_pair() {
-        assert_eq!(parse_hand("Ac Ah Qs Qd Jd").rank(), TWO_PAIR);
+        assert_eq!(parse_hand("Ac Ah Qs Qd Jd").ord(), TwoPair::ORDINAL);
     }
 
     #[test]
     fn test_pair() {
-        assert_eq!(parse_hand("Ac Ah Qs Td Jd").rank(), ONE_PAIR);
+        assert_eq!(parse_hand("Ac Ah Qs Td Jd").ord(), OnePair::ORDINAL);
     }
 
     // #[test]
