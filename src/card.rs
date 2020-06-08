@@ -129,7 +129,7 @@ impl Card {
     }
 
     pub const fn copy(&self) -> Card {
-        Card { rank: self.rank, suit: self.suit, scoring_rank: self.rank }
+        Card { rank: self.rank, suit: self.suit, scoring_rank: self.scoring_rank }
     }
 
     pub const fn scored_as(&self, rank: Rank) -> Card {
