@@ -249,28 +249,24 @@ pub fn make_poker_hand(cards: &[Card], is_wild: &Option<IsWildCard>) -> Box<dyn 
     unreachable!();
 }
 
-impl PartialEq for dyn PokerHand {
+impl<'a> PartialEq for dyn PokerHand + 'a {
     fn eq(&self, other: &dyn PokerHand) -> bool {
         return self.ord() == other.ord();
     }
 }
 
-impl Eq for dyn PokerHand {}
+impl<'a> Eq for dyn PokerHand + 'a {}
 
-impl std::cmp::Ord for dyn PokerHand {
+impl<'a> Ord for dyn PokerHand + 'a {
     // TODO handle wild cards
     fn cmp(&self, other: &dyn PokerHand) -> Ordering {
         self.ord().cmp(&other.ord())
     }
 }
 
-impl PartialOrd for dyn PokerHand {
+impl<'a> PartialOrd for dyn PokerHand + 'a {
     fn partial_cmp(&self, other: &dyn PokerHand) -> Option<Ordering> {
-        match self.ord().cmp(&other.ord()) {
-            Ordering::Less => Some(Ordering::Less),
-            Ordering::Greater => Some(Ordering::Greater),
-            Ordering::Equal => Some(Ordering::Equal)
-        }
+        Some(self.cmp(other))
     }
 }
 
