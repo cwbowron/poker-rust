@@ -1,13 +1,6 @@
 use strum::IntoEnumIterator;
 
-#[derive(Debug, Clone)]
-pub struct ParseError;
-
-impl std::fmt::Display for ParseError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "Invalid strings")
-    }
-}
+type ParseError = &'static str;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, EnumIter, Ord, PartialOrd, Display)]
 pub enum Suit {
@@ -41,7 +34,7 @@ impl std::str::FromStr for Suit {
         } else if str == "?" {
             Ok(Suit::Joker)
         } else {
-            Err(ParseError)
+            Err("Invalid Suit")
         }
     }
 }
@@ -109,7 +102,7 @@ impl std::str::FromStr for Rank {
                 }
             }
         }
-        return Err(ParseError)
+        return Err("Invalid Rank")
     }
 }
 
