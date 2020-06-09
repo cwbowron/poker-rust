@@ -6,28 +6,8 @@ use super::card::Rank;
 use super::card::Card;
 use super::card::IsWildCard;
 use super::card::fmt_cards;
-
-fn remove_cards(a: &[Card], b: &[Card]) -> Vec<Card> {
-    return a.iter()
-        .filter(|card| !b.contains(card))
-        .map(Card::copy)
-        .collect();
-}
-
-fn remove_card(a: &[Card], b: &Card) -> Vec<Card> {
-    let mut found = false;
-    return a.iter()
-        .filter(|card| {
-            if found || *card != b {
-                true
-            } else {
-                found = true;
-                false
-            }
-        })
-        .map(Card::copy)
-        .collect();
-}
+use super::card::remove_cards;
+use super::card::remove_card;
 
 fn filter_suit(cards: &[Card], suit: Suit, is_wild: &Option<IsWildCard>) -> Vec<Card> {
     return cards
@@ -317,18 +297,6 @@ mod tests {
 
     fn parse_hand_suicide_king(card_string: &str) -> Box<dyn PokerHand> {
         _parse_hand(card_string, &Some(Card::is_suicide_king))
-    }
-
-    #[test]
-    fn test_remove_card() {
-        let cards0 = CardVector::parse("Kc ?? ??");
-        assert_eq!(cards0.len(), 3);
-
-        let cards1 = remove_card(&cards0, &Rank::Joker.of(Suit::Joker));
-        assert_eq!(cards1.len(), 2);
-
-        let cards2 = remove_card(&cards1, &Rank::Joker.of(Suit::Joker));
-        assert_eq!(cards2.len(), 1);
     }
 
     #[test]
