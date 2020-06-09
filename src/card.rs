@@ -238,19 +238,6 @@ impl std::ops::Deref for CardVector {
     }
 }
 
-// impl std::ops::Index<usize> for CardVector {
-//     type Output = Card;
-//     fn index(&self, index: usize) -> &Self::Output {
-//         &self.0[index]
-//     }
-// }
-
-// impl From<CardVector> for Vec<Card> {
-//     fn from(card_vector: CardVector) -> Vec<Card> {
-//         card_vector.0
-//     }
-// }
-
 impl std::fmt::Display for CardVector {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "{}", fmt_cards(&self.0))
