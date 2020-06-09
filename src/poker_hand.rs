@@ -122,12 +122,9 @@ fn as_straight(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>
 }
 
 fn contains_scoring_rank(cards: &[Card], rank: Rank) -> bool {
-    for card in cards {
-        if card.scoring_rank == rank {
-            return true;
-        }
-    }
-    return false;
+    return cards.iter()
+        .find(|card| card.scoring_rank == rank)
+        .is_some();
 }
 
 fn build_flush(partition: (Vec<&Card>, Vec<&Card>)) -> Vec<Card> {
