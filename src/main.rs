@@ -80,6 +80,22 @@ impl WinLoseSplit {
             splits: 0
         }
     }
+
+    pub fn total(&self) -> i32{
+        self.wins + self.losses + self.splits
+    }
+
+    pub fn win_pct(&self) -> f32 {
+        (self.wins as f32) / (self.total() as f32)
+    }
+
+    pub fn losses_pct(&self) -> f32 {
+        (self.losses as f32) / (self.total() as f32)
+    }
+
+    pub fn splits_pct(&self) -> f32 {
+        (self.splits as f32) / (self.total() as f32)
+    }
 }
 
 impl Copy for WinLoseSplit {}
@@ -94,6 +110,11 @@ impl Clone for WinLoseSplit {
     }
 }
 
+impl std::fmt::Display for WinLoseSplit {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{} - {} - {}", self.win_pct(), self.losses_pct(), self.splits_pct())
+    }
+}
 
 fn hold_em_odds(deck: &[Card], pockets: &Vec<Vec<Card>>, board: &Vec<Card>) -> Vec<WinLoseSplit> {
     let mut results = vec![WinLoseSplit::new(); pockets.len()];
@@ -121,7 +142,7 @@ fn hold_em_odds(deck: &[Card], pockets: &Vec<Vec<Card>>, board: &Vec<Card>) -> V
                 .collect::<Vec<_>>();
 
             for winner in winners.iter() {
-                if (winners.len() == 1) {
+                if winners.len() == 1 {
                     results[winner.0].wins += 1;
                 } else {
                     results[winner.0].splits += 1;
@@ -164,6 +185,6 @@ fn main() {
     for i in 0..results.len() {
         let p = &pockets[i];
         let r = results[i];
-        println!("- {} - {} {} {}", fmt_cards(&p), r.wins, r.losses, r.splits);
+        println!("- {} - {}", fmt_cards(&p), r);
     }
 }
