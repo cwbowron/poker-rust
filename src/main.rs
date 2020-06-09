@@ -90,7 +90,7 @@ fn find_winners(pockets: &Vec<Vec<Card>>, board: &Vec<Card>) -> Vec<usize> {
 
 fn hold_em_odds(deck: &[Card], pockets: &Vec<Vec<Card>>, board: &Vec<Card>) -> Vec<WinLoseSplit> {
     let mut results = vec![WinLoseSplit::new(); pockets.len()];
-    let mut count = 0;
+
     for combination in deck.iter()
         .combinations(5 - board.len()) {
             let mut b = board.to_vec();
@@ -110,8 +110,6 @@ fn hold_em_odds(deck: &[Card], pockets: &Vec<Vec<Card>>, board: &Vec<Card>) -> V
                     results[index].losses += 1;
                 }
             }
-
-            count += 1;
         }
 
     return results;
@@ -133,7 +131,7 @@ fn main() {
     pockets.push(pocket_ace_king.0);
     pockets.push(pocket_eights.0);
 
-    let board = CardVector::parse("7c 5c 4s");
+    let board = CardVector::parse("7c");
     // let board = Vec::new();
     let results = hold_em_odds(&deck, &pockets, &board);
 
