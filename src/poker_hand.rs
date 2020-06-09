@@ -257,7 +257,7 @@ pub fn make_poker_hand(cards: &[Card], is_wild: &Option<IsWildCard>) -> Box<dyn 
 
 impl<'a> PartialEq for dyn PokerHand + 'a {
     fn eq(&self, other: &dyn PokerHand) -> bool {
-        return self.ord() == other.ord();
+        self.ord() == other.ord() && self.cards().cmp(&other.cards()) == Ordering::Equal
     }
 }
 
