@@ -138,7 +138,6 @@ fn build_flush(partition: (Vec<&Card>, Vec<&Card>)) -> Vec<Card> {
         for rank in Rank::iter() {
             if !contains_scoring_rank(&r, rank) {
                 r.push(w.scored_as(rank));
-                println!("{} scored as {}", w.rank, rank);
                 break;
             }
         }
