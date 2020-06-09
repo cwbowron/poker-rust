@@ -145,11 +145,8 @@ fn build_flush(partition: (Vec<&Card>, Vec<&Card>)) -> Vec<Card> {
     
     r.sort_by_key(|card| card.scoring_rank);
     r.reverse();
-    
-    return r.iter()
-        .take(5)
-        .map(Card::clone)
-        .collect();
+    r.truncate(5);
+    return r;
 }
 
 fn as_flush(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
