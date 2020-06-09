@@ -20,12 +20,13 @@ fn filter_suit(cards: &[Card], suit: Suit, is_wild: &Option<IsWildCard>) -> Vec<
 fn find_set(cards: &[Card], n: usize, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     for rank in Rank::iter() {
         if rank != Rank::LowAce && rank != Rank::Joker {
-            let filtered = cards.iter()
+            let count = cards.iter()
                 .filter(|card| card.rank == rank || card.is_wild(is_wild))
-                .collect::<Vec<_>>();
+                .count();
 
-            if filtered.len() >= n {
-                return Some(filtered.iter()
+            if count >= n {
+                return Some(cards.iter()
+                            .filter(|card| card.rank == rank || card.is_wild(is_wild))
                             .take(n)
                             .map(|card_ref_ref| card_ref_ref.scored_as(rank))
                             .collect());
