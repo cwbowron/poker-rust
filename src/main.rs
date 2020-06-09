@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 extern crate strum;
 #[macro_use] extern crate strum_macros;
 
@@ -180,6 +181,7 @@ fn main() {
     pockets.push(pocket_eights.0);
 
     let board = CardVector::parse("7c 5c 4s");
+    // let board = Vec::new();
     let results = hold_em_odds(&deck, &pockets, &board);
 
     println!("Board: {}", fmt_cards(&board));
