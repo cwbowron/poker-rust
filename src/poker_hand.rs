@@ -13,7 +13,7 @@ fn filter_suit(cards: &[Card], suit: Suit, is_wild: &Option<IsWildCard>) -> Vec<
     return cards
         .iter()
         .filter(|card| card.suit == suit || card.is_wild(is_wild))
-        .map(Card::copy)
+        .map(Card::clone)
         .collect();
 }
 
@@ -88,7 +88,7 @@ fn fill_straight(cards: &[Card], is_wild:&Option<IsWildCard>, rank_ordinal: usiz
         if let Some(card) = cards.iter()
             .filter(|card| !card.is_wild(is_wild))
             .find(|card| card.rank.is_ordinal(rank_ordinal)) {
-                result.push(card.copy());
+                result.push(card.clone());
                 if fill_straight(cards, is_wild, rank_ordinal - 1, result) {
                     return true;
                 }
@@ -134,7 +134,7 @@ fn build_flush(partition: (Vec<&Card>, Vec<&Card>)) -> Vec<Card> {
     let mut r = Vec::new();
     
     for n in partition.1 {
-        r.push(n.copy());
+        r.push(n.clone());
     }
     
     for w in partition.0 {
@@ -152,7 +152,7 @@ fn build_flush(partition: (Vec<&Card>, Vec<&Card>)) -> Vec<Card> {
     
     return r.iter()
         .take(5)
-        .map(|card_ref| Card::copy(card_ref))
+        .map(Card::clone)
         .collect();
 }
 

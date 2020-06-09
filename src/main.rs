@@ -95,7 +95,7 @@ fn hold_em_odds(deck: &[Card], pockets: &Vec<Vec<Card>>, board: &Vec<Card>) -> V
         .combinations(5 - board.len()) {
             let mut b = board.to_vec();
             for card in combination {
-                b.push(card.copy());
+                b.push(card.clone());
             }
 
             let winners = find_winners(pockets, &b);
@@ -131,8 +131,7 @@ fn main() {
     pockets.push(pocket_ace_king.0);
     pockets.push(pocket_eights.0);
 
-    let board = CardVector::parse("7c");
-    // let board = Vec::new();
+    let board = CardVector::parse("7c 8c 3s");
     let results = hold_em_odds(&deck, &pockets, &board);
 
     println!("Board: {}", fmt_cards(&board));

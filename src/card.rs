@@ -128,10 +128,6 @@ impl Card {
         Card { rank: rank, suit: suit, scoring_rank: rank }
     }
 
-    pub const fn copy(&self) -> Card {
-        Card { rank: self.rank, suit: self.suit, scoring_rank: self.scoring_rank }
-    }
-
     pub const fn scored_as(&self, rank: Rank) -> Card {
         Card { rank: self.rank, suit: self.suit, scoring_rank: rank }
     }
@@ -271,7 +267,7 @@ impl std::fmt::Display for CardVector {
 pub fn remove_cards(a: &[Card], b: &[Card]) -> Vec<Card> {
     return a.iter()
         .filter(|card| !b.contains(card))
-        .map(Card::copy)
+        .map(Card::clone)
         .collect();
 }
 
@@ -286,13 +282,13 @@ pub fn remove_card(a: &[Card], b: &Card) -> Vec<Card> {
                 false
             }
         })
-        .map(Card::copy)
+        .map(Card::clone)
         .collect();
 }
 
 pub fn add_cards(a: &[Card], b: &[Card]) -> Vec<Card> {
     let mut r = a.to_vec();
-    r.extend(b.iter().map(Card::copy));
+    r.extend(b.iter().map(Card::clone));
     return r;
 }
 
