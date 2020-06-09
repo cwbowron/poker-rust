@@ -27,7 +27,7 @@ fn find_set(cards: &[Card], n: usize, is_wild: &Option<IsWildCard>) -> Option<Ve
                 return Some(cards.iter()
                             .filter(|card| card.rank == rank || card.is_wild(is_wild))
                             .take(n)
-                            .map(|card_ref_ref| card_ref_ref.scored_as(rank))
+                            .map(|card| card.scored_as(rank))
                             .collect());
             }
         }
