@@ -116,6 +116,24 @@ impl std::fmt::Display for WinLoseSplit {
     }
 }
 
+fn find_winners(pockets: &Vec<Vec<Card>>, board: &Vec<Card>) -> Vec<usize> {
+    let mut poker_hands = pockets.iter()
+        .map(|pocket| add_cards(pocket, &board))
+        .map(|cards| make_poker_hand(&cards, &None))
+        .enumerate()
+        .collect::<Vec<_>>();
+    
+    poker_hands.sort_by(|a, b| a.1.cmp(&b.1));
+    poker_hands.reverse();
+    
+    let best = &poker_hands.first().unwrap().1;
+    
+    return poker_hands.iter()
+        .filter(|tuple| tuple.1.cmp(&best) == Ordering::Equal)
+        .map(|tuple| tuple.0)
+        .collect::<Vec<_>>();
+}
+
 fn hold_em_odds(deck: &[Card], pockets: &Vec<Vec<Card>>, board: &Vec<Card>) -> Vec<WinLoseSplit> {
     let mut results = vec![WinLoseSplit::new(); pockets.len()];
     let mut count = 0;
@@ -126,34 +144,17 @@ fn hold_em_odds(deck: &[Card], pockets: &Vec<Vec<Card>>, board: &Vec<Card>) -> V
                 b.push(card.copy());
             }
 
-            let mut poker_hands = pockets.iter()
-                .map(|pocket| add_cards(pocket, &b))
-                .map(|cards| make_poker_hand(&cards, &None))
-                .enumerate()
-                .collect::<Vec<_>>();
-
-            poker_hands.sort_by(|a, b| a.1.cmp(&b.1));
-            poker_hands.reverse();
-
-            let best = &poker_hands.first().unwrap().1;
-
-            let winners = poker_hands.iter()
-                .filter(|tuple| tuple.1.cmp(&best) == Ordering::Equal)
-                .collect::<Vec<_>>();
-
-            for winner in winners.iter() {
-                if winners.len() == 1 {
-                    results[winner.0].wins += 1;
+            let winners = find_winners(pockets, &b);
+            for index in 0..results.len() { 
+                if winners.contains(&index) {
+                    if winners.len() == 1 {
+                        results[index].wins += 1;
+                    } else {
+                        results[index].splits += 1;
+                    }
                 } else {
-                    results[winner.0].splits += 1;
+                    results[index].losses += 1;
                 }
-            }
-                
-            let losers = poker_hands.iter()
-                .filter(|tuple| tuple.1.cmp(&best) != Ordering::Equal);
-
-            for loser in losers {
-                results[loser.0].losses += 1;
             }
 
             count += 1;
