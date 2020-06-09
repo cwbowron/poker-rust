@@ -9,11 +9,10 @@ use super::card::fmt_cards;
 use super::card::remove_cards;
 use super::card::remove_card;
 
-fn filter_suit(cards: &[Card], suit: Suit, is_wild: &Option<IsWildCard>) -> Vec<Card> {
+fn filter_suit<'a>(cards: &'a [Card], suit: Suit, is_wild: &Option<IsWildCard>) -> Vec<&'a Card> {
     return cards
         .iter()
         .filter(|card| card.suit == suit || card.is_wild(is_wild))
-        .map(Card::clone)
         .collect();
 }
 
@@ -177,7 +176,11 @@ fn as_straight_flush(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec
         let suited = filter_suit(cards, suit, is_wild);
         
         if suited.len() >= 5 {
-            if let Some(straight) = as_straight(&suited, is_wild) {
+            let suited_cards = suited.iter()
+                .map(|foo :&&Card| (*foo).clone())
+                .collect::<Vec<_>>();
+                
+            if let Some(straight) = as_straight(&suited_cards, is_wild) {
                 return Some(straight);
             }
         }
