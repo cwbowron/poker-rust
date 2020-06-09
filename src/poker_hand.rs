@@ -36,25 +36,13 @@ fn find_set(cards: &[Card], n: usize, is_wild: &Option<IsWildCard>) -> Option<Ve
     return None;
 }
 
-fn make_sets_worker(cards: &[Card], sizes: &mut Vec<usize>, is_wild: &Option<IsWildCard>, result: &mut Vec<Card>) -> bool {
-    if let Some(set_size) = sizes.pop() {
-        if let Some(set) = find_set(cards, set_size, is_wild) {
-            let next_cards = remove_cards(cards, &set);
-            result.extend(set);
-            return make_sets_worker(&next_cards, sizes, is_wild, result);
-        }
-        return false;
-    } else {
-        return true;
-    }
-}
-
-fn make_sets(cards: &[Card], set_sizes: &Vec<usize>, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
-    let mut sizes_copy = set_sizes.to_vec();
-    sizes_copy.reverse();
-    let mut hand = Vec::new();
-    if make_sets_worker(cards, &mut sizes_copy, is_wild, &mut hand) {
-        return Some(hand);
+fn make_sets(cards: &[Card], sizes: &Vec<usize>, size_index: usize, is_wild: &Option<IsWildCard>, result: &mut Vec<Card>) -> Option<Vec<Card>> {
+    if size_index >= sizes.len() {
+        return Some(result.to_vec());
+    } else if let Some(set) = find_set(cards, sizes[size_index], is_wild) {
+        let next_cards = remove_cards(cards, &set);
+        result.extend(set);
+        return make_sets(&next_cards, sizes, size_index + 1, is_wild, result);
     } else {
         return None;
     }
@@ -63,7 +51,7 @@ fn make_sets(cards: &[Card], set_sizes: &Vec<usize>, is_wild: &Option<IsWildCard
 macro_rules! define_set_maker {
     ($fn_name: ident, $set: tt) => {
         fn $fn_name(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
-            return make_sets(cards, &vec!$set, is_wild);
+            return make_sets(cards, &vec!$set, 0, is_wild, &mut Vec::new());
         }
     }
 }
