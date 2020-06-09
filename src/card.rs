@@ -310,50 +310,50 @@ mod tests {
 
     #[test]
     fn test_suit_parsing() {
-        assert_eq!("c".parse::<Suit>().unwrap(), Clubs);
-        assert_eq!("d".parse::<Suit>().unwrap(), Diamonds);
-        assert_eq!("h".parse::<Suit>().unwrap(), Hearts);
-        assert_eq!("s".parse::<Suit>().unwrap(), Spades);
-        assert_eq!("♣".parse::<Suit>().unwrap(), Clubs);
-        assert_eq!("♦".parse::<Suit>().unwrap(), Diamonds);
-        assert_eq!("♥".parse::<Suit>().unwrap(), Hearts);
-        assert_eq!("♠".parse::<Suit>().unwrap(), Spades);
+        assert_eq!("c".parse::<Suit>(), Ok(Clubs));
+        assert_eq!("d".parse::<Suit>(), Ok(Diamonds));
+        assert_eq!("h".parse::<Suit>(), Ok(Hearts));
+        assert_eq!("s".parse::<Suit>(), Ok(Spades));
+        assert_eq!("♣".parse::<Suit>(), Ok(Clubs));
+        assert_eq!("♦".parse::<Suit>(), Ok(Diamonds));
+        assert_eq!("♥".parse::<Suit>(), Ok(Hearts));
+        assert_eq!("♠".parse::<Suit>(), Ok(Spades));
     }
 
     #[test]
     fn test_rank_parsing() {
-        assert_eq!("a".parse::<Rank>().unwrap(), Ace);
-        assert_eq!("k".parse::<Rank>().unwrap(), King);
-        assert_eq!("q".parse::<Rank>().unwrap(), Queen);
-        assert_eq!("j".parse::<Rank>().unwrap(), Jack);
-        assert_eq!("t".parse::<Rank>().unwrap(), Ten);
-        assert_eq!("9".parse::<Rank>().unwrap(), Nine);
-        assert_eq!("8".parse::<Rank>().unwrap(), Eight);
-        assert_eq!("7".parse::<Rank>().unwrap(), Seven);
-        assert_eq!("6".parse::<Rank>().unwrap(), Six);
-        assert_eq!("5".parse::<Rank>().unwrap(), Five);
-        assert_eq!("4".parse::<Rank>().unwrap(), Four);
-        assert_eq!("3".parse::<Rank>().unwrap(), Three);
-        assert_eq!("2".parse::<Rank>().unwrap(), Two);
-        assert_eq!("?".parse::<Rank>().unwrap(), Rank::Joker);
+        assert_eq!("a".parse::<Rank>(), Ok(Ace));
+        assert_eq!("k".parse::<Rank>(), Ok(King));
+        assert_eq!("q".parse::<Rank>(), Ok(Queen));
+        assert_eq!("j".parse::<Rank>(), Ok(Jack));
+        assert_eq!("t".parse::<Rank>(), Ok(Ten));
+        assert_eq!("9".parse::<Rank>(), Ok(Nine));
+        assert_eq!("8".parse::<Rank>(), Ok(Eight));
+        assert_eq!("7".parse::<Rank>(), Ok(Seven));
+        assert_eq!("6".parse::<Rank>(), Ok(Six));
+        assert_eq!("5".parse::<Rank>(), Ok(Five));
+        assert_eq!("4".parse::<Rank>(), Ok(Four));
+        assert_eq!("3".parse::<Rank>(), Ok(Three));
+        assert_eq!("2".parse::<Rank>(), Ok(Two));
+        assert_eq!("?".parse::<Rank>(), Ok(Rank::Joker));
     }
 
     #[test]
     fn test_card_parsing() {
-        assert_eq!("Ac".parse::<Card>().unwrap(), Ace.of(Clubs));
-        assert_eq!(" Kd".parse::<Card>().unwrap(), King.of(Diamonds));
-        assert_eq!("Qh ".parse::<Card>().unwrap(), Queen.of(Hearts));
-        assert_eq!("Js".parse::<Card>().unwrap(), Jack.of(Spades));
-        assert_eq!("Tc".parse::<Card>().unwrap(), Ten.of(Clubs));
-        assert_eq!("9s".parse::<Card>().unwrap(), Nine.of(Spades));
-        assert_eq!("8h".parse::<Card>().unwrap(), Eight.of(Hearts));
-        assert_eq!("7h".parse::<Card>().unwrap(), Seven.of(Hearts));
-        assert_eq!("6♥".parse::<Card>().unwrap(), Six.of(Hearts));
-        assert_eq!("5♣".parse::<Card>().unwrap(), Five.of(Clubs));
-        assert_eq!("4♦".parse::<Card>().unwrap(), Four.of(Diamonds));
-        assert_eq!("3♥".parse::<Card>().unwrap(), Three.of(Hearts));
-        assert_eq!("     2♠        ".parse::<Card>().unwrap(), Two.of(Spades));
-        assert_eq!("     ??        ".parse::<Card>().unwrap(), Rank::Joker.of(Suit::Joker));
+        assert_eq!("Ac".parse::<Card>(), Ok(Ace.of(Clubs)));
+        assert_eq!(" Kd".parse::<Card>(), Ok(King.of(Diamonds)));
+        assert_eq!("Qh ".parse::<Card>(), Ok(Queen.of(Hearts)));
+        assert_eq!("Js".parse::<Card>(), Ok(Jack.of(Spades)));
+        assert_eq!("Tc".parse::<Card>(), Ok(Ten.of(Clubs)));
+        assert_eq!("9s".parse::<Card>(), Ok(Nine.of(Spades)));
+        assert_eq!("8h".parse::<Card>(), Ok(Eight.of(Hearts)));
+        assert_eq!("7h".parse::<Card>(), Ok(Seven.of(Hearts)));
+        assert_eq!("6♥".parse::<Card>(), Ok(Six.of(Hearts)));
+        assert_eq!("5♣".parse::<Card>(), Ok(Five.of(Clubs)));
+        assert_eq!("4♦".parse::<Card>(), Ok(Four.of(Diamonds)));
+        assert_eq!("3♥".parse::<Card>(), Ok(Three.of(Hearts)));
+        assert_eq!("     2♠        ".parse::<Card>(), Ok(Two.of(Spades)));
+        assert_eq!("     ??        ".parse::<Card>(), Ok(Rank::Joker.of(Suit::Joker)));
     }
 
     #[test]
