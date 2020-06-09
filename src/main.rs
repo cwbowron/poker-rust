@@ -86,15 +86,15 @@ impl WinLoseSplit {
     }
 
     pub fn win_pct(&self) -> f32 {
-        (self.wins as f32) / (self.total() as f32)
-    }
+        100.0 * (self.wins as f32) / (self.total() as f32)
+    } 
 
     pub fn losses_pct(&self) -> f32 {
-        (self.losses as f32) / (self.total() as f32)
+        100.0 * (self.losses as f32) / (self.total() as f32)
     }
 
     pub fn splits_pct(&self) -> f32 {
-        (self.splits as f32) / (self.total() as f32)
+        100.0 * (self.splits as f32) / (self.total() as f32)
     }
 }
 
@@ -112,7 +112,7 @@ impl Clone for WinLoseSplit {
 
 impl std::fmt::Display for WinLoseSplit {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{} - {} - {}", self.win_pct(), self.losses_pct(), self.splits_pct())
+        write!(f, "{:.2}% - {:.2}% - {:.2}%", self.win_pct(), self.losses_pct(), self.splits_pct())
     }
 }
 
