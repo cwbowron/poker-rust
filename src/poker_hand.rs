@@ -170,17 +170,23 @@ fn as_straight_flush(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec
     return None;
 }
 
-pub trait PokerHand: std::fmt::Display {
+pub trait PokerHand {
     fn new(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Self> where Self: Sized;
     
+    fn score_hand(hand_rank: i32, cards: &[Card]) -> i32 where Self: Sized {
+        return cards.iter()
+            .fold(hand_rank, |acc, card| acc * 16 + (card.scoring_rank as i32));
+    }
+
     fn name(&self) -> &'static str;
     fn ord(&self) -> i32;
     fn cards(&self) -> &[Card];
+    fn score(&self) -> i32;
 }
 
 macro_rules! define_hand {
     ($ordinal: literal, $symbol_struct: ident, $string: literal, $as_fn: expr) => {
-        pub struct $symbol_struct(Vec<Card>);
+        pub struct $symbol_struct(Vec<Card>, i32);
 
         impl $symbol_struct {
             const ORDINAL: i32 = $ordinal;
@@ -190,7 +196,8 @@ macro_rules! define_hand {
         impl PokerHand for $symbol_struct {
             fn new(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Self> {
                 if let Some(hand) = $as_fn(cards, is_wild) {
-                    Some($symbol_struct(hand))
+                    let score = Self::score_hand(Self::ORDINAL, &hand);
+                    Some($symbol_struct(hand, score))
                 } else {
                     None
                 }
@@ -198,13 +205,8 @@ macro_rules! define_hand {
             
             fn name(&self) -> &'static str { Self::NAME }
             fn ord(&self) -> i32 { Self::ORDINAL }
+            fn score(&self) -> i32 { self.1 }
             fn cards(&self) -> &[Card] { &self.0 }
-        }
-
-        impl std::fmt::Display for $symbol_struct {
-            fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-                write!(f, "{} -> {}", fmt_cards(self.cards()), self.name())
-            }
         }
     }
 }
@@ -242,7 +244,8 @@ pub fn make_poker_hand(cards: &[Card], is_wild: &Option<IsWildCard>) -> Box<dyn 
 
 impl<'a> PartialEq for dyn PokerHand + 'a {
     fn eq(&self, other: &dyn PokerHand) -> bool {
-        self.ord() == other.ord() && self.cards().cmp(&other.cards()) == Ordering::Equal
+        // self.ord() == other.ord() && self.cards().cmp(&other.cards()) == Ordering::Equal
+        self.score() == other.score()
     }
 }
 
@@ -250,17 +253,24 @@ impl<'a> Eq for dyn PokerHand + 'a {}
 
 impl<'a> Ord for dyn PokerHand + 'a {
     fn cmp(&self, other: &dyn PokerHand) -> Ordering {
-        match self.ord().cmp(&other.ord()) {
-            Ordering::Greater => Ordering::Greater,
-            Ordering::Less => Ordering::Less,
-            Ordering::Equal => self.cards().cmp(&other.cards())
-        }
+        self.score().cmp(&other.score())
+        // match self.ord().cmp(&other.ord()) {
+        //     Ordering::Greater => Ordering::Greater,
+        //     Ordering::Less => Ordering::Less,
+        //     Ordering::Equal => self.cards().cmp(&other.cards())
+        // }
     }
 }
 
 impl<'a> PartialOrd for dyn PokerHand + 'a {
     fn partial_cmp(&self, other: &dyn PokerHand) -> Option<Ordering> {
         Some(self.cmp(other))
+    }
+}
+
+impl<'a> std::fmt::Display for dyn PokerHand + 'a {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{} -> {}", fmt_cards(self.cards()), self.name())
     }
 }
 
