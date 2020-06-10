@@ -66,7 +66,8 @@ fn as_high_card(cards: &[Card], _is_wild: &Option<IsWildCard>) -> Option<Vec<Car
     let mut sorted_cards = cards.to_vec();
     sorted_cards.sort();
     sorted_cards.reverse();
-    return Some(sorted_cards[0..5].to_vec());
+    sorted_cards.truncate(5);
+    Some(sorted_cards)
 }
 
 fn fill_straight(cards: &[Card], is_wild:&Option<IsWildCard>, rank_ordinal: usize, result: &mut Vec<Card>) -> bool {
