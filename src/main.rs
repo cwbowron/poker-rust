@@ -1,4 +1,6 @@
+#![feature(iterator_fold_self)]
 #![allow(dead_code)]
+
 extern crate strum;
 #[macro_use] extern crate strum_macros;
 
@@ -72,21 +74,25 @@ fn deal(cards: &mut Vec<Card>, n: usize) {
 }
 
 fn find_winners(pockets: &Vec<Vec<Card>>, board: &Vec<Card>) -> Vec<usize> {
-    let mut poker_hands = pockets.iter()
+    let mut vec = vec![0];
+    pockets.iter()
         .map(|pocket| add_cards(pocket, &board))
         .map(|cards| make_poker_hand(&cards, &None))
         .enumerate()
-        .collect::<Vec<_>>();
-    
-    poker_hands.sort_by(|a, b| a.1.cmp(&b.1));
-    poker_hands.reverse();
-    
-    let best = &poker_hands.first().unwrap().1;
-    
-    return poker_hands.iter()
-        .filter(|tuple| tuple.1.cmp(&best) == Ordering::Equal)
-        .map(|tuple| tuple.0)
-        .collect::<Vec<_>>();
+        .fold_first(|max, current| match current.1.cmp(&max.1) {
+            Ordering::Equal => {
+                vec.push(current.0);
+                max
+            },
+            Ordering::Greater => {
+                vec.clear();
+                vec.push(current.0);
+                current
+            },
+            Ordering::Less => max
+        });
+
+    return vec;
 }
 
 fn hold_em_odds(deck: &[Card], pockets: &Vec<Vec<Card>>, board: &Vec<Card>) -> Vec<WinLoseSplit> {
