@@ -62,12 +62,15 @@ define_set_maker!(as_trips, [3, 1, 1]);
 define_set_maker!(as_two_pair, [2, 2, 1]);
 define_set_maker!(as_pair, [2, 1, 1, 1]);
 
+fn top_five(mut cards: Vec<Card>) -> Vec<Card> {
+    cards.sort();
+    cards.reverse();
+    cards.truncate(5);
+    return cards;
+}
+
 fn as_high_card(cards: &[Card], _is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
-    let mut sorted_cards = cards.to_vec();
-    sorted_cards.sort();
-    sorted_cards.reverse();
-    sorted_cards.truncate(5);
-    Some(sorted_cards)
+    return Some(top_five(cards.to_vec()))
 }
 
 fn fill_straight(cards: &[Card], is_wild:&Option<IsWildCard>, rank_ordinal: usize, result: &mut Vec<Card>) -> bool {
@@ -131,11 +134,8 @@ fn build_flush(partition: (Vec<&Card>, Vec<&Card>)) -> Vec<Card> {
             }
         }
     }
-    
-    r.sort();
-    r.reverse();
-    r.truncate(5);
-    return r;
+
+    return top_five(r);
 }
 
 fn as_flush(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
