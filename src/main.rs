@@ -15,6 +15,7 @@ use card::add_cards;
 
 mod deck;
 use deck::make_deck;
+use deck::make_shuffled_deck;
 
 mod poker_hand;
 use poker_hand::PokerHand;
@@ -115,11 +116,14 @@ fn hold_em_odds(deck: &[Card], pockets: &Vec<Vec<Card>>, board: &Vec<Card>) -> V
     return results;
 }
 
-fn main() {
-    // for _n in 0..100 {
-    //     let mut deck = make_shuffled_deck();
-    //     deal(&mut deck, 8);
-    // }
+fn random_deals() {
+    for _n in 0..100 {
+        let mut deck = make_shuffled_deck();
+        deal(&mut deck, 8);
+    }
+}
+
+fn enumerate_deals() {
     let mut deck = make_deck();
     let pocket_ace_king = CardVector::parse("Ac Kc");
     deck = remove_cards(&deck, &pocket_ace_king);
@@ -131,7 +135,8 @@ fn main() {
     pockets.push(pocket_ace_king.0);
     pockets.push(pocket_eights.0);
 
-    let board = CardVector::parse("7c 8c 3s");
+    // let board = CardVector::parse("7c 8c 3s");
+    let board = Vec::new();
     let results = hold_em_odds(&deck, &pockets, &board);
 
     println!("Board: {}", fmt_cards(&board));
@@ -140,4 +145,9 @@ fn main() {
         let r = results[i];
         println!("- {} - {}", fmt_cards(&p), r);
     }
+}
+
+fn main() {
+    // random_deals();
+    enumerate_deals();
 }
