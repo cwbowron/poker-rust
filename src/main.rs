@@ -74,23 +74,34 @@ fn deal(cards: &mut Vec<Card>, n: usize) {
 }
 
 fn find_winners(pockets: &Vec<Vec<Card>>, board: &Vec<Card>) -> Vec<usize> {
-    let mut vec = vec![0];
+    let mut vec = Vec::new();
+    
     pockets.iter()
         .map(|pocket| add_cards(pocket, &board))
         .map(|cards| make_poker_hand(&cards, &None))
         .enumerate()
-        .fold_first(|max, current| match current.1.cmp(&max.1) {
-            Ordering::Equal => {
-                vec.push(current.0);
-                max
-            },
-            Ordering::Greater => {
-                vec.clear();
-                vec.push(current.0);
-                current
-            },
-            Ordering::Less => max
-        });
+        .fold(None, |option_max: Option<(usize, Box<_>)>, current|
+              match option_max {
+                  Some(max) => {
+                      match current.1.cmp(&max.1) {
+                          Ordering::Equal => {
+                              vec.push(current.0);
+                              Some(current)
+                          },
+                          Ordering::Greater => {
+                              vec.clear();
+                              vec.push(current.0);
+                              Some(current)
+                          },
+                          Ordering::Less => {
+                              Some(max)
+                          }
+                      }
+                  }
+                  None => {
+                      vec.push(current.0);
+                      Some(current)
+                  }});
 
     return vec;
 }
