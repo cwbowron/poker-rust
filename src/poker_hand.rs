@@ -132,7 +132,7 @@ fn build_flush(partition: (Vec<&Card>, Vec<&Card>)) -> Vec<Card> {
         }
     }
     
-    r.sort_by_key(|card| card.scoring_rank);
+    r.sort();
     r.reverse();
     r.truncate(5);
     return r;
