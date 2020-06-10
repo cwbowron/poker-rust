@@ -164,8 +164,7 @@ impl std::fmt::Display for Card {
 impl std::str::FromStr for Card {
     type Err = ParseError;
     fn from_str(str: &str) -> Result<Self, Self::Err> {
-        let trimmed = str.trim();
-        let mut chars = trimmed.chars();
+        let mut chars = str.trim().chars();
         let rank = chars.next().unwrap().to_string().parse::<Rank>()?;
         let suit = chars.next().unwrap().to_string().parse::<Suit>()?;
         Ok(Card::new(rank, suit))
