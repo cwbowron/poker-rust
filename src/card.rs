@@ -145,6 +145,14 @@ impl Card {
             false
         }
     }
+
+    pub fn is_wild_or_rank(&self, rank: Rank, is_wild: &Option<IsWildCard>) -> bool {
+        self.rank == rank || self.is_wild(is_wild)
+    }
+
+    pub fn is_wild_or_suit(&self, suit: Suit, is_wild: &Option<IsWildCard>) -> bool {
+        self.suit == suit || self.is_wild(is_wild)
+    }
 }
 
 impl std::fmt::Display for Card {

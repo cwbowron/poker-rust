@@ -12,7 +12,7 @@ use super::card::remove_card;
 fn filter_suit<'a>(cards: &'a [Card], suit: Suit, is_wild: &Option<IsWildCard>) -> Vec<&'a Card> {
     return cards
         .iter()
-        .filter(|card| card.suit == suit || card.is_wild(is_wild))
+        .filter(|card| card.is_wild_or_suit(suit, is_wild))
         .collect();
 }
 
@@ -20,12 +20,12 @@ fn find_set(cards: &[Card], n: usize, is_wild: &Option<IsWildCard>) -> Option<Ve
     for rank in Rank::iter() {
         if rank != Rank::LowAce && rank != Rank::Joker {
             let count = cards.iter()
-                .filter(|card| card.rank == rank || card.is_wild(is_wild))
+                .filter(|card| card.is_wild_or_rank(rank, is_wild))
                 .count();
 
             if count >= n {
                 return Some(cards.iter()
-                            .filter(|card| card.rank == rank || card.is_wild(is_wild))
+                            .filter(|card| card.is_wild_or_rank(rank, is_wild))
                             .take(n)
                             .map(|card| card.scored_as(rank))
                             .collect());
