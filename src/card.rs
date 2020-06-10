@@ -199,7 +199,7 @@ impl PartialOrd for Card {
 pub fn fmt_cards(cards: &[Card]) -> String {
     return cards.iter()
         .map(|card| card.to_string())
-        .collect::<Vec<String>>()
+        .collect::<Vec<_>>()
         .join(" ");
 }
 
@@ -219,13 +219,13 @@ impl std::str::FromStr for CardVector {
         let cards = str.replace(" ", "")
             .replace(",", "")
             .chars()
-            .collect::<Vec<char>>()
+            .collect::<Vec<_>>()
             .chunks(2)
             .map(|chunk| {
                 let rank = chunk[0].to_string().parse::<Rank>().unwrap();
                 let suit = chunk[1].to_string().parse::<Suit>().unwrap();
                 Card::new(rank, suit)
-            }).collect::<Vec<Card>>();
+            }).collect::<Vec<_>>();
 
         Ok(CardVector(cards))
     }
