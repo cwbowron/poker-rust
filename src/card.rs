@@ -184,6 +184,12 @@ impl PartialEq for Card {
     }
 }
 
+impl PartialEq<Card> for &Card {
+    fn eq(&self, other: &Card) -> bool {
+        self.rank == other.rank && self.suit == other.suit
+    }
+}
+
 impl Ord for Card {
     fn cmp(&self, other: &Card) -> std::cmp::Ordering {
         self.scoring_rank.cmp(&other.scoring_rank)

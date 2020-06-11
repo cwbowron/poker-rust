@@ -1,5 +1,6 @@
 #![feature(iterator_fold_self)]
 #![feature(drain_filter)]
+#![feature(vec_remove_item)]
 #![allow(dead_code)]
 
 extern crate strum;

@@ -12,18 +12,9 @@ pub fn remove_0(a: &mut Vec<&Card>, b: &[Card]) {
 }
 
 pub fn remove_card_ref<'a>(a: &[&'a Card], b: &Card) -> Vec<&'a Card> {
-    let mut found = false;
-    return a.iter()
-        .filter(|card| {
-            if found || **card != b {
-                true
-            } else {
-                found = true;
-                false
-            }
-        })
-        .cloned()
-        .collect();
+    let mut vec = a.to_vec();
+    vec.remove_item(b);
+    return vec;
 }
 
 fn find_set(cards: &[&Card], n: usize, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
