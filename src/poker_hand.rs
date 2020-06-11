@@ -121,11 +121,11 @@ fn contains_scoring_rank(cards: &[Card], rank: Rank) -> bool {
 
 fn build_flush(partition: (Vec<&Card>, Vec<&Card>)) -> Option<Vec<Card>> {
     if (partition.0.len() + partition.1.len() >= 5) {
-        let mut r = Vec::new();
+        let mut r = partition.1
+            .iter()
+            .map(|card| (*card).clone())
+            .collect::<Vec<_>>();
         
-        for n in partition.1 {
-            r.push(n.clone());
-        }
         
         for w in partition.0 {
             for rank in Rank::iter() {
