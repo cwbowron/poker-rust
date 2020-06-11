@@ -6,6 +6,7 @@ use super::card::Rank;
 use super::card::Card;
 use super::card::IsWildCard;
 use super::card::fmt_cards;
+use super::card::fmt_cards_refs;
 
 pub fn remove_cards<'a>(a: &'a [&Card], b: &[Card]) -> Vec<&'a Card> {
     let mut vec = a.to_vec();
@@ -19,16 +20,17 @@ pub fn remove_card<'a>(a: &[&'a Card], b: &Card) -> Vec<&'a Card> {
     return vec;
 }
 
-fn find_set(cards: &[&Card], n: usize, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
+fn find_set(cards: &[&Card], wild_cards: &[&Card], n: usize) -> Option<Vec<Card>> {
     for rank in Rank::iter() {
         if rank != Rank::LowAce && rank != Rank::Joker {
             let count = cards.iter()
-                .filter(|card| card.is_wild_or_rank(rank, is_wild))
+                .filter(|card| card.rank == rank)
                 .count();
             
-            if count >= n {
+            if count + wild_cards.len() >= n {
                 return Some(cards.iter()
-                            .filter(|card| card.is_wild_or_rank(rank, is_wild))
+                            .filter(|card| card.rank == rank)
+                            .chain(wild_cards.iter())
                             .take(n)
                             .map(|card| card.scored_as(rank))
                             .collect());
@@ -39,12 +41,13 @@ fn find_set(cards: &[&Card], n: usize, is_wild: &Option<IsWildCard>) -> Option<V
     return None;
 }
 
-fn make_sets(cards: &[&Card], sizes: &Vec<usize>, size_index: usize, is_wild: &Option<IsWildCard>, result: &mut Vec<Card>) -> bool {
+fn make_sets(cards: &[&Card], wild_cards: &[&Card], sizes: &Vec<usize>, size_index: usize, result: &mut Vec<Card>) -> bool {
     if size_index >= sizes.len() {
         return true;
-    } else if let Some(set) = find_set(cards, sizes[size_index], is_wild) {
+    } else if let Some(set) = find_set(cards, wild_cards, sizes[size_index]) {
+        // TODO fixme
         let next = remove_cards(cards, &set);
-        if make_sets(&next, sizes, size_index + 1, is_wild, result) {
+        if make_sets(&next, &vec![], sizes, size_index + 1, result) {
             result.extend(set);
             return true;
         }
@@ -55,9 +58,9 @@ fn make_sets(cards: &[&Card], sizes: &Vec<usize>, size_index: usize, is_wild: &O
 
 macro_rules! define_set_maker {
     ($fn_name: ident, $set: tt) => {
-        fn $fn_name(cards: &[&Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
+        fn $fn_name(cards: &[&Card], wild_cards: &[&Card]) -> Option<Vec<Card>> {
             let mut r = Vec::new();
-            if make_sets(cards, &vec!$set, 0, is_wild, &mut r) {
+            if make_sets(cards, wild_cards, &vec!$set, 0, &mut r) {
                 r.reverse();
                 return Some(r);
             } else {
@@ -80,39 +83,39 @@ fn top_five(mut cards: Vec<Card>) -> Vec<Card> {
     return cards;
 }
 
-fn as_high_card(cards: &[&Card], _is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
+fn as_high_card(cards: &[&Card], _wild_cards: &[&Card]) -> Option<Vec<Card>> {
     return Some(top_five(cards.iter().cloned().cloned().collect()));
 }
 
-fn fill_straight(cards: &[&Card], is_wild:&Option<IsWildCard>, rank_ordinal: usize, n: usize) -> Option<Vec<Card>>{
+fn fill_straight(cards: &[&Card], wild_cards:&[&Card], rank_ordinal: usize, n: usize) -> Option<Vec<Card>>{
     if n >= 5 {
         return Some(Vec::new());
     } else {
         if let Some(card) = cards.iter()
-            .find(|card| !card.is_wild(is_wild) && card.rank.is_ordinal(rank_ordinal)) {
-                if let Some(mut result) = fill_straight(cards, is_wild, rank_ordinal - 1, n + 1) {
+            .find(|card| card.rank.is_ordinal(rank_ordinal)) {
+                if let Some(mut result) = fill_straight(cards, wild_cards, rank_ordinal - 1, n + 1) {
                     result.push((*card).clone());
                     return Some(result);
                 }
             }
 
-        if let Some(wild) = cards.iter()
-            .find(|card| card.is_wild(is_wild)) {
-                let rank = Rank::for_ordinal(rank_ordinal);
-                let remaining_cards = remove_card(cards, wild);
-                if let Some(mut result) = fill_straight(&remaining_cards, is_wild, rank_ordinal - 1, n + 1) {
-                    result.push(wild.scored_as(rank));
-                    return Some(result);
-                }
+        if wild_cards.len() > 0 {
+            let rank = Rank::for_ordinal(rank_ordinal);
+            let wild = wild_cards[0];
+            let next_wild = &wild_cards[1..];
+            if let Some(mut result) = fill_straight(cards, next_wild, rank_ordinal - 1, n + 1) {
+                result.push(wild.scored_as(rank));
+                return Some(result);
             }
+        }
 
         return None;
     }
 }
 
-fn as_straight(cards: &[&Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
+fn as_straight(cards: &[&Card], wild_cards: &[&Card]) -> Option<Vec<Card>> {
     for rank_ordinal in (Rank::Five as usize .. Rank::Ace as usize + 1).rev() {
-        if let Some(mut result) = fill_straight(cards, is_wild, rank_ordinal, 0) {
+        if let Some(mut result) = fill_straight(cards, wild_cards, rank_ordinal, 0) {
             result.reverse();
             return Some(result);
         }
@@ -127,58 +130,69 @@ fn contains_scoring_rank(cards: &[Card], rank: Rank) -> bool {
         .is_some();
 }
 
-fn build_flush(partition: (Vec<&Card>, Vec<&Card>)) -> Option<Vec<Card>> {
-    if partition.0.len() + partition.1.len() >= 5 {
-        let mut r = partition.1
-            .iter()
-            .map(|card| (*card).clone())
+// fn build_flush(suited: ) -> Option<Vec<Card>> {
+//     if partition.0.len() + partition.1.len() >= 5 {
+//         let mut r = partition.1
+//             .iter()
+//             .map(|card| (*card).clone())
+//             .collect::<Vec<_>>();
+        
+        
+//         for w in partition.0 {
+//             for rank in Rank::iter() {
+//                 if !contains_scoring_rank(&r, rank) {
+//                     r.push(w.scored_as(rank));
+//                     break;
+//                 }
+//             }
+//         }
+        
+//         return Some(top_five(r));
+//     } else {
+//         return None;
+//     }
+// }
+
+fn as_flush(cards: &[&Card], wild_cards: &[&Card]) -> Option<Vec<Card>> {
+    for suit in Suit::iter() {
+        let mut suited = cards.iter()
+            .filter(|card| card.suit == suit)
+            .cloned()
+            .cloned()
             .collect::<Vec<_>>();
-        
-        
-        for w in partition.0 {
-            for rank in Rank::iter() {
-                if !contains_scoring_rank(&r, rank) {
-                    r.push(w.scored_as(rank));
-                    break;
+
+        if suited.len() + wild_cards.len() >= 5 {
+            for w in wild_cards {
+                for rank in Rank::iter() {
+                    if !contains_scoring_rank(&suited, rank) {
+                        suited.push(w.scored_as(rank));
+                        break;
+                    }
                 }
             }
-        }
-        
-        return Some(top_five(r));
-    } else {
-        return None;
-    }
-}
 
-fn as_flush(cards: &[&Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
-    for suit in Suit::iter() {
-        let option = build_flush(cards.iter()
-                                 .filter(|card| card.is_wild_or_suit(suit, is_wild))
-                                 .partition(|card| card.is_wild(is_wild)));
-
-        if option.is_some() {
-            return option;
+            return Some(top_five(suited));
         }
     }
 
     return None;
 }
 
-fn as_straight_flush(cards: &[&Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
+fn as_straight_flush(cards: &[&Card], wild_cards: &[&Card]) -> Option<Vec<Card>> {
     for suit in Suit::iter() {
         let count = cards
             .iter()
-            .filter(|card| card.is_wild_or_suit(suit, is_wild))
+            .filter(|card| card.suit == suit)
             .count();
         
-        if count >= 5 {
+        if count + wild_cards.len() >= 5 {
             let suited_cards = cards
                 .iter()
-                .filter(|card| card.is_wild_or_suit(suit, is_wild))
+                .filter(|card| card.suit == suit)
                 .cloned()
                 .collect::<Vec<_>>();
                 
-            let option = as_straight(&suited_cards, is_wild);
+            let option = as_straight(&suited_cards, wild_cards);
             if option.is_some() {
                 return option;
             }
@@ -189,7 +203,7 @@ fn as_straight_flush(cards: &[&Card], is_wild: &Option<IsWildCard>) -> Option<Ve
 }
 
 pub trait PokerHand {
-    fn new(cards: &[&Card], is_wild: &Option<IsWildCard>) -> Option<Self> where Self: Sized;
+    fn new(cards: &[&Card], wild_cards: &[&Card]) -> Option<Self> where Self: Sized;
     
     fn score_hand(hand_rank: i32, cards: &[Card]) -> i32 where Self: Sized {
         return cards.iter()
@@ -212,8 +226,8 @@ macro_rules! define_hand {
         }
         
         impl PokerHand for $symbol_struct {
-            fn new(cards: &[&Card], is_wild: &Option<IsWildCard>) -> Option<Self> {
-                if let Some(hand) = $as_fn(cards, is_wild) {
+            fn new(cards: &[&Card], wild_cards: &[&Card]) -> Option<Self> {
+                if let Some(hand) = $as_fn(cards, wild_cards) {
                     let score = Self::score_hand(Self::ORDINAL, &hand);
                     Some($symbol_struct(hand, score))
                 } else {
@@ -240,23 +254,30 @@ define_hand!(7, Quads, "Four of a Kind", as_quads);
 define_hand!(8, StraightFlush, "Straight Flush", as_straight_flush);
 
 macro_rules! try_make_hand {
-    ($struct_type: ident, $cards: ident, $is_wild: ident) => {
-        if let Some(hand) = $struct_type::new($cards, $is_wild) {
+    ($struct_type: ident, $cards: ident, $wild_cards: ident) => {
+        if let Some(hand) = $struct_type::new(&$cards, &$wild_cards) {
             return Box::new(hand);
         }
     }
 }
 
-pub fn make_poker_hand(cards: &[&Card], is_wild: &Option<IsWildCard>) -> Box<dyn PokerHand> {
-    try_make_hand!(StraightFlush, cards, is_wild);
-    try_make_hand!(Quads, cards, is_wild);
-    try_make_hand!(FullHouse, cards, is_wild);
-    try_make_hand!(Flush, cards, is_wild);
-    try_make_hand!(Straight, cards, is_wild);
-    try_make_hand!(Triplets, cards, is_wild);
-    try_make_hand!(TwoPair, cards, is_wild);
-    try_make_hand!(OnePair, cards, is_wild);
-    try_make_hand!(HighCard, cards, is_wild);
+pub fn make_poker_hand(all_cards: &[&Card], is_wild: &Option<IsWildCard>) -> Box<dyn PokerHand> {
+    let (wild_cards, cards): (Vec<&Card>, Vec<&Card>) = all_cards.iter()
+        .cloned()
+        .partition(|card| card.is_wild(is_wild));
+
+    // println!("naturals: {}", fmt_cards_refs(&cards));
+    // println!("wilds: {}", fmt_cards_refs(&wild_cards));
+
+    try_make_hand!(StraightFlush, cards, wild_cards);
+    try_make_hand!(Quads, cards, wild_cards);
+    try_make_hand!(FullHouse, cards, wild_cards);
+    try_make_hand!(Flush, cards, wild_cards);
+    try_make_hand!(Straight, cards, wild_cards);
+    try_make_hand!(Triplets, cards, wild_cards);
+    try_make_hand!(TwoPair, cards, wild_cards);
+    try_make_hand!(OnePair, cards, wild_cards);
+    try_make_hand!(HighCard, cards, wild_cards);
     unreachable!();
 }
 
@@ -296,7 +317,9 @@ mod tests {
     fn _parse_hand(card_string: &str, is_wild: &Option<IsWildCard>) -> Box<dyn PokerHand> {
         let card_vector = CardVector::parse(card_string);
         let foo = card_vector.iter().collect::<Vec<_>>();
-        return make_poker_hand(&foo, is_wild);
+        let hand = make_poker_hand(&foo, is_wild);
+        println!("{} -> {}", card_string, hand);
+        return hand;
     }
 
     fn parse_hand(card_string: &str) -> Box<dyn PokerHand> {

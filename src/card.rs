@@ -209,6 +209,13 @@ pub fn fmt_cards(cards: &[Card]) -> String {
         .join(" ");
 }
 
+pub fn fmt_cards_refs(cards: &[&Card]) -> String {
+    return cards.iter()
+        .map(|card| (*card).to_string())
+        .collect::<Vec<_>>()
+        .join(" ");
+}
+
 pub struct Cards<'a>(pub &'a [Card]);
 
 impl std::fmt::Display for Cards<'_> {
