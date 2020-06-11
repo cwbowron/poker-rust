@@ -180,7 +180,7 @@ fn as_straight_flush(cards: &[&Card], wild_cards: &[&Card]) -> Option<Vec<Card>>
     return None;
 }
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Display)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Display, EnumIter)]
 pub enum HandRank {
     #[strum(to_string = "Straight Flush")]
     StraightFlush = 8,
@@ -200,6 +200,22 @@ pub enum HandRank {
     OnePair = 1,
     #[strum(to_string = "High Card")]
     HighCard = 0
+}
+
+impl HandRank {
+    pub fn build(&self) -> fn(&[&Card], &[&Card]) -> Option<Vec<Card>> {
+        match self {
+            HandRank::StraightFlush => as_straight_flush,
+            HandRank::Quads => as_quads,
+            HandRank::FullHouse => as_full_house,
+            HandRank::Flush => as_flush,
+            HandRank::Straight => as_straight,
+            HandRank::Triplets => as_trips,
+            HandRank::TwoPair => as_two_pair,
+            HandRank::OnePair => as_pair,
+            HandRank::HighCard => as_high_card
+        }
+    }
 }
 
 pub struct PokerHand {
@@ -240,28 +256,17 @@ impl PokerHand {
     }
 }
 
-macro_rules! try_make_hand {
-    ($hand_rank: ident, $cards: ident, $wild_cards: ident, $as_fn: ident) => {
-        if let Some(cards) = $as_fn(&$cards, &$wild_cards) {
-            return PokerHand::new(HandRank::$hand_rank, cards);
-        }
-    }
-}
-
 pub fn make_poker_hand(all_cards: &[&Card], is_wild: &Option<IsWildCard>) -> PokerHand {
     let (wild_cards, cards): (Vec<&Card>, Vec<&Card>) = all_cards.iter()
         .cloned()
         .partition(|card| card.is_wild(is_wild));
 
-    try_make_hand!(StraightFlush, cards, wild_cards, as_straight_flush);
-    try_make_hand!(Quads, cards, wild_cards, as_quads);
-    try_make_hand!(FullHouse, cards, wild_cards, as_full_house);
-    try_make_hand!(Flush, cards, wild_cards, as_flush);
-    try_make_hand!(Straight, cards, wild_cards, as_straight);
-    try_make_hand!(Triplets, cards, wild_cards, as_trips);
-    try_make_hand!(TwoPair, cards, wild_cards, as_two_pair);
-    try_make_hand!(OnePair, cards, wild_cards, as_pair);
-    try_make_hand!(HighCard, cards, wild_cards, as_high_card);
+    for rank in HandRank::iter() {
+        if let Some(cards) = rank.build()(&cards, &wild_cards) {
+            return PokerHand::new(rank, cards);
+        }
+    }
+
     unreachable!();
 }
 
