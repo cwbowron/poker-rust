@@ -39,22 +39,27 @@ fn find_set(cards: &[&Card], n: usize, is_wild: &Option<IsWildCard>) -> Option<V
     return None;
 }
 
-fn make_sets(cards: &[&Card], sizes: &Vec<usize>, size_index: usize, is_wild: &Option<IsWildCard>, result: &mut Vec<Card>) -> Option<Vec<Card>> {
+fn make_sets(cards: &[&Card], sizes: &Vec<usize>, size_index: usize, is_wild: &Option<IsWildCard>, result: &mut Vec<Card>) -> bool {
     if size_index >= sizes.len() {
-        return Some(result.to_vec());
+        return true;
     } else if let Some(set) = find_set(cards, sizes[size_index], is_wild) {
         let next = remove_cards(cards, &set);
         result.extend(set);
         return make_sets(&next, sizes, size_index + 1, is_wild, result);
     } else {
-        return None;
+        return false;
     }
 }
 
 macro_rules! define_set_maker {
     ($fn_name: ident, $set: tt) => {
         fn $fn_name(cards: &[&Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
-            return make_sets(cards, &vec!$set, 0, is_wild, &mut Vec::new());
+            let mut r = Vec::new();
+            if make_sets(cards, &vec!$set, 0, is_wild, &mut r) {
+                return Some(r);
+            } else {
+                return None;
+            }
         }
     }
 }
