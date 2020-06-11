@@ -55,22 +55,22 @@ fn deal(cards: &mut Vec<Card>, n: usize) {
 
     println!("Board: {}", Cards(&board));
 
-    // let mut evals = Vec::new();
-    // for pocket in &pockets {
-    //     let mut cards = pocket.to_vec();
-    //     cards.extend(board.to_vec());
+    let mut evals = Vec::new();
+    for pocket in &pockets {
+        let mut cards = pocket.to_vec();
+        cards.extend(board.to_vec());
 
-    //     let poker_hand = make_poker_hand(&cards, &None);
-    //     evals.push((pocket, poker_hand));
-    // }
+        let poker_hand = make_poker_hand(&cards.iter().collect::<Vec<_>>(), &None);
+        evals.push((pocket, poker_hand));
+    }
 
-    // evals.sort_by(|a, b| a.1.cmp(&b.1));
-    // evals.reverse();
+    evals.sort_by(|a, b| a.1.cmp(&b.1));
+    evals.reverse();
 
-    // for eval in evals {
-    //     let (pocket, poker_hand) = eval;
-    //     println!("Pocket: {} -> {}", Cards(&pocket), poker_hand);
-    // }
+    for eval in evals {
+        let (pocket, poker_hand) = eval;
+        println!("Pocket: {} -> {}", Cards(&pocket), poker_hand);
+    }
 }
 
 fn find_winners(pockets: &Vec<Vec<Card>>, board: &Vec<&Card>) -> Vec<usize> {
