@@ -7,8 +7,10 @@ use super::card::Card;
 use super::card::IsWildCard;
 use super::card::fmt_cards;
 
-pub fn remove_0(a: &mut Vec<&Card>, b: &[Card]) {
-    a.drain_filter(|card| b.contains(card));
+pub fn remove_0<'a>(a: &'a [&Card], b: &[Card]) -> Vec<&'a Card> {
+    let mut vec = a.to_vec();
+    vec.drain_filter(|card| b.contains(card));
+    return vec;
 }
 
 pub fn remove_card_ref<'a>(a: &[&'a Card], b: &Card) -> Vec<&'a Card> {
@@ -41,8 +43,7 @@ fn make_sets(cards: &[&Card], sizes: &Vec<usize>, size_index: usize, is_wild: &O
     if size_index >= sizes.len() {
         return Some(result.to_vec());
     } else if let Some(set) = find_set(cards, sizes[size_index], is_wild) {
-        let mut next = cards.to_vec();
-        remove_0(&mut next, &set);
+        let next = remove_0(cards, &set);
         result.extend(set);
         return make_sets(&next, sizes, size_index + 1, is_wild, result);
     } else {
