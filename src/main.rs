@@ -1,4 +1,5 @@
 #![feature(iterator_fold_self)]
+#![feature(drain_filter)]
 #![allow(dead_code)]
 
 extern crate strum;
@@ -22,7 +23,7 @@ use deck::make_shuffled_deck;
 mod poker_hand;
 use poker_hand::PokerHand;
 use poker_hand::make_poker_hand;
-use poker_hand::make_poker_hand_ref;
+// use poker_hand::make_poker_hand_ref;
 
 mod win_lose_split;
 use win_lose_split::WinLoseSplit;
@@ -56,22 +57,22 @@ fn deal(cards: &mut Vec<Card>, n: usize) {
 
     println!("Board: {}", Cards(&board));
 
-    let mut evals = Vec::new();
-    for pocket in &pockets {
-        let mut cards = pocket.to_vec();
-        cards.extend(board.to_vec());
+    // let mut evals = Vec::new();
+    // for pocket in &pockets {
+    //     let mut cards = pocket.to_vec();
+    //     cards.extend(board.to_vec());
 
-        let poker_hand = make_poker_hand(&cards, &None);
-        evals.push((pocket, poker_hand));
-    }
+    //     let poker_hand = make_poker_hand(&cards, &None);
+    //     evals.push((pocket, poker_hand));
+    // }
 
-    evals.sort_by(|a, b| a.1.cmp(&b.1));
-    evals.reverse();
+    // evals.sort_by(|a, b| a.1.cmp(&b.1));
+    // evals.reverse();
 
-    for eval in evals {
-        let (pocket, poker_hand) = eval;
-        println!("Pocket: {} -> {}", Cards(&pocket), poker_hand);
-    }
+    // for eval in evals {
+    //     let (pocket, poker_hand) = eval;
+    //     println!("Pocket: {} -> {}", Cards(&pocket), poker_hand);
+    // }
 }
 
 fn find_winners(pockets: &Vec<Vec<Card>>, board: &Vec<&Card>) -> Vec<usize> {
@@ -81,7 +82,7 @@ fn find_winners(pockets: &Vec<Vec<Card>>, board: &Vec<&Card>) -> Vec<usize> {
     for (index, pocket) in pockets.iter().enumerate() {
         let mut current = board.to_vec();
         current.extend(pocket);
-        let hand = make_poker_hand_ref(&current, &None);
+        let hand = make_poker_hand(&current, &None);
         
         if let Some(max) = &best_hand {
             match hand.cmp(&max) {
