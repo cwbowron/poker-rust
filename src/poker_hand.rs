@@ -120,7 +120,7 @@ fn contains_scoring_rank(cards: &[Card], rank: Rank) -> bool {
 }
 
 fn build_flush(partition: (Vec<&Card>, Vec<&Card>)) -> Option<Vec<Card>> {
-    if (partition.0.len() + partition.1.len() >= 5) {
+    if partition.0.len() + partition.1.len() >= 5 {
         let mut r = partition.1
             .iter()
             .map(|card| (*card).clone())
