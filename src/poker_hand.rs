@@ -7,13 +7,13 @@ use super::card::Card;
 use super::card::IsWildCard;
 use super::card::fmt_cards;
 
-pub fn remove_0<'a>(a: &'a [&Card], b: &[Card]) -> Vec<&'a Card> {
+pub fn remove_cards<'a>(a: &'a [&Card], b: &[Card]) -> Vec<&'a Card> {
     let mut vec = a.to_vec();
     vec.drain_filter(|card| b.contains(card));
     return vec;
 }
 
-pub fn remove_card_ref<'a>(a: &[&'a Card], b: &Card) -> Vec<&'a Card> {
+pub fn remove_card<'a>(a: &[&'a Card], b: &Card) -> Vec<&'a Card> {
     let mut vec = a.to_vec();
     vec.remove_item(b);
     return vec;
@@ -43,7 +43,7 @@ fn make_sets(cards: &[&Card], sizes: &Vec<usize>, size_index: usize, is_wild: &O
     if size_index >= sizes.len() {
         return Some(result.to_vec());
     } else if let Some(set) = find_set(cards, sizes[size_index], is_wild) {
-        let next = remove_0(cards, &set);
+        let next = remove_cards(cards, &set);
         result.extend(set);
         return make_sets(&next, sizes, size_index + 1, is_wild, result);
     } else {
@@ -94,7 +94,7 @@ fn fill_straight(cards: &[&Card], is_wild:&Option<IsWildCard>, rank_ordinal: usi
             .find(|card| card.is_wild(is_wild)) {
                 let rank = Rank::for_ordinal(rank_ordinal);
                 result.push(wild.scored_as(rank));
-                let remaining_cards = remove_card_ref(cards, wild);
+                let remaining_cards = remove_card(cards, wild);
                 if fill_straight(&remaining_cards, is_wild, rank_ordinal - 1, result) {
                     return true;
                 }
