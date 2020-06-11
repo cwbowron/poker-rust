@@ -130,38 +130,19 @@ fn contains_scoring_rank(cards: &[Card], rank: Rank) -> bool {
         .is_some();
 }
 
-// fn build_flush(suited: ) -> Option<Vec<Card>> {
-//     if partition.0.len() + partition.1.len() >= 5 {
-//         let mut r = partition.1
-//             .iter()
-//             .map(|card| (*card).clone())
-//             .collect::<Vec<_>>();
-        
-        
-//         for w in partition.0 {
-//             for rank in Rank::iter() {
-//                 if !contains_scoring_rank(&r, rank) {
-//                     r.push(w.scored_as(rank));
-//                     break;
-//                 }
-//             }
-//         }
-        
-//         return Some(top_five(r));
-//     } else {
-//         return None;
-//     }
-// }
-
 fn as_flush(cards: &[&Card], wild_cards: &[&Card]) -> Option<Vec<Card>> {
     for suit in Suit::iter() {
-        let mut suited = cards.iter()
+        let suited_count = cards.iter()
             .filter(|card| card.suit == suit)
-            .cloned()
-            .cloned()
-            .collect::<Vec<_>>();
+            .count();
 
-        if suited.len() + wild_cards.len() >= 5 {
+        if suited_count + wild_cards.len() >= 5 {
+            let mut suited = cards.iter()
+                .filter(|card| card.suit == suit)
+                .cloned()
+                .cloned()
+                .collect::<Vec<_>>();
+            
             for w in wild_cards {
                 for rank in Rank::iter() {
                     if !contains_scoring_rank(&suited, rank) {
