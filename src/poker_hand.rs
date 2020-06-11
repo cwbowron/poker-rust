@@ -6,26 +6,10 @@ use super::card::Rank;
 use super::card::Card;
 use super::card::IsWildCard;
 use super::card::fmt_cards;
-// use super::card::remove_cards;
-// use super::card::remove_card;
-
-// pub fn remove_cards_ref<'a>(a: &[&'a Card], b: &[&Card]) -> Vec<&'a Card> {
-//     return a.iter()
-//         .filter(|card| !b.contains(card))
-//         .map(|card| card.clone())
-//         .collect();
-// }
 
 pub fn remove_0(a: &mut Vec<&Card>, b: &[Card]) {
     a.drain_filter(|card| b.contains(card));
 }
-
-// pub fn remove_cards_0<'a>(a: &[&'a Card], b: &[Card]) -> Vec<&'a Card> {
-//     return a.iter()
-//         .filter(|card| !b.contains(card))
-//         .map(|card| card.clone())
-//         .collect();
-// }
 
 pub fn remove_card_ref<'a>(a: &[&'a Card], b: &Card) -> Vec<&'a Card> {
     let mut found = false;
@@ -38,18 +22,9 @@ pub fn remove_card_ref<'a>(a: &[&'a Card], b: &Card) -> Vec<&'a Card> {
                 false
             }
         })
-    // .map(|card| card.clone())
         .cloned()
         .collect();
 }
-
-
-// fn filter_suit<'a>(cards: &'a [Card], suit: Suit, is_wild: &Option<IsWildCard>) -> Vec<&'a Card> {
-//     return cards
-//         .iter()
-//         .filter(|card| card.is_wild_or_suit(suit, is_wild))
-//         .collect();
-// }
 
 fn find_set(cards: &[&Card], n: usize, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     for rank in Rank::iter() {
@@ -203,11 +178,8 @@ fn as_straight_flush(cards: &[&Card], is_wild: &Option<IsWildCard>) -> Option<Ve
             let suited_cards = cards
                 .iter()
                 .filter(|card| card.is_wild_or_suit(suit, is_wild))
-            // .map(|card_ref_ref| *card_ref_ref)
                 .cloned()
                 .collect::<Vec<_>>();
-                // .map(|card| (*card).clone())
-                // .collect::<Vec<_>>();
                 
             let option = as_straight(&suited_cards, is_wild);
             if option.is_some() {
@@ -291,17 +263,8 @@ pub fn make_poker_hand(cards: &[&Card], is_wild: &Option<IsWildCard>) -> Box<dyn
     unreachable!();
 }
 
-// pub fn make_poker_hand_ref(cards: &[&Card], is_wild: &Option<IsWildCard>) -> Box<dyn PokerHand> {
-//     let deref = cards.iter()
-//         .map(|card_ref_ref| (*card_ref_ref).clone())
-//         .collect::<Vec<_>>(); 
-    
-//     return make_poker_hand(&deref, is_wild);
-// }
-
 impl<'a> PartialEq for dyn PokerHand + 'a {
     fn eq(&self, other: &dyn PokerHand) -> bool {
-        // self.ord() == other.ord() && self.cards().cmp(&other.cards()) == Ordering::Equal
         self.score() == other.score()
     }
 }
@@ -311,11 +274,6 @@ impl<'a> Eq for dyn PokerHand + 'a {}
 impl<'a> Ord for dyn PokerHand + 'a {
     fn cmp(&self, other: &dyn PokerHand) -> Ordering {
         self.score().cmp(&other.score())
-        // match self.ord().cmp(&other.ord()) {
-        //     Ordering::Greater => Ordering::Greater,
-        //     Ordering::Less => Ordering::Less,
-        //     Ordering::Equal => self.cards().cmp(&other.cards())
-        // }
     }
 }
 
