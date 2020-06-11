@@ -14,7 +14,6 @@ use card::Card;
 use card::Cards;
 use card::CardVector;
 use card::fmt_cards;
-use card::remove_cards;
 
 mod deck;
 use deck::make_deck;
@@ -102,7 +101,18 @@ fn find_winners(pockets: &Vec<Vec<Card>>, board: &Vec<&Card>) -> Vec<usize> {
     return vec;
 }
 
-fn hold_em_odds(deck: &[Card], pockets: &Vec<Vec<Card>>, board: &Vec<Card>) -> Vec<WinLoseSplit> {
+fn hold_em_odds(pockets: &Vec<Vec<Card>>, board: &Vec<Card>) -> Vec<WinLoseSplit> {
+    let mut deck = make_deck();
+    for pocket in pockets {
+        for card in pocket {
+            deck.remove_item(&card);
+        }
+    }
+    
+    for card in board {
+        deck.remove_item(&card);
+    }
+
     let mut results = vec![WinLoseSplit::new(); pockets.len()];
 
     let n = 5 - board.len();
@@ -134,12 +144,8 @@ fn random_deals() {
 }
 
 fn enumerate_deals() {
-    let mut deck = make_deck();
     let pocket_ace_king = CardVector::parse("Ac Kc");
-    deck = remove_cards(&deck, &pocket_ace_king);
-    
     let pocket_eights = CardVector::parse("8s 8d");
-    deck = remove_cards(&deck, &pocket_eights);
 
     let mut pockets = Vec::new();
     pockets.push(pocket_ace_king.0);
@@ -147,7 +153,7 @@ fn enumerate_deals() {
 
     // let board = CardVector::parse("7c 8c 3s");
     let board = Vec::new();
-    let results = hold_em_odds(&deck, &pockets, &board);
+    let results = hold_em_odds(&pockets, &board);
 
     println!("Board: {}", fmt_cards(&board));
     for i in 0..results.len() {
