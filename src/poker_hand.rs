@@ -165,8 +165,9 @@ fn as_straight_flush(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec
                 .map(|foo :&&Card| (*foo).clone())
                 .collect::<Vec<_>>();
                 
-            if let Some(straight) = as_straight(&suited_cards, is_wild) {
-                return Some(straight);
+            let option = as_straight(&suited_cards, is_wild);
+            if option.is_some() {
+                return option;
             }
         }
     }
