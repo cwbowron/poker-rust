@@ -184,6 +184,12 @@ impl PartialEq for Card {
     }
 }
 
+impl PartialEq<Card> for &Card {
+    fn eq(&self, other: &Card) -> bool {
+        self.rank == other.rank && self.suit == other.suit
+    }
+}
+
 impl Ord for Card {
     fn cmp(&self, other: &Card) -> std::cmp::Ordering {
         self.scoring_rank.cmp(&other.scoring_rank)
@@ -249,34 +255,6 @@ impl std::fmt::Display for CardVector {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "{}", fmt_cards(&self.0))
     }
-}
-
-pub fn remove_cards(a: &[Card], b: &[Card]) -> Vec<Card> {
-    return a.iter()
-        .filter(|card| !b.contains(card))
-        .map(Card::clone)
-        .collect();
-}
-
-pub fn remove_card(a: &[Card], b: &Card) -> Vec<Card> {
-    let mut found = false;
-    return a.iter()
-        .filter(|card| {
-            if found || *card != b {
-                true
-            } else {
-                found = true;
-                false
-            }
-        })
-        .map(Card::clone)
-        .collect();
-}
-
-pub fn add_cards(a: &[Card], b: &[Card]) -> Vec<Card> {
-    let mut r = a.to_vec();
-    r.extend(b.iter().map(Card::clone));
-    return r;
 }
 
 #[cfg(test)]
@@ -430,17 +408,5 @@ mod tests {
         assert!(!Jack.of(Hearts).is_wild(&Some(Card::is_suicide_king)));
         assert!(!King.of(Hearts).is_wild(&None));
         assert!(!Jack.of(Hearts).is_wild(&None));
-    }
-
-    #[test]
-    fn test_remove_card() {
-        let cards0 = CardVector::parse("Kc ?? ??");
-        assert_eq!(cards0.len(), 3);
-
-        let cards1 = remove_card(&cards0, &Rank::Joker.of(Suit::Joker));
-        assert_eq!(cards1.len(), 2);
-
-        let cards2 = remove_card(&cards1, &Rank::Joker.of(Suit::Joker));
-        assert_eq!(cards2.len(), 1);
     }
 }

@@ -1,4 +1,6 @@
 #![feature(iterator_fold_self)]
+#![feature(drain_filter)]
+#![feature(vec_remove_item)]
 #![allow(dead_code)]
 
 extern crate strum;
@@ -12,8 +14,6 @@ use card::Card;
 use card::Cards;
 use card::CardVector;
 use card::fmt_cards;
-use card::remove_cards;
-use card::add_cards;
 
 mod deck;
 use deck::make_deck;
@@ -55,79 +55,78 @@ fn deal(cards: &mut Vec<Card>, n: usize) {
 
     println!("Board: {}", Cards(&board));
 
-    let mut evals = Vec::new();
-    for pocket in &pockets {
-        let mut cards = pocket.to_vec();
-        cards.extend(board.to_vec());
+    // let mut evals = Vec::new();
+    // for pocket in &pockets {
+    //     let mut cards = pocket.to_vec();
+    //     cards.extend(board.to_vec());
 
-        let poker_hand = make_poker_hand(&cards, &None);
-        evals.push((pocket, poker_hand));
-    }
+    //     let poker_hand = make_poker_hand(&cards, &None);
+    //     evals.push((pocket, poker_hand));
+    // }
 
-    evals.sort_by(|a, b| a.1.cmp(&b.1));
-    evals.reverse();
+    // evals.sort_by(|a, b| a.1.cmp(&b.1));
+    // evals.reverse();
 
-    for eval in evals {
-        let (pocket, poker_hand) = eval;
-        println!("Pocket: {} -> {}", Cards(&pocket), poker_hand);
-    }
+    // for eval in evals {
+    //     let (pocket, poker_hand) = eval;
+    //     println!("Pocket: {} -> {}", Cards(&pocket), poker_hand);
+    // }
 }
 
-fn find_winners(pockets: &Vec<Vec<Card>>, board: &Vec<Card>) -> Vec<usize> {
+fn find_winners(pockets: &Vec<Vec<Card>>, board: &Vec<&Card>) -> Vec<usize> {
     let mut vec = Vec::new();
     
-    pockets.iter()
-        .map(|pocket| add_cards(pocket, &board))
-        .map(|cards| make_poker_hand(&cards, &None))
-        .enumerate()
-        .fold(None, |option_max: Option<(usize, Box<_>)>, current|
-              if let Some(max) = option_max {
-                  match current.1.cmp(&max.1) {
-                      Ordering::Equal => {
-                          vec.push(current.0);
-                          Some(current)
-                      },
-                      Ordering::Greater => {
-                          vec.clear();
-                          vec.push(current.0);
-                          Some(current)
-                      },
-                      Ordering::Less => {
-                          Some(max)
-                      }
-                  }
-              } else {
-                  vec.push(current.0);
-                  Some(current)
-              });
-
+    let mut best_hand = None;
+    for (index, pocket) in pockets.iter().enumerate() {
+        let mut current = board.to_vec();
+        current.extend(pocket);
+        let hand = make_poker_hand(&current, &None);
+        
+        if let Some(max) = &best_hand {
+            match hand.cmp(&max) {
+                Ordering::Equal => vec.push(index),
+                Ordering::Greater => {
+                    vec.clear();
+                    vec.push(index);
+                    best_hand = Some(hand)
+                },
+                Ordering::Less => {}
+            }
+        } else {
+            vec.push(index);
+            best_hand = Some(hand);
+        }
+    }
+    
     return vec;
 }
 
-fn hold_em_odds(deck: &[Card], pockets: &Vec<Vec<Card>>, board: &Vec<Card>) -> Vec<WinLoseSplit> {
+fn hold_em_odds(pockets: &Vec<Vec<Card>>, board: &Vec<Card>) -> Vec<WinLoseSplit> {
+    let mut deck = make_deck();
+    for card in pockets.iter().flatten().chain(board.iter()) {
+        deck.remove_item(&card);
+    }
+
     let mut results = vec![WinLoseSplit::new(); pockets.len()];
 
-    for combination in deck.iter()
-        .combinations(5 - board.len()) {
-            let mut b = board.to_vec();
-            for card in combination {
-                b.push(card.clone());
-            }
-
-            let winners = find_winners(pockets, &b);
-            for index in 0..results.len() { 
-                if winners.contains(&index) {
-                    if winners.len() == 1 {
-                        results[index].wins += 1;
-                    } else {
-                        results[index].splits += 1;
-                    }
+    let n = 5 - board.len();
+    for combination in deck.iter().combinations(n) {
+        let complete_board = board.iter().chain(combination).collect::<Vec<_>>();
+        
+        let winners = find_winners(pockets, &complete_board);
+        for index in 0..results.len() { 
+            if winners.contains(&index) {
+                if winners.len() == 1 {
+                    results[index].wins += 1;
                 } else {
-                    results[index].losses += 1;
+                    results[index].splits += 1;
                 }
+            } else {
+                results[index].losses += 1;
             }
         }
-
+    }
+    
     return results;
 }
 
@@ -139,20 +138,14 @@ fn random_deals() {
 }
 
 fn enumerate_deals() {
-    let mut deck = make_deck();
     let pocket_ace_king = CardVector::parse("Ac Kc");
-    deck = remove_cards(&deck, &pocket_ace_king);
-    
     let pocket_eights = CardVector::parse("8s 8d");
-    deck = remove_cards(&deck, &pocket_eights);
 
-    let mut pockets = Vec::new();
-    pockets.push(pocket_ace_king.0);
-    pockets.push(pocket_eights.0);
-
+    let pockets = vec![pocket_ace_king.0, pocket_eights.0];
+    
     // let board = CardVector::parse("7c 8c 3s");
     let board = Vec::new();
-    let results = hold_em_odds(&deck, &pockets, &board);
+    let results = hold_em_odds(&pockets, &board);
 
     println!("Board: {}", fmt_cards(&board));
     for i in 0..results.len() {
