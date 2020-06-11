@@ -103,13 +103,7 @@ fn find_winners(pockets: &Vec<Vec<Card>>, board: &Vec<&Card>) -> Vec<usize> {
 
 fn hold_em_odds(pockets: &Vec<Vec<Card>>, board: &Vec<Card>) -> Vec<WinLoseSplit> {
     let mut deck = make_deck();
-    for pocket in pockets {
-        for card in pocket {
-            deck.remove_item(&card);
-        }
-    }
-    
-    for card in board {
+    for card in pockets.iter().flatten().chain(board.iter()) {
         deck.remove_item(&card);
     }
 
