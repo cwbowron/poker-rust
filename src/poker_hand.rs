@@ -9,12 +9,12 @@ use super::card::fmt_cards;
 use super::card::remove_cards;
 use super::card::remove_card;
 
-fn filter_suit<'a>(cards: &'a [Card], suit: Suit, is_wild: &Option<IsWildCard>) -> Vec<&'a Card> {
-    return cards
-        .iter()
-        .filter(|card| card.is_wild_or_suit(suit, is_wild))
-        .collect();
-}
+// fn filter_suit<'a>(cards: &'a [Card], suit: Suit, is_wild: &Option<IsWildCard>) -> Vec<&'a Card> {
+//     return cards
+//         .iter()
+//         .filter(|card| card.is_wild_or_suit(suit, is_wild))
+//         .collect();
+// }
 
 fn find_set(cards: &[Card], n: usize, is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     for rank in Rank::iter() {
@@ -158,11 +158,16 @@ fn as_flush(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
 
 fn as_straight_flush(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     for suit in Suit::iter() {
-        let suited = filter_suit(cards, suit, is_wild);
+        let count = cards
+            .iter()
+            .filter(|card| card.is_wild_or_suit(suit, is_wild))
+            .count();
         
-        if suited.len() >= 5 {
-            let suited_cards = suited.iter()
-                .map(|foo :&&Card| (*foo).clone())
+        if count >= 5 {
+            let suited_cards = cards
+                .iter()
+                .filter(|card| card.is_wild_or_suit(suit, is_wild))
+                .map(Card::clone)
                 .collect::<Vec<_>>();
                 
             let option = as_straight(&suited_cards, is_wild);
