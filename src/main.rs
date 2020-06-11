@@ -15,7 +15,6 @@ use card::Cards;
 use card::CardVector;
 use card::fmt_cards;
 use card::remove_cards;
-use card::add_cards;
 
 mod deck;
 use deck::make_deck;
@@ -24,7 +23,6 @@ use deck::make_shuffled_deck;
 mod poker_hand;
 use poker_hand::PokerHand;
 use poker_hand::make_poker_hand;
-// use poker_hand::make_poker_hand_ref;
 
 mod win_lose_split;
 use win_lose_split::WinLoseSplit;

@@ -279,12 +279,6 @@ pub fn remove_card(a: &[Card], b: &Card) -> Vec<Card> {
         .collect();
 }
 
-pub fn add_cards(a: &[Card], b: &[Card]) -> Vec<Card> {
-    let mut r = a.to_vec();
-    r.extend(b.iter().map(Card::clone));
-    return r;
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
