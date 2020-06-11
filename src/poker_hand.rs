@@ -73,7 +73,7 @@ fn top_five(mut cards: Vec<Card>) -> Vec<Card> {
 }
 
 fn as_high_card(cards: &[&Card], _is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
-    return Some(top_five(cards.iter().map(|card| (*card).clone()).collect()));
+    return Some(top_five(cards.iter().cloned().cloned().collect()));
 }
 
 fn fill_straight(cards: &[&Card], is_wild:&Option<IsWildCard>, rank_ordinal: usize, result: &mut Vec<Card>) -> bool {
