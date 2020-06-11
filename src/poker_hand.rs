@@ -81,8 +81,7 @@ fn fill_straight(cards: &[&Card], is_wild:&Option<IsWildCard>, rank_ordinal: usi
         return true;
     } else {
         if let Some(card) = cards.iter()
-            .filter(|card| !card.is_wild(is_wild))
-            .find(|card| card.rank.is_ordinal(rank_ordinal)) {
+            .find(|card| !card.is_wild(is_wild) && card.rank.is_ordinal(rank_ordinal)) {
                 result.push((*card).clone());
                 if fill_straight(cards, is_wild, rank_ordinal - 1, result) {
                     return true;
