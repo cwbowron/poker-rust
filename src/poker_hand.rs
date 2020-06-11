@@ -252,6 +252,14 @@ pub fn make_poker_hand(cards: &[Card], is_wild: &Option<IsWildCard>) -> Box<dyn 
     unreachable!();
 }
 
+pub fn make_poker_hand_ref(cards: &[&Card], is_wild: &Option<IsWildCard>) -> Box<dyn PokerHand> {
+    let deref = cards.iter()
+        .map(|card_ref_ref| (*card_ref_ref).clone())
+        .collect::<Vec<_>>(); 
+    
+    return make_poker_hand(&deref, is_wild);
+}
+
 impl<'a> PartialEq for dyn PokerHand + 'a {
     fn eq(&self, other: &dyn PokerHand) -> bool {
         // self.ord() == other.ord() && self.cards().cmp(&other.cards()) == Ordering::Equal
