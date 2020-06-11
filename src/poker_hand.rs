@@ -76,39 +76,37 @@ fn as_high_card(cards: &[&Card], _is_wild: &Option<IsWildCard>) -> Option<Vec<Ca
     return Some(top_five(cards.iter().cloned().cloned().collect()));
 }
 
-fn fill_straight(cards: &[&Card], is_wild:&Option<IsWildCard>, rank_ordinal: usize, result: &mut Vec<Card>) -> bool {
-    if result.len() >= 5 {
-        return true;
+fn fill_straight(cards: &[&Card], is_wild:&Option<IsWildCard>, rank_ordinal: usize, n: usize) -> Option<Vec<Card>>{
+    if n >= 5 {
+        return Some(Vec::new());
     } else {
         if let Some(card) = cards.iter()
             .find(|card| !card.is_wild(is_wild) && card.rank.is_ordinal(rank_ordinal)) {
-                result.push((*card).clone());
-                if fill_straight(cards, is_wild, rank_ordinal - 1, result) {
-                    return true;
+                if let Some(mut result) = fill_straight(cards, is_wild, rank_ordinal - 1, n + 1) {
+                    result.push((*card).clone());
+                    return Some(result);
                 }
-                result.pop();
             }
 
         if let Some(wild) = cards.iter()
             .find(|card| card.is_wild(is_wild)) {
                 let rank = Rank::for_ordinal(rank_ordinal);
-                result.push(wild.scored_as(rank));
                 let remaining_cards = remove_card(cards, wild);
-                if fill_straight(&remaining_cards, is_wild, rank_ordinal - 1, result) {
-                    return true;
+                if let Some(mut result) = fill_straight(&remaining_cards, is_wild, rank_ordinal - 1, n + 1) {
+                    result.push(wild.scored_as(rank));
+                    return Some(result);
                 }
-                result.pop();
             }
 
-        return false;
+        return None;
     }
 }
 
 fn as_straight(cards: &[&Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     for rank_ordinal in (Rank::Five as usize .. Rank::Ace as usize + 1).rev() {
-        let mut result = Vec::with_capacity(5);
-        if fill_straight(cards, is_wild, rank_ordinal, &mut result) {
-            return Some(result);   
+        if let Some(mut result) = fill_straight(cards, is_wild, rank_ordinal, 0) {
+            result.reverse();
+            return Some(result);
         }
     }
 
