@@ -119,34 +119,37 @@ fn contains_scoring_rank(cards: &[Card], rank: Rank) -> bool {
         .is_some();
 }
 
-fn build_flush(partition: (Vec<&Card>, Vec<&Card>)) -> Vec<Card> {
-    let mut r = Vec::new();
-    
-    for n in partition.1 {
-        r.push(n.clone());
-    }
-    
-    for w in partition.0 {
-        for rank in Rank::iter() {
-            if !contains_scoring_rank(&r, rank) {
-                r.push(w.scored_as(rank));
-                break;
+fn build_flush(partition: (Vec<&Card>, Vec<&Card>)) -> Option<Vec<Card>> {
+    if (partition.0.len() + partition.1.len() >= 5) {
+        let mut r = Vec::new();
+        
+        for n in partition.1 {
+            r.push(n.clone());
+        }
+        
+        for w in partition.0 {
+            for rank in Rank::iter() {
+                if !contains_scoring_rank(&r, rank) {
+                    r.push(w.scored_as(rank));
+                    break;
+                }
             }
         }
+        
+        return Some(top_five(r));
+    } else {
+        return None;
     }
-
-    return top_five(r);
 }
 
 fn as_flush(cards: &[Card], is_wild: &Option<IsWildCard>) -> Option<Vec<Card>> {
     for suit in Suit::iter() {
-        let suited = filter_suit(cards, suit, is_wild);
-        
-        if suited.len() >= 5 {
-            return Some(
-                build_flush(
-                    suited.iter()
-                        .partition(|card| card.is_wild(is_wild))));
+        let option = build_flush(cards.iter()
+                                 .filter(|card| card.is_wild_or_suit(suit, is_wild))
+                                 .partition(|card| card.is_wild(is_wild)));
+
+        if option.is_some() {
+            return option;
         }
     }
 
