@@ -100,8 +100,7 @@ fn fill_straight(cards: &[&Card], wild_cards:&[&Card], rank_ordinal: usize, n: u
 
         if wild_cards.len() > 0 {
             let rank = Rank::for_ordinal(rank_ordinal);
-            let next_wild = &wild_cards[1..];
-            if let Some(mut result) = fill_straight(cards, next_wild, rank_ordinal - 1, n + 1) {
+            if let Some(mut result) = fill_straight(cards, &wild_cards[1..], rank_ordinal - 1, n + 1) {
                 result.push(wild_cards[0].scored_as(rank));
                 return Some(result);
             }
