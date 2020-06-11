@@ -45,7 +45,6 @@ fn make_sets(cards: &[&Card], wild_cards: &[&Card], sizes: &Vec<usize>, size_ind
     if size_index >= sizes.len() {
         return true;
     } else if let Some(set) = find_set(cards, wild_cards, sizes[size_index]) {
-        // TODO fixme
         let next = remove_cards(cards, &set);
         if make_sets(&next, &vec![], sizes, size_index + 1, result) {
             result.extend(set);
