@@ -182,14 +182,23 @@ fn as_straight_flush(cards: &[&Card], wild_cards: &[&Card]) -> Option<Vec<Card>>
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Display)]
 pub enum HandRank {
+    #[strum(to_string = "Straight Flush")]
     StraightFlush = 8,
+    #[strum(to_string = "Four of a Kind")]
     Quads = 7,
+    #[strum(to_string = "Full House")]
     FullHouse = 6,
+    #[strum(to_string = "Flush")]
     Flush = 5,
+    #[strum(to_string = "Straight")]
     Straight = 4,
+    #[strum(to_string = "Triplets")]
     Triplets = 3,
+    #[strum(to_string = "Two Pair")]
     TwoPair = 2,
+    #[strum(to_string = "Pair")]
     OnePair = 1,
+    #[strum(to_string = "High Card")]
     HighCard = 0
 }
 
