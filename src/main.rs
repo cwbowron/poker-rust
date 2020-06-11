@@ -141,10 +141,8 @@ fn enumerate_deals() {
     let pocket_ace_king = CardVector::parse("Ac Kc");
     let pocket_eights = CardVector::parse("8s 8d");
 
-    let mut pockets = Vec::new();
-    pockets.push(pocket_ace_king.0);
-    pockets.push(pocket_eights.0);
-
+    let pockets = vec![pocket_ace_king.0, pocket_eights.0];
+    
     // let board = CardVector::parse("7c 8c 3s");
     let board = Vec::new();
     let results = hold_em_odds(&pockets, &board);
