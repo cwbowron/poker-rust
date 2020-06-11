@@ -216,6 +216,11 @@ impl HandRank {
             HandRank::HighCard => as_high_card
         }
     }
+
+    fn score_cards(&self, cards: &[Card]) -> i32 {
+        return cards.iter()
+            .fold(*self as i32, |acc, card| acc * 16 + (card.scoring_rank as i32));
+    }
 }
 
 pub struct PokerHand {
@@ -226,7 +231,7 @@ pub struct PokerHand {
 
 impl PokerHand {
     fn new(hand_rank: HandRank, cards: Vec<Card>) -> Self {
-        let score = PokerHand::score_cards(hand_rank, &cards);
+        let score = hand_rank.score_cards(&cards);
         PokerHand {
             rank: hand_rank,
             cards: cards,
@@ -234,11 +239,6 @@ impl PokerHand {
         }
     }
     
-    fn score_cards(hand_rank: HandRank, cards: &[Card]) -> i32 {
-        return cards.iter()
-            .fold(hand_rank as i32, |acc, card| acc * 16 + (card.scoring_rank as i32));
-    }
-
     fn name(&self) -> std::string::String {
         self.rank.to_string()
     }
