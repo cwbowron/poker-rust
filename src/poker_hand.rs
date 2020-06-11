@@ -290,7 +290,7 @@ mod tests {
 
     fn _parse_hand(card_string: &str, is_wild: &Option<IsWildCard>) -> Box<dyn PokerHand> {
         let card_vector = CardVector::parse(card_string);
-        let foo: Vec<&Card> = card_vector.iter().collect();
+        let foo = card_vector.iter().collect::<Vec<_>>();
         return make_poker_hand(&foo, is_wild);
     }
 
