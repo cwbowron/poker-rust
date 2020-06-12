@@ -218,9 +218,9 @@ impl HandRank {
 }
 
 pub struct PokerHand {
-    rank: HandRank,
-    cards: Vec<Card>,
-    score: i32
+    pub rank: HandRank,
+    pub cards: Vec<Card>,
+    pub score: i32
 }
 
 impl PokerHand {

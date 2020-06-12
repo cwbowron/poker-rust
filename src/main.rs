@@ -97,7 +97,7 @@ fn deal(cards: &mut Vec<Card>, n: usize) {
     }
 }
 
-fn find_winners(pockets: &Vec<Vec<Card>>, board: &Vec<&Card>) -> Vec<usize> {
+fn find_winners(pockets: &Vec<Vec<Card>>, board: &Vec<&Card>, hand_rank_counts: &mut Vec<HandRankCount>) -> Vec<usize> {
     let mut vec = Vec::new();
     
     let mut best_hand = None;
@@ -105,6 +105,8 @@ fn find_winners(pockets: &Vec<Vec<Card>>, board: &Vec<&Card>) -> Vec<usize> {
         let mut current = board.to_vec();
         current.extend(pocket);
         let hand = PokerHand::build(&current, &None);
+
+        hand_rank_counts[index].inc(hand.rank);
         
         if let Some(max) = &best_hand {
             match hand.cmp(&max) {
@@ -125,7 +127,7 @@ fn find_winners(pockets: &Vec<Vec<Card>>, board: &Vec<&Card>) -> Vec<usize> {
     return vec;
 }
 
-fn hold_em_odds(pockets: &Vec<Vec<Card>>, board: &Vec<Card>) -> Vec<WinLoseSplit> {
+fn hold_em_odds(pockets: &Vec<Vec<Card>>, board: &Vec<Card>, hand_rank_counts: &mut Vec<HandRankCount>) -> Vec<WinLoseSplit> {
     let mut deck = make_deck();
     for card in pockets.iter().flatten().chain(board.iter()) {
         deck.remove_item(&card);
@@ -137,7 +139,7 @@ fn hold_em_odds(pockets: &Vec<Vec<Card>>, board: &Vec<Card>) -> Vec<WinLoseSplit
     for combination in deck.iter().combinations(n) {
         let complete_board = board.iter().chain(combination).collect::<Vec<_>>();
         
-        let winners = find_winners(pockets, &complete_board);
+        let winners = find_winners(pockets, &complete_board, hand_rank_counts);
         for index in 0..results.len() { 
             if winners.contains(&index) {
                 if winners.len() == 1 {
@@ -167,7 +169,7 @@ fn enumerate_deals(pockets: Vec<Vec<Card>>, board: &Vec<Card>) {
         hand_rank_counts.push(HandRankCount::new());
     }
 
-    let results = hold_em_odds(&pockets, board);
+    let results = hold_em_odds(&pockets, board, &mut hand_rank_counts);
 
     if board.len() > 0 {
         println!("Board: {}", fmt_cards(&board));
