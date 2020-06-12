@@ -161,11 +161,10 @@ fn main() {
              .multiple(true)
              .index(1)
              .about("Pocket cards"))
-        .arg(Arg::new("montecarlo")
-             .about("Monte Carlo Texas Hold 'em Simulation")
-             .long("montecarlo"))
+        .subcommand(App::new("montecarlo")
+                    .about("Monte Carlo Texas Hold 'em Simulation"))
         .get_matches();
-
+             
     if matches.is_present("montecarlo") {
         random_deals();
     } else {
