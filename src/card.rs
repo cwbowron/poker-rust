@@ -230,8 +230,9 @@ pub struct CardVector(pub Vec<Card>);
 impl std::str::FromStr for CardVector {
     type Err = ParseError;
     fn from_str(str: &str) -> Result<Self, Self::Err> {
-        let cards = str.chars()
-            .filter(|ch| "AKQJT98765432?cdhs♥♣♦♠".contains(*ch))
+        let cards = str.to_ascii_lowercase()
+            .chars()
+            .filter(|ch| "akqjt98765432?cdhs♥♣♦♠".contains(*ch))
             .collect::<Vec<_>>()
             .chunks(2)
             .map(|chunk| {
