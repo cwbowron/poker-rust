@@ -43,8 +43,13 @@ impl std::ops::Deref for HandRankCount {
 
 impl std::fmt::Display for HandRankCount {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let total = self.0.iter()
+            .fold(0, |acc, current| current + acc) as f32;
+        
         for rank in HandRank::iter() {
-            write!(f, "{:14} - {}\n", rank.to_string(), self.0[rank as usize]);
+            let count = self.0[rank as usize] as f32;
+            let p = 100.0 * count / total;
+            write!(f, "{:14} - {:5.2} %%\n", rank.to_string(), p);
         }
         Ok(())
     }
