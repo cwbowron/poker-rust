@@ -230,6 +230,20 @@ pub struct PokerHand {
 }
 
 impl PokerHand {
+    pub fn build(all_cards: &[&Card], is_wild: &Option<IsWildCard>) -> PokerHand {
+        let (wild_cards, cards): (Vec<&Card>, Vec<&Card>) = all_cards.iter()
+            .cloned()
+            .partition(|card| card.is_wild(is_wild));
+        
+        for rank in HandRank::iter() {
+            if let Some(cards) = rank.build()(&cards, &wild_cards) {
+                return PokerHand::new(rank, cards);
+            }
+        }
+
+        unreachable!();
+    }
+
     fn new(hand_rank: HandRank, cards: Vec<Card>) -> Self {
         let score = hand_rank.score_cards(&cards);
         PokerHand {
@@ -246,20 +260,6 @@ impl PokerHand {
     fn cards(&self) -> &[Card] {
         &self.cards
     }
-}
-
-pub fn make_poker_hand(all_cards: &[&Card], is_wild: &Option<IsWildCard>) -> PokerHand {
-    let (wild_cards, cards): (Vec<&Card>, Vec<&Card>) = all_cards.iter()
-        .cloned()
-        .partition(|card| card.is_wild(is_wild));
-
-    for rank in HandRank::iter() {
-        if let Some(cards) = rank.build()(&cards, &wild_cards) {
-            return PokerHand::new(rank, cards);
-        }
-    }
-
-    unreachable!();
 }
 
 impl PartialEq for PokerHand {
@@ -299,7 +299,7 @@ mod tests {
     fn _parse_hand(card_string: &str, is_wild: &Option<IsWildCard>) -> PokerHand {
         let card_vector = CardVector::parse(card_string);
         let foo = card_vector.iter().collect::<Vec<_>>();
-        let hand = make_poker_hand(&foo, is_wild);
+        let hand = PokerHand::build(&foo, is_wild);
         println!("{} -> {}", card_string, hand);
         return hand;
     }

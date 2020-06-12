@@ -21,7 +21,6 @@ use deck::make_shuffled_deck;
 
 mod poker_hand;
 use poker_hand::PokerHand;
-use poker_hand::make_poker_hand;
 
 mod win_lose_split;
 use win_lose_split::WinLoseSplit;
@@ -60,7 +59,7 @@ fn deal(cards: &mut Vec<Card>, n: usize) {
         let mut cards = pocket.to_vec();
         cards.extend(board.to_vec());
 
-        let poker_hand = make_poker_hand(&cards.iter().collect::<Vec<_>>(), &None);
+        let poker_hand = PokerHand::build(&cards.iter().collect::<Vec<_>>(), &None);
         evals.push((pocket, poker_hand));
     }
 
@@ -80,7 +79,7 @@ fn find_winners(pockets: &Vec<Vec<Card>>, board: &Vec<&Card>) -> Vec<usize> {
     for (index, pocket) in pockets.iter().enumerate() {
         let mut current = board.to_vec();
         current.extend(pocket);
-        let hand = make_poker_hand(&current, &None);
+        let hand = PokerHand::build(&current, &None);
         
         if let Some(max) = &best_hand {
             match hand.cmp(&max) {
