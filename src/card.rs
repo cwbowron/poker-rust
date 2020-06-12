@@ -209,6 +209,7 @@ pub fn fmt_cards(cards: &[Card]) -> String {
         .join(" ");
 }
 
+#[allow(dead_code)]
 pub fn fmt_cards_refs(cards: &[&Card]) -> String {
     return cards.iter()
         .map(|card| (*card).to_string())

@@ -8,16 +8,14 @@ extern crate strum;
 
 use std::cmp::Ordering;
 use itertools::Itertools;
+use clap::App;
+use clap::Arg;
 
 mod card;
-use card::Card;
-use card::Cards;
-use card::CardVector;
-use card::fmt_cards;
+use card::{Card, Cards, CardVector, fmt_cards};
 
 mod deck;
-use deck::make_deck;
-use deck::make_shuffled_deck;
+use deck::{make_deck, make_shuffled_deck};
 
 mod poker_hand;
 use poker_hand::PokerHand;
@@ -136,17 +134,13 @@ fn random_deals() {
     }
 }
 
-fn enumerate_deals(pockets: Vec<Vec<Card>>) {
-    // let pocket_ace_king = CardVector::parse("Ac Kc");
-    // let pocket_eights = CardVector::parse("8s 8d");
+fn enumerate_deals(pockets: Vec<Vec<Card>>, board: &Vec<Card>) {
+    let results = hold_em_odds(&pockets, board);
 
-    // let pockets = vec![pocket_ace_king.0, pocket_eights.0];
-    
-    // let board = CardVector::parse("7c 8c 3s");
-    let board = Vec::new();
-    let results = hold_em_odds(&pockets, &board);
+    if board.len() > 0 {
+        println!("Board: {}", fmt_cards(&board));
+    }
 
-    // println!("Board: {}", fmt_cards(&board));
     for i in 0..results.len() {
         let p = &pockets[i];
         let r = results[i];
@@ -158,16 +152,31 @@ fn main() {
     // random_deals();
     // enumerate_deals();
 
-    let args: Vec<String> = std::env::args().collect();
+    let matches = App::new("poker-rust")
+        .version("1.0")
+        .author("Chris Bowron <cwbowron@gmail.com>")
+        .about("Calculate poker odds")
+        .arg(Arg::new("pocket")
+             .short('p')
+             .long("pocket")
+             .multiple(true)
+             .required(true)
+             .about("Pocket cards"))
+        .arg(Arg::new("board")
+             .short('b')
+             .long("board")
+             .about("Board")
+             .takes_value(true))
+        .get_matches();
 
-    if args.len() < 3 {
-        panic!("Requires at least 2 pocket cards");
-    } else {
-        let pockets = args.iter()
-            .skip(1)
+    let board_string = matches.value_of("board").unwrap_or("");
+    let board = CardVector::parse(board_string);
+    
+    if let Some(pocket_strings) = matches.values_of("pocket") {
+        let pockets  = pocket_strings
             .map(|str| CardVector::parse(str).to_vec())
             .collect::<Vec<Vec<Card>>>();
 
-        enumerate_deals(pockets);
+        enumerate_deals(pockets, &board);
     }
 }
