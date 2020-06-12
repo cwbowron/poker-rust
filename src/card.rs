@@ -202,19 +202,19 @@ impl PartialOrd for Card {
     }
 }
 
-pub fn fmt_cards(cards: &[Card]) -> String {
-    return cards.iter()
-        .map(|card| card.to_string())
+fn fmt<'a, I>(it: I) -> String where I: Iterator<Item=&'a Card> {
+    it.map(|card| card.to_string())
         .collect::<Vec<_>>()
-        .join(" ");
+        .join(" ")
+}
+    
+pub fn fmt_cards(cards: &[Card]) -> String {
+    fmt(cards.iter())
 }
 
 #[allow(dead_code)]
 pub fn fmt_cards_refs(cards: &[&Card]) -> String {
-    return cards.iter()
-        .map(|card| (*card).to_string())
-        .collect::<Vec<_>>()
-        .join(" ");
+    fmt(cards.iter().cloned())
 }
 
 pub struct Cards<'a>(pub &'a [Card]);
