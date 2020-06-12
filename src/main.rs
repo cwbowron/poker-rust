@@ -180,13 +180,15 @@ fn enumerate_deals(pockets: Vec<Vec<Card>>, board: &Vec<Card>) {
         println!("Board: {}", fmt_cards(&board));
     }
 
-    for i in 0..results.len() {
-        let p = &pockets[i];
-        let r = results[i];
-        println!("- {} - {}", fmt_cards(&p), r);
+    if pockets.len() >= 2 {
+        for i in 0..results.len() {
+            let p = &pockets[i];
+            let r = results[i];
+            println!("- {} - {}", fmt_cards(&p), r);
+        }
+        println!("\n");
     }
 
-    println!("\n");
     for i in 0..hand_rank_counts.len() {
         println!("{}", fmt_cards(&pockets[i]));
         println!("{}", hand_rank_counts[i]);
