@@ -246,10 +246,6 @@ impl PokerHand {
     fn cards(&self) -> &[Card] {
         &self.cards
     }
-    
-    fn score(&self) -> i32 {
-        self.score
-    }
 }
 
 pub fn make_poker_hand(all_cards: &[&Card], is_wild: &Option<IsWildCard>) -> PokerHand {
@@ -268,7 +264,7 @@ pub fn make_poker_hand(all_cards: &[&Card], is_wild: &Option<IsWildCard>) -> Pok
 
 impl PartialEq for PokerHand {
     fn eq(&self, other: &PokerHand) -> bool {
-        self.score() == other.score()
+        self.score == other.score
     }
 }
 
@@ -276,7 +272,7 @@ impl Eq for PokerHand {}
 
 impl Ord for PokerHand {
     fn cmp(&self, other: &PokerHand) -> Ordering {
-        self.score().cmp(&other.score())
+        self.score.cmp(&other.score)
     }
 }
 
