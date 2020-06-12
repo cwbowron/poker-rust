@@ -156,17 +156,15 @@ fn main() {
         .version("1.0")
         .author("Chris Bowron <cwbowron@gmail.com>")
         .about("Calculate poker odds")
-        .arg(Arg::new("pocket")
-             .short('p')
-             .long("pocket")
-             .multiple(true)
-             .required(true)
-             .about("Pocket cards"))
         .arg(Arg::new("board")
              .short('b')
              .long("board")
              .about("Board")
              .takes_value(true))
+        .arg(Arg::new("pocket")
+             .multiple(true)
+             .index(1)
+             .about("Pocket cards"))
         .get_matches();
 
     let board_string = matches.value_of("board").unwrap_or("");
