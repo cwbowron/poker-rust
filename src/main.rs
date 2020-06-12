@@ -8,8 +8,7 @@ extern crate strum;
 
 use std::cmp::Ordering;
 use itertools::Itertools;
-use clap::App;
-use clap::Arg;
+use clap::{App, Arg};
 
 mod card;
 use card::{Card, Cards, CardVector, fmt_cards};
