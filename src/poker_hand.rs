@@ -120,10 +120,14 @@ fn as_straight(cards: &[&Card], wild_cards: &[&Card]) -> Option<Vec<Card>> {
     return None;
 }
 
-fn contains_scoring_rank(cards: &[Card], rank: Rank) -> bool {
-    return cards.iter()
-        .find(|card| card.scoring_rank == rank)
-        .is_some();
+fn find_missing_rank(cards: &[Card]) -> Option<Rank> {
+    for rank in Rank::iter() {
+        if !cards.iter().any(|card| card.scoring_rank == rank) {
+            return Some(rank);
+        }
+    }
+
+    return None;
 }
 
 fn as_flush(cards: &[&Card], wild_cards: &[&Card]) -> Option<Vec<Card>> {
@@ -140,11 +144,10 @@ fn as_flush(cards: &[&Card], wild_cards: &[&Card]) -> Option<Vec<Card>> {
                 .collect::<Vec<_>>();
             
             for w in wild_cards {
-                for rank in Rank::iter() {
-                    if !contains_scoring_rank(&suited, rank) {
-                        suited.push(w.scored_as(rank));
-                        break;
-                    }
+                if let Some(rank) = find_missing_rank(&suited) {
+                    suited.push(w.scored_as(rank));
+                } else {
+                    break;
                 }
             }
 
