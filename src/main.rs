@@ -9,6 +9,7 @@ extern crate strum;
 use std::cmp::Ordering;
 use itertools::Itertools;
 use clap::{App, Arg};
+use strum::IntoEnumIterator;
 
 mod card;
 use card::{Card, Cards, CardVector, fmt_cards};
@@ -17,10 +18,37 @@ mod deck;
 use deck::{make_deck, make_shuffled_deck};
 
 mod poker_hand;
-use poker_hand::PokerHand;
+use poker_hand::{PokerHand, HandRank};
 
 mod win_lose_split;
 use win_lose_split::WinLoseSplit;
+
+struct HandRankCount(Vec<usize>);
+impl HandRankCount {
+    pub fn new() -> HandRankCount {
+        HandRankCount(vec![0; 1 + HandRank:: StraightFlush as usize])
+    }
+
+    pub fn inc(&mut self, rank: HandRank) {
+        self.0[rank as usize] += 1;
+    }
+}
+
+impl std::ops::Deref for HandRankCount {
+    type Target = Vec<usize>;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl std::fmt::Display for HandRankCount {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        for rank in HandRank::iter() {
+            write!(f, "{:14} - {}\n", rank.to_string(), self.0[rank as usize]);
+        }
+        Ok(())
+    }
+}
 
 fn deal(cards: &mut Vec<Card>, n: usize) {
     let mut pockets = Vec::new();
@@ -134,6 +162,11 @@ fn random_deals() {
 }
 
 fn enumerate_deals(pockets: Vec<Vec<Card>>, board: &Vec<Card>) {
+    let mut hand_rank_counts = Vec::new();
+    for _i in 0..pockets.len() {
+        hand_rank_counts.push(HandRankCount::new());
+    }
+
     let results = hold_em_odds(&pockets, board);
 
     if board.len() > 0 {
@@ -144,6 +177,12 @@ fn enumerate_deals(pockets: Vec<Vec<Card>>, board: &Vec<Card>) {
         let p = &pockets[i];
         let r = results[i];
         println!("- {} - {}", fmt_cards(&p), r);
+    }
+
+    println!("\n");
+    for i in 0..hand_rank_counts.len() {
+        println!("{}", fmt_cards(&pockets[i]));
+        println!("{}", hand_rank_counts[i]);
     }
 }
 
