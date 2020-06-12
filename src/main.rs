@@ -148,9 +148,6 @@ fn enumerate_deals(pockets: Vec<Vec<Card>>, board: &Vec<Card>) {
 }
 
 fn main() {
-    // random_deals();
-    // enumerate_deals();
-
     let matches = App::new("poker-rust")
         .version("1.0")
         .author("Chris Bowron <cwbowron@gmail.com>")
@@ -164,16 +161,23 @@ fn main() {
              .multiple(true)
              .index(1)
              .about("Pocket cards"))
+        .arg(Arg::new("montecarlo")
+             .about("Monte Carlo Texas Hold 'em Simulation")
+             .long("montecarlo"))
         .get_matches();
 
-    let board_string = matches.value_of("board").unwrap_or("");
-    let board = CardVector::parse(board_string);
-    
-    if let Some(pocket_strings) = matches.values_of("pocket") {
-        let pockets  = pocket_strings
-            .map(|str| CardVector::parse(str).to_vec())
-            .collect::<Vec<Vec<Card>>>();
-
-        enumerate_deals(pockets, &board);
+    if matches.is_present("montecarlo") {
+        random_deals();
+    } else {
+        let board_string = matches.value_of("board").unwrap_or("");
+        let board = CardVector::parse(board_string);
+        
+        if let Some(pocket_strings) = matches.values_of("pocket") {
+            let pockets  = pocket_strings
+                .map(|str| CardVector::parse(str).to_vec())
+                .collect::<Vec<Vec<Card>>>();
+            
+            enumerate_deals(pockets, &board);
+        }
     }
 }
