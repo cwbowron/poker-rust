@@ -3,6 +3,14 @@ use std::cmp::Ordering;
 
 use super::card::{Suit, Rank, Card, IsWildCard, fmt_cards};
 
+fn filter_suit<'a>(cards: &'a [&'a Card], suit: Suit) -> impl Iterator<Item=&&'a Card> {
+    cards.iter().filter(move |card| card.suit == suit)
+}
+
+fn filter_rank<'a>(cards: &'a [&'a Card], rank: Rank) -> impl Iterator<Item=&&'a Card> {
+    cards.iter().filter(move |card| card.rank == rank)
+}
+
 pub fn remove_cards<'a>(a: &'a [&Card], b: &[Card]) -> Vec<&'a Card> {
     let mut vec = a.to_vec();
     vec.drain_filter(|card| b.contains(card));
@@ -18,13 +26,10 @@ pub fn remove_cards<'a>(a: &'a [&Card], b: &[Card]) -> Vec<&'a Card> {
 fn find_set(cards: &[&Card], wild_cards: &[&Card], n: usize) -> Option<Vec<Card>> {
     for rank in Rank::iter() {
         if rank != Rank::LowAce && rank != Rank::Joker {
-            let count = cards.iter()
-                .filter(|card| card.rank == rank)
-                .count();
+            let count = filter_rank(cards, rank).count();
             
             if count + wild_cards.len() >= n {
-                return Some(cards.iter()
-                            .filter(|card| card.rank == rank)
+                return Some(filter_rank(cards, rank)
                             .chain(wild_cards.iter())
                             .take(n)
                             .map(|card| card.scored_as(rank))
@@ -128,13 +133,9 @@ fn find_missing_rank(cards: &[Card]) -> Option<Rank> {
 
 fn as_flush(cards: &[&Card], wild_cards: &[&Card]) -> Option<Vec<Card>> {
     for suit in Suit::iter() {
-        let suited_count = cards.iter()
-            .filter(|card| card.suit == suit)
-            .count();
-
+        let suited_count = filter_suit(&cards, suit).count();
         if suited_count + wild_cards.len() >= 5 {
-            let mut suited = cards.iter()
-                .filter(|card| card.suit == suit)
+            let mut suited = filter_suit(cards, suit)
                 .cloned()
                 .cloned()
                 .collect::<Vec<_>>();
@@ -156,15 +157,10 @@ fn as_flush(cards: &[&Card], wild_cards: &[&Card]) -> Option<Vec<Card>> {
 
 fn as_straight_flush(cards: &[&Card], wild_cards: &[&Card]) -> Option<Vec<Card>> {
     for suit in Suit::iter() {
-        let count = cards
-            .iter()
-            .filter(|card| card.suit == suit)
-            .count();
+        let count = filter_suit(cards, suit).count();
         
         if count + wild_cards.len() >= 5 {
-            let suited_cards = cards
-                .iter()
-                .filter(|card| card.suit == suit)
+            let suited_cards = filter_suit(cards, suit)
                 .cloned()
                 .collect::<Vec<_>>();
                 
