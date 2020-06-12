@@ -9,11 +9,11 @@ pub fn remove_cards<'a>(a: &'a [&Card], b: &[Card]) -> Vec<&'a Card> {
     return vec;
 }
 
-pub fn remove_card<'a>(a: &[&'a Card], b: &Card) -> Vec<&'a Card> {
-    let mut vec = a.to_vec();
-    vec.remove_item(b);
-    return vec;
-}
+// pub fn remove_card<'a>(a: &[&'a Card], b: &Card) -> Vec<&'a Card> {
+//     let mut vec = a.to_vec();
+//     vec.remove_item(b);
+//     return vec;
+// }
 
 fn find_set(cards: &[&Card], wild_cards: &[&Card], n: usize) -> Option<Vec<Card>> {
     for rank in Rank::iter() {
