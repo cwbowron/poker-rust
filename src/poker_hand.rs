@@ -1,11 +1,7 @@
 use strum::IntoEnumIterator;
 use std::cmp::Ordering;
 
-use super::card::Suit;
-use super::card::Rank;
-use super::card::Card;
-use super::card::IsWildCard;
-use super::card::fmt_cards;
+use super::card::{Suit, Rank, Card, IsWildCard, fmt_cards};
 
 pub fn remove_cards<'a>(a: &'a [&Card], b: &[Card]) -> Vec<&'a Card> {
     let mut vec = a.to_vec();
