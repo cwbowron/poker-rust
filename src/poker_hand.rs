@@ -243,10 +243,6 @@ impl PokerHand {
         self.rank.to_string()
     }
     
-    fn ord(&self) -> i32 {
-        self.rank as i32
-    }
-    
     fn cards(&self) -> &[Card] {
         &self.cards
     }
@@ -328,20 +324,20 @@ mod tests {
 
     #[test]
     fn test_straight_flush() {
-        assert_eq!(parse_hand("Ac Kc Qc Tc Jc").ord(), StraightFlush as i32);
+        assert_eq!(parse_hand("Ac Kc Qc Tc Jc").rank, StraightFlush);
     }
 
     #[test]
     fn test_straight_flush_with_jokers() {
-        assert_eq!(parse_hand("Ac Kc Qc ?? Jc").ord(), StraightFlush as i32);
-        assert_eq!(parse_hand("Ac Kc ?? ?? Jc").ord(), StraightFlush as i32);
+        assert_eq!(parse_hand("Ac Kc Qc ?? Jc").rank, StraightFlush);
+        assert_eq!(parse_hand("Ac Kc ?? ?? Jc").rank, StraightFlush);
     }
 
     #[test]
     fn test_quads() {
         let poker_hand = parse_hand("Ac As Ad Ah Jd");
         let cards = poker_hand.cards();
-        assert_eq!(poker_hand.ord(), Quads as i32);
+        assert_eq!(poker_hand.rank, Quads);
 
         assert_eq!(cards[0].rank, Ace);
         assert_eq!(cards[1].rank, Ace);
@@ -354,7 +350,7 @@ mod tests {
     fn test_full_house() {
         let poker_hand = parse_hand("Ac As Ad Jh Jd");
         let cards = poker_hand.cards();
-        assert_eq!(poker_hand.ord(), FullHouse as i32);
+        assert_eq!(poker_hand.rank, FullHouse);
         
         assert_eq!(cards[0].rank, Ace);
         assert_eq!(cards[1].rank, Ace);
@@ -365,23 +361,23 @@ mod tests {
 
     #[test]
     fn test_one_joker() {
-        assert_eq!(parse_hand("Ac As Ad ?? Jd").ord(), Quads as i32);
-        assert_eq!(parse_hand("Ac As ?? Jc Jd").ord(), FullHouse as i32);
-        assert_eq!(parse_hand("Ac As ?? Jc Td").ord(), Triplets as i32);
-        assert_eq!(parse_hand("Ac ?? Jc Td 7c").ord(), OnePair as i32);
+        assert_eq!(parse_hand("Ac As Ad ?? Jd").rank, Quads);
+        assert_eq!(parse_hand("Ac As ?? Jc Jd").rank, FullHouse);
+        assert_eq!(parse_hand("Ac As ?? Jc Td").rank, Triplets);
+        assert_eq!(parse_hand("Ac ?? Jc Td 7c").rank, OnePair);
     }
 
     #[test]
     fn test_two_joker() {
-        assert_eq!(parse_hand("Ac As ?? ?? Jd").ord(), Quads as i32);
-        assert_eq!(parse_hand("Ac ?? ?? Td 7c").ord(), Triplets as i32);
+        assert_eq!(parse_hand("Ac As ?? ?? Jd").rank, Quads);
+        assert_eq!(parse_hand("Ac ?? ?? Td 7c").rank, Triplets);
     }
 
     #[test]
     fn test_flush() {
         let poker_hand = parse_hand("Ac Kc 7c Tc Jc");
         let cards = poker_hand.cards();
-        assert_eq!(poker_hand.ord(), Flush as i32);
+        assert_eq!(poker_hand.rank, Flush);
         
         assert_eq!(cards[0].rank, Ace);
         assert_eq!(cards[1].rank, King);
@@ -392,48 +388,48 @@ mod tests {
     
     #[test]
     fn test_flush_with_jokers() {
-        assert_eq!(parse_hand("Ac Kc 7c Tc ??").ord(), Flush as i32);
-        assert_eq!(parse_hand("Ac Kc ?? Jc 7c").ord(), Flush as i32);
+        assert_eq!(parse_hand("Ac Kc 7c Tc ??").rank, Flush);
+        assert_eq!(parse_hand("Ac Kc ?? Jc 7c").rank, Flush);
     }
     
     #[test]
     fn test_straight() {
-        assert_eq!(parse_hand("Ac Kc Qc Ts Jd").ord(), Straight as i32);
+        assert_eq!(parse_hand("Ac Kc Qc Ts Jd").rank, Straight);
     }
 
     #[test]
     fn test_low_straight() {
-        assert_eq!(parse_hand("Ac 5c 4s 3s 2d").ord(), Straight as i32);
-        assert_eq!(parse_hand("5c 4s 3s 2d ??").ord(), Straight as i32);
-        assert_eq!(parse_hand("?? 4s 3s 2d Ac").ord(), Straight as i32);
+        assert_eq!(parse_hand("Ac 5c 4s 3s 2d").rank, Straight);
+        assert_eq!(parse_hand("5c 4s 3s 2d ??").rank, Straight);
+        assert_eq!(parse_hand("?? 4s 3s 2d Ac").rank, Straight);
     }
 
     #[test]
     fn test_straight_with_jokers() {
-        assert_eq!(parse_hand("Ac Kc Qc Jd ??").ord(), Straight as i32);
-        assert_eq!(parse_hand("Ac Kc ?? ?? Ts").ord(), Straight as i32);
+        assert_eq!(parse_hand("Ac Kc Qc Jd ??").rank, Straight);
+        assert_eq!(parse_hand("Ac Kc ?? ?? Ts").rank, Straight);
     }
 
     #[test]
     fn test_triplets() {
-        assert_eq!(parse_hand("Ac Ah As Ts Jd").ord(), Triplets as i32);
+        assert_eq!(parse_hand("Ac Ah As Ts Jd").rank, Triplets);
     }
 
     #[test]
     fn test_two_pair() {
-        assert_eq!(parse_hand("Ac Ah Qs Qd Jd").ord(), TwoPair as i32);
+        assert_eq!(parse_hand("Ac Ah Qs Qd Jd").rank, TwoPair);
     }
 
     #[test]
     fn test_pair() {
-        assert_eq!(parse_hand("Ac Ah Qs Td Jd").ord(), OnePair as i32);
+        assert_eq!(parse_hand("Ac Ah Qs Td Jd").rank, OnePair);
     }
 
     #[test]
     fn test_high_card() {
         let poker_hand = parse_hand("Ac Jh 9s 7d 5d");
         let cards = poker_hand.cards();
-        assert_eq!(poker_hand.ord(), HighCard as i32);
+        assert_eq!(poker_hand.rank, HighCard);
 
         assert_eq!(cards[0], Ace.of(Clubs));
         assert_eq!(cards[1], Jack.of(Hearts));
@@ -444,19 +440,19 @@ mod tests {
 
     #[test]
     fn test_suicide_king() {
-        assert_eq!(parse_hand_suicide_king("9c Kh 7c 6c 5c").ord(), StraightFlush as i32);
-        assert_eq!(parse_hand_suicide_king("Ac Kh As Ad 7d").ord(), Quads as i32);
-        assert_eq!(parse_hand_suicide_king("Kc Kh 7c 6c 5c").ord(), Flush as i32);
-        assert_eq!(parse_hand_suicide_king("9c Kh 7s 6d 5d").ord(), Straight as i32);
-        assert_eq!(parse_hand_suicide_king("Ac Kh As 7c 7d").ord(), FullHouse as i32);
-        assert_eq!(parse_hand_suicide_king("Ac Kh As 6c 7d").ord(), Triplets as i32);
-        assert_eq!(parse_hand_suicide_king("Ac Kh 5c 6c 7d").ord(), OnePair as i32);
+        assert_eq!(parse_hand_suicide_king("9c Kh 7c 6c 5c").rank, StraightFlush);
+        assert_eq!(parse_hand_suicide_king("Ac Kh As Ad 7d").rank, Quads);
+        assert_eq!(parse_hand_suicide_king("Kc Kh 7c 6c 5c").rank, Flush);
+        assert_eq!(parse_hand_suicide_king("9c Kh 7s 6d 5d").rank, Straight);
+        assert_eq!(parse_hand_suicide_king("Ac Kh As 7c 7d").rank, FullHouse);
+        assert_eq!(parse_hand_suicide_king("Ac Kh As 6c 7d").rank, Triplets);
+        assert_eq!(parse_hand_suicide_king("Ac Kh 5c 6c 7d").rank, OnePair);
     }
 
     #[test]
     fn test_two_pair_edge_case() {
         let poker_hand = parse_hand("K♣ K♦ 5♠ 5♣ 3♥ 3♣");
-        assert_eq!(poker_hand.ord(), TwoPair as i32);
+        assert_eq!(poker_hand.rank, TwoPair);
 
         println!("two_pair_edge_case: {}", poker_hand);
         assert_eq!(poker_hand.cards().len(), 5);
@@ -467,8 +463,8 @@ mod tests {
         let natural = parse_hand("Ac As Ad Jh Jd");
         let wild = parse_hand("Ac As ?? Jh Jd");
 
-        assert_eq!(natural.ord(), FullHouse as i32);
-        assert_eq!(wild.ord(), FullHouse as i32);
+        assert_eq!(natural.rank, FullHouse);
+        assert_eq!(wild.rank, FullHouse);
 
         assert_eq!(wild.cmp(&natural), Ordering::Equal);
         assert_eq!(natural.cmp(&wild), Ordering::Equal);
@@ -480,9 +476,9 @@ mod tests {
         let wild_one = parse_hand("Ac Ks ?? Jh Td");
         let wild_two = parse_hand("Ac Ks ?? ?? Td");
 
-        assert_eq!(natural.ord(), Straight as i32);
-        assert_eq!(wild_one.ord(), Straight as i32);
-        assert_eq!(wild_two.ord(), Straight as i32);
+        assert_eq!(natural.rank, Straight);
+        assert_eq!(wild_one.rank, Straight);
+        assert_eq!(wild_two.rank, Straight);
 
         assert_eq!(natural.cmp(&wild_one), Ordering::Equal);
         assert_eq!(natural.cmp(&wild_two), Ordering::Equal);
@@ -500,9 +496,9 @@ mod tests {
         let wild_one = parse_hand("Ac ?? Qc 7c 6c");
         let wild_two = parse_hand("Ac ?? ?? 7c 6c");
 
-        assert_eq!(natural.ord(), Flush as i32);
-        assert_eq!(wild_one.ord(), Flush as i32);
-        assert_eq!(wild_two.ord(), Flush as i32);
+        assert_eq!(natural.rank, Flush);
+        assert_eq!(wild_one.rank, Flush);
+        assert_eq!(wild_two.rank, Flush);
 
         assert_eq!(natural.cmp(&wild_one), Ordering::Equal);
         assert_eq!(natural.cmp(&wild_two), Ordering::Equal);
