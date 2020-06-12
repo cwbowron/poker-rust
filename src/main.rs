@@ -136,17 +136,17 @@ fn random_deals() {
     }
 }
 
-fn enumerate_deals() {
-    let pocket_ace_king = CardVector::parse("Ac Kc");
-    let pocket_eights = CardVector::parse("8s 8d");
+fn enumerate_deals(pockets: Vec<Vec<Card>>) {
+    // let pocket_ace_king = CardVector::parse("Ac Kc");
+    // let pocket_eights = CardVector::parse("8s 8d");
 
-    let pockets = vec![pocket_ace_king.0, pocket_eights.0];
+    // let pockets = vec![pocket_ace_king.0, pocket_eights.0];
     
     // let board = CardVector::parse("7c 8c 3s");
     let board = Vec::new();
     let results = hold_em_odds(&pockets, &board);
 
-    println!("Board: {}", fmt_cards(&board));
+    // println!("Board: {}", fmt_cards(&board));
     for i in 0..results.len() {
         let p = &pockets[i];
         let r = results[i];
@@ -156,5 +156,18 @@ fn enumerate_deals() {
 
 fn main() {
     // random_deals();
-    enumerate_deals();
+    // enumerate_deals();
+
+    let args: Vec<String> = std::env::args().collect();
+
+    if args.len() < 3 {
+        panic!("Requires at least 2 pocket cards");
+    } else {
+        let pockets = args.iter()
+            .skip(1)
+            .map(|str| CardVector::parse(str).to_vec())
+            .collect::<Vec<Vec<Card>>>();
+
+        enumerate_deals(pockets);
+    }
 }
