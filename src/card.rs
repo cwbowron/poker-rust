@@ -231,6 +231,7 @@ impl std::str::FromStr for CardVector {
     type Err = ParseError;
     fn from_str(str: &str) -> Result<Self, Self::Err> {
         let cards = str.to_ascii_lowercase()
+            .replace("10", "t")
             .chars()
             .filter(|ch| "akqjt98765432?cdhs♥♣♦♠".contains(*ch))
             .collect::<Vec<_>>()
