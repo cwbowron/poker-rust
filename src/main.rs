@@ -186,7 +186,7 @@ fn enumerate_deals(pockets: Vec<Vec<Card>>, board: &Vec<Card>) {
             let r = results[i];
             println!("- {} - {}", fmt_cards(&p), r);
         }
-        println!("\n");
+        println!("");
     }
 
     for i in 0..hand_rank_counts.len() {
