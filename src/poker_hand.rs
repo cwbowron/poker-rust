@@ -35,27 +35,26 @@ fn find_set(cards: &[&Card], wild_cards: &[&Card], n: usize) -> Option<Vec<Card>
     return None;
 }
 
-fn make_sets(cards: &[&Card], wild_cards: &[&Card], sizes: &[usize], size_index: usize, result: &mut Vec<Card>) -> bool {
+fn make_sets(cards: &[&Card], wild_cards: &[&Card], sizes: &[usize], size_index: usize) -> Option<Vec<Card>> {
     if size_index >= sizes.len() {
-        return true;
+        return Some(Vec::with_capacity(5));
     } else if let Some(set) = find_set(cards, wild_cards, sizes[size_index]) {
         let next = remove_cards(cards, &set);
-        if make_sets(&next, &[], sizes, size_index + 1, result) {
+        if let Some(mut result) = make_sets(&next, &[], sizes, size_index + 1) {
             result.extend(set);
-            return true;
+            return Some(result);
         }
     }
 
-    return false;
+    return None;
 }
 
 macro_rules! define_set_maker {
     ($fn_name: ident, $set: expr) => {
         fn $fn_name(cards: &[&Card], wild_cards: &[&Card]) -> Option<Vec<Card>> {
-            let mut r = Vec::new();
-            if make_sets(cards, wild_cards, $set, 0, &mut r) {
-                r.reverse();
-                return Some(r);
+            if let Some(mut hand) = make_sets(cards, wild_cards, $set, 0) {
+                hand.reverse();
+                return Some(hand);
             } else {
                 return None;
             }
