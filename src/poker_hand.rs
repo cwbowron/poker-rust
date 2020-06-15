@@ -127,22 +127,24 @@ fn find_missing_rank(cards: &[Card]) -> Option<Rank> {
 
 fn as_flush(cards: &[&Card], wild_cards: &[&Card]) -> Option<Vec<Card>> {
     for suit in Suit::iter() {
-        let suited_count = filter_suit(&cards, suit).count();
-        if suited_count + wild_cards.len() >= 5 {
-            let mut suited = filter_suit(cards, suit)
-                .cloned()
-                .cloned()
-                .collect::<Vec<_>>();
-            
-            for w in wild_cards {
-                if let Some(rank) = find_missing_rank(&suited) {
-                    suited.push(w.scored_as(rank));
-                } else {
-                    break;
+        if suit != Suit::Joker {
+            let suited_count = filter_suit(&cards, suit).count();
+            if suited_count + wild_cards.len() >= 5 {
+                let mut suited = filter_suit(cards, suit)
+                    .cloned()
+                    .cloned()
+                    .collect::<Vec<_>>();
+                
+                for w in wild_cards {
+                    if let Some(rank) = find_missing_rank(&suited) {
+                        suited.push(w.scored_as(rank));
+                    } else {
+                        break;
+                    }
                 }
+                
+                return Some(top_five(suited));
             }
-
-            return Some(top_five(suited));
         }
     }
 
@@ -151,16 +153,18 @@ fn as_flush(cards: &[&Card], wild_cards: &[&Card]) -> Option<Vec<Card>> {
 
 fn as_straight_flush(cards: &[&Card], wild_cards: &[&Card]) -> Option<Vec<Card>> {
     for suit in Suit::iter() {
-        let count = filter_suit(cards, suit).count();
-        
-        if count + wild_cards.len() >= 5 {
-            let suited_cards = filter_suit(cards, suit)
-                .cloned()
-                .collect::<Vec<_>>();
+        if suit != Suit::Joker {
+            let count = filter_suit(cards, suit).count();
+            
+            if count + wild_cards.len() >= 5 {
+                let suited_cards = filter_suit(cards, suit)
+                    .cloned()
+                    .collect::<Vec<_>>();
                 
-            let option = as_straight(&suited_cards, wild_cards);
-            if option.is_some() {
-                return option;
+                let option = as_straight(&suited_cards, wild_cards);
+                if option.is_some() {
+                    return option;
+                }
             }
         }
     }
