@@ -217,14 +217,6 @@ pub fn fmt_cards_refs(cards: &[&Card]) -> String {
     fmt(cards.iter().cloned())
 }
 
-// pub struct Cards<'a>(pub &'a [Card]);
-
-// impl std::fmt::Display for Cards<'_> {
-//     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-//         write!(f, "{}", fmt_cards(self.0))
-//     }
-// }
-
 pub struct CardVector(pub Vec<Card>);
 
 impl std::str::FromStr for CardVector {
@@ -370,28 +362,6 @@ mod tests {
         assert_eq!(cards[0], Ace.of(Clubs));
         assert_eq!(cards[1], King.of(Diamonds));
     }
-
-    // #[test]
-    // fn test_card_vector_from() {
-    //     let cards = "AcKd".parse::<CardVector>().unwrap();
-    //     let vec = Vec::from(cards);
-    //     assert_eq!(vec[0], Ace.of(Clubs));
-    //     assert_eq!(vec[1], King.of(Diamonds));
-    // }
-
-    // #[test]
-    // fn test_card_vector_into() {
-    //     let cards = "AcKd".parse::<CardVector>().unwrap();
-    //     let vec: Vec<Card> = cards.into();
-    //     assert_eq!(vec[0], Ace.of(Clubs));
-    //     assert_eq!(vec[1], King.of(Diamonds));
-    // }
-
-    // #[test]
-    // fn test_convert_card_vector_into_cards() {
-    //     let card_vector = "AcKd".parse::<CardVector>().unwrap();
-    //     println!("{}", Cards(&card_vector));
-    // }
 
     #[test]
     fn test_is_one_eyed_jack() {
