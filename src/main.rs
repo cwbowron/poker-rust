@@ -12,7 +12,7 @@ use clap::{App, Arg};
 use strum::IntoEnumIterator;
 
 mod card;
-use card::{Card, Cards, CardVector, fmt_cards};
+use card::{Card, CardVector, fmt_cards};
 
 mod deck;
 use deck::{make_deck, make_shuffled_deck};
@@ -82,7 +82,7 @@ fn deal(cards: &mut Vec<Card>, n: usize) {
     if let Some(burn) = cards.pop() { burns.push(burn); }
     if let Some(card) = cards.pop() { board.push(card); }
 
-    println!("Board: {}", Cards(&board));
+    println!("Board: {}", fmt_cards(&board));
 
     let mut evals = Vec::new();
     for pocket in &pockets {
@@ -98,7 +98,7 @@ fn deal(cards: &mut Vec<Card>, n: usize) {
 
     for eval in evals {
         let (pocket, poker_hand) = eval;
-        println!("Pocket: {} -> {}", Cards(&pocket), poker_hand);
+        println!("Pocket: {} -> {}", fmt_cards(&pocket), poker_hand);
     }
 }
 
