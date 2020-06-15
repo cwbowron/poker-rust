@@ -41,12 +41,12 @@ fn find_set(cards: &[&Card], wild_cards: &[&Card], n: usize) -> Option<Vec<Card>
     return None;
 }
 
-fn make_sets(cards: &[&Card], wild_cards: &[&Card], sizes: &Vec<usize>, size_index: usize, result: &mut Vec<Card>) -> bool {
+fn make_sets(cards: &[&Card], wild_cards: &[&Card], sizes: &[usize], size_index: usize, result: &mut Vec<Card>) -> bool {
     if size_index >= sizes.len() {
         return true;
     } else if let Some(set) = find_set(cards, wild_cards, sizes[size_index]) {
         let next = remove_cards(cards, &set);
-        if make_sets(&next, &vec![], sizes, size_index + 1, result) {
+        if make_sets(&next, &[], sizes, size_index + 1, result) {
             result.extend(set);
             return true;
         }
@@ -56,10 +56,10 @@ fn make_sets(cards: &[&Card], wild_cards: &[&Card], sizes: &Vec<usize>, size_ind
 }
 
 macro_rules! define_set_maker {
-    ($fn_name: ident, $set: tt) => {
+    ($fn_name: ident, $set: expr) => {
         fn $fn_name(cards: &[&Card], wild_cards: &[&Card]) -> Option<Vec<Card>> {
             let mut r = Vec::new();
-            if make_sets(cards, wild_cards, &vec!$set, 0, &mut r) {
+            if make_sets(cards, wild_cards, $set, 0, &mut r) {
                 r.reverse();
                 return Some(r);
             } else {
@@ -69,11 +69,11 @@ macro_rules! define_set_maker {
     }
 }
 
-define_set_maker!(as_quads, [4, 1]);
-define_set_maker!(as_full_house, [3, 2]);
-define_set_maker!(as_trips, [3, 1, 1]);
-define_set_maker!(as_two_pair, [2, 2, 1]);
-define_set_maker!(as_pair, [2, 1, 1, 1]);
+define_set_maker!(as_quads, &[4, 1]);
+define_set_maker!(as_full_house, &[3, 2]);
+define_set_maker!(as_trips, &[3, 1, 1]);
+define_set_maker!(as_two_pair, &[2, 2, 1]);
+define_set_maker!(as_pair, &[2, 1, 1, 1]);
 
 fn top_five(mut cards: Vec<Card>) -> Vec<Card> {
     cards.sort();
