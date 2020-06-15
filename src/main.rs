@@ -49,7 +49,7 @@ impl std::fmt::Display for HandRankCount {
         for rank in HandRank::iter() {
             let count = self.0[rank as usize] as f32;
             let p = 100.0 * count / total;
-            write!(f, "{:14} - {:5.2} %%\n", rank.to_string(), p);
+            write!(f, "{:14} - {:5.2} %%\n", rank.to_string(), p)?;
         }
         Ok(())
     }
