@@ -1,6 +1,5 @@
 #![feature(iterator_fold_self)]
 #![feature(drain_filter)]
-#![feature(vec_remove_item)]
 #![allow(dead_code)]
 
 extern crate strum;
@@ -135,7 +134,9 @@ fn find_winners(pockets: &Vec<Vec<Card>>, board: &Vec<&Card>, hand_rank_counts: 
 fn hold_em_odds(pockets: &Vec<Vec<Card>>, board: &Vec<Card>, hand_rank_counts: &mut Vec<HandRankCount>) -> Vec<WinLoseSplit> {
     let mut deck = make_deck();
     for card in pockets.iter().flatten().chain(board.iter()) {
-        deck.remove_item(&card);
+        if let Some(pos) = deck.iter().position(|x| *x == *card) {
+            deck.remove(pos);
+        }
     }
 
     let mut results = vec![WinLoseSplit::new(); pockets.len()];
