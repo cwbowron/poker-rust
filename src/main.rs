@@ -137,11 +137,19 @@ fn remove_card(deck: &mut Vec<Card>, card: &Card) {
     }
 }
 
+fn remove_all_cards(deck: &mut Vec<Card>, cards: &[Card]) {
+    for card in cards {
+        remove_card(deck, card);
+    }
+}
+
+
 fn hold_em_odds(pockets: &Vec<Vec<Card>>, board: &Vec<Card>, hand_rank_counts: &mut Vec<HandRankCount>) -> Vec<WinLoseSplit> {
     let mut deck = make_deck();
-    for card in pockets.iter().flatten().chain(board.iter()) {
-        remove_card(&mut deck, card);
+    for pocket in pockets.iter() {
+        remove_all_cards(&mut deck, pocket);
     }
+    remove_all_cards(&mut deck, board); 
 
     let mut results = vec![WinLoseSplit::new(); pockets.len()];
 
