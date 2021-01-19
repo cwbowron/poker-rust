@@ -131,12 +131,16 @@ fn find_winners(pockets: &Vec<Vec<Card>>, board: &Vec<&Card>, hand_rank_counts: 
     return vec;
 }
 
+fn remove_card(deck: &mut Vec<Card>, card: &Card) {
+    if let Some(pos) = deck.iter().position(|x| *x == *card) {
+        deck.remove(pos);
+    }
+}
+
 fn hold_em_odds(pockets: &Vec<Vec<Card>>, board: &Vec<Card>, hand_rank_counts: &mut Vec<HandRankCount>) -> Vec<WinLoseSplit> {
     let mut deck = make_deck();
     for card in pockets.iter().flatten().chain(board.iter()) {
-        if let Some(pos) = deck.iter().position(|x| *x == *card) {
-            deck.remove(pos);
-        }
+        remove_card(&mut deck, card);
     }
 
     let mut results = vec![WinLoseSplit::new(); pockets.len()];
